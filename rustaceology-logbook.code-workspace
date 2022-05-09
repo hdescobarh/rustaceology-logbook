@@ -4,6 +4,18 @@
 			"name": "File tree",
 			"path": "."
 		},
+		{
+			"name": "Notes",
+			"path": "notes"
+		},
+		{
+			"name": "Exercises",
+			"path": "exercises"
+		},
+		{
+			"name": "Bibliography",
+			"path": "bibliography"
+		},
 	],
 	"settings": {
 		"files.eol": "auto",
