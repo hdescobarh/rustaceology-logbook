@@ -5,12 +5,15 @@ fn type_of<T>(_: &T, message: &str) {
 fn escalar_types() {
     let default_float = 30.0;
     let default_int = 10;
-    let unit_type = (); // the value is called "unit value"
+    let unit_type = ();
+    // "A char is a ‘Unicode scalar value’, which is any ‘Unicode code point’ other than a surrogate code point." https://doc.rust-lang.org/std/primitive.char.html
+    let default_character = 'Ф'; // Ф code point is U+0424, is encoded as 0xd0a4 in UTF-8
 
     println!("Some examples of scalar types:");
     type_of(&default_float, "Default float type is"); // f64
     type_of(&default_int, "Default integer type is"); // i32
     type_of(&unit_type, "Unit value is"); // ()
+    type_of(&default_character, "This type have a size of 4 bytes"); // char
 }
 
 fn compound_types() {
