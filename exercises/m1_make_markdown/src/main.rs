@@ -54,7 +54,7 @@ fn main() -> std::io::Result<()> {
     }
 
     // https://doc.rust-lang.org/rust-by-example/std_misc/file/open.html
-    let mut file = File::create("mynotes.md")?;
+    let mut file = File::create("./../../notes/notes_extract.md")?;
     file.write_all(notes_all.as_bytes())?;
     Ok(())
 }
