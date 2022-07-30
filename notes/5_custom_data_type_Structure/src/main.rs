@@ -48,6 +48,7 @@ fn basics_struct() {
 
 // Structure definition
 #[derive(Debug)]
+#[allow(dead_code)]
 struct Population {
     genre: String,
     specie: String,
@@ -66,6 +67,7 @@ impl Population {
         }
     }
     // associated functions which are not methods usually are used as constructors
+    #[allow(dead_code)]
     fn homosapiens(size: u32) -> Population {
         Population {
             genre: String::from("Homo"), //String::from() itself is an example of constructor. Notice the "::"
