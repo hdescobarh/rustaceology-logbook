@@ -11,3 +11,9 @@ Cargo.lock
 
 # Microsoft Visual C++'s program database (.pdb) files
 *.pdb
+
+
+bin/
+pkg/
+node_modules
+dist
