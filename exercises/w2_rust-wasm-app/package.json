@@ -5,10 +5,12 @@
     "main": "index.js",
     "scripts": {
         "build": "webpack --config webpack.config.js",
-        "start": "webpack serve"
+        "start": "webpack serve",
+        "wasm:build": "cd rust_wasm_dev && wasm-pack build --out-dir pkg",
+        "wasm:test": "cd rust_wasm_dev && wasm-pack test --chrome"
     },
     "dependencies": {
-        "rust-wasm-app-template": "file:pkg",
+        "rust-wasm-app-template": "file:rust_wasm_dev/pkg",
         "webpack-dev-server": "4.11.1"
     },
     "devDependencies": {

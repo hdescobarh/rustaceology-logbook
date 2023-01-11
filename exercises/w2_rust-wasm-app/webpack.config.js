@@ -1,6 +1,6 @@
 const path = require("path");
 module.exports = {
-    entry: "./bootstrap.js",
+    entry: "./source/bootstrap.js",
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: 'bootstrap.js',
@@ -11,7 +11,7 @@ module.exports = {
     },
     devServer: {
         static: {
-            directory: path.join(__dirname, '/')
+            directory: path.join(__dirname, 'source')
         },
         port: 9000,
     },
