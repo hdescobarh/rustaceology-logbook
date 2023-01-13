@@ -18,6 +18,8 @@ crate-type = ["cdylib", "rlib"]
 wasm-bindgen = "0.2.83"
 # for logging panic messages to the developer console. 
 console_error_panic_hook = { version = "0.1.7", optional = true }
+# Bindings to JavaScript’s standard, built-in objects, including their methods and properties.
+js-sys = "0.3.60"
 
 
 [dev-dependencies]
