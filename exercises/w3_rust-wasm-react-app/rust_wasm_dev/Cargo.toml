@@ -1,0 +1,49 @@
+[package]
+name = "rust-wasm-app-template"
+version = "0.1.0"
+authors = ["Hans Escobar <escobar.hans@gmail.com>"]
+description = "Trying to setup a wasm app"
+edition = "2021"
+license = "MIT"
+
+# cdylib for *.wasm
+# rlib is necesary to perform unit tests with wasm-pack test
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# fundamental for wasm
+wasm-bindgen = "0.2.83"
+# for logging panic messages to the developer console. 
+console_error_panic_hook = { version = "0.1.7", optional = true }
+# Bindings to JavaScript’s standard, built-in objects, including their methods and properties.
+js-sys = "0.3.60"
+
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.33"
+
+[features]
+default = ["console_error_panic_hook"]
+
+
+###### profiles ######
+# https://doc.rust-lang.org/cargo/reference/profiles.html
+
+[profile.release]
+# link-time-optimization. Gives to the LLVM more oportunities to make the code smaller and faster
+lto = true # default is false
+# Set the goal of LLVM
+opt-level= 3 # default is 3
+
+[profile.dev]
+lto = true # default is false
+opt-level = 1 # default is 0
+overflow-checks = true
+
+# example of custom profile
+[profile.release-custom-example]
+inherits = "release"
+opt-level = 2
+panic = "abort" # This might reduce binary size and increase performance slightly
+
