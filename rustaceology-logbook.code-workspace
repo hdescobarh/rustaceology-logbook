@@ -22,6 +22,17 @@
 		"files.encoding": "utf8",
 		"editor.formatOnPaste": true,
 		"editor.formatOnSave": true,
+		"rust-analyzer.check.command": "clippy",
+		"rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
+		"rust-analyzer.restartServerOnConfigChange": true,
+		"editor.defaultFormatter": null,
+		"[rust]": {
+			"editor.defaultFormatter": "rust-lang.rust-analyzer"
+		},
+		"rust-analyzer.linkedProjects": [
+			"exercises\\_exercism\\rust\\assembly-line\\Cargo.toml",
+		],
+		"rust-analyzer.cargo.buildScripts.invocationLocation": "root",
 	},
 	"extensions": {
 		"recommendations": [
