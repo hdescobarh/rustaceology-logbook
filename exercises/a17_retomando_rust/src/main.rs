@@ -115,13 +115,13 @@ fn tipos_primitivos_escalares() {
 fn caracteres_en_rust() {
     // El tipo caracter o char tambien es un tipo primitivo,
     // pero merece su propia sección porque puede ser complejo de manejar
-    // sí no se conoce como funcionan los sitemas de códificación de caracteres.
+    // sí no se conoce como funcionan los sistemas de códificación de caracteres.
     // Rust define un caracter como un 'UNICODE SCALAR VALUE'.
     // ...
     // De forma MUY breve: el Estandar Unicode define un conjunto de caracteres
     // codificados ('encoded character set'), y un mapa entre dicho conjunto y otro
     // conjunto de enteros no-negativos ('code points') denominado el 'codespace'.
-    // Un subconjunto del 'codespace' es el conjunto de 'unicode scalar values'.
+    // El conjunto de 'unicode scalar values' es un SUBCONJUNTO del 'codespace'.
     // Se sugiere revisar los terminos entre comillas en este glosario: https://www.unicode.org/glossary/
 
     // Por ejemplo, 'ϵ' mapea a 0x3B5 (https://www.compart.com/en/unicode/U+03B5)
@@ -136,11 +136,9 @@ fn caracteres_en_rust() {
 
     // Otro ejemplo. El caracter Latin Small Letter E with Acute (https://www.compart.com/en/unicode/U+00E9),
     // es el mismo elemento del encoded character set,
-
     // pero aquí esta representado en un solo code point, 0xE9
     println!("Esta 'é' es UN caracter: {:?}", "é".chars()); // Chars(['é'])
-
-    // y aquí esta representado con DOS code points: 0x65 0x301
+                                                            // y aquí esta representado con DOS code points: 0x65 0x301
     println!("Esta 'é' son DOS caracteres: {:?}", "é".chars()); // Chars(['e', '\u{301}'])
 }
 
@@ -166,15 +164,17 @@ fn y_donde_estan_las_strings() {
     // son structures (struct), algo parecido a las clases (mas detalles en sección "tipos personalizados")
     // y son parte de la biblioteca estandar (https://doc.rust-lang.org/std/index.html#the-rust-standard-library).
 
-    // El tipo String puede pensarse como secuencias de valores UTF-8 validos
+    // El tipo String son secuencias de bytes almacenados como valores UTF-8 validos
     let _saludo = String::from("Hola");
 
-    // El tipo String NO SON secuencias caracteres. Para ilustrar la diferencia:
-    // el caracter é mapea al code point 0xE9 (valor que toma el tipo char),
+    // IMPORTANTE: el tipo String NO SON secuencias caracteres. Por ejemplo:
+    // el caracter ñ mapea al code point 0xF1,
     let esto_es_un_caracter = 'ñ';
-    // el caracter é bajo el esquema UTF-8 mapea a la secuencia 0xC3 0xA9 (https://unicode.org/glossary/#unicode_encoding_form)
-    let esto_es_una_string = String::from(esto_es_un_caracter);
-    assert_eq!([0xC3, 0xB1], esto_es_una_string.as_bytes());
+    assert_eq!(4, std::mem::size_of::<char>()); // el tipo char tiene un tamaño fijo de CUATRO bytes
+
+    // ñ bajo el esquema UTF-8 mapea la SECUENCIA de DOS bytes: 0xC3 0xB1 (195 177 en decimal) https://unicode.org/glossary/#unicode_encoding_form)
+    let esto_es_una_string = String::from(esto_es_un_caracter); // representemos la ñ como String
+    assert_eq!([195u8, 177u8], esto_es_una_string.as_bytes()); // coincide con la secuencia y tamaño esperados
 }
 
 // ▶▶▶▶▶ 4. Definiendo funciones  ◀◀◀◀◀
@@ -183,7 +183,7 @@ fn y_donde_estan_las_strings() {
 
 fn una_funcion_sin_parametros() -> String {
     // Se puede usar la keyword return, o, sí termina en expresión se puede omitir
-    "No tiene parametros, pero retorna un String".to_string()
+    "No tiene parametros, pero retorna un tipo String".to_string()
 }
 
 fn una_funcion_con_parametros(mensaje: &str) {
@@ -203,7 +203,7 @@ fn condicionales(numero1: usize, numero2: usize) {
     } else if !primero_es_par && !segundo_es_par {
         println!("Ambos son impares");
     } else {
-        println!("Uno es impar y el otro par");
+        println!("Alguno es impar y el otro par");
     }
 
     // Asignación de variable con condicional.
@@ -226,11 +226,17 @@ fn uso_de_loops() {
         valor_actual += 1;
     }
 
-    // loop sobre una colección - for
+    // loops sobre iteradores - for in
     let una_coleccion: [f64; 3] = [6.62607015e-34, 1.618033, std::f64::consts::PI];
 
+    // implicitamente transforma las colecciones en un iterador (https://doc.rust-lang.org/rust-by-example/trait/iter.html)
     for elemento in una_coleccion {
         println!("The value is {}", elemento);
+    }
+
+    // loop en un rango
+    for valor in 0..3 {
+        println!("The value is {}", valor);
     }
 
     // kewords loop y break
@@ -255,7 +261,9 @@ fn uso_de_loops() {
 // ▶▶▶▶▶ 6. Tipos personalizados  ◀◀◀◀◀
 
 fn las_structures() {
-    // Definiendo una structure
+    // Las structures permiten agrupar datos y relacionarlos con funciones (funciones asociadas)
+
+    // definición: nombre y campos
     struct Poblacion {
         // Notese la MAYUSCULA INICIAL
         genero: String,
@@ -263,13 +271,14 @@ fn las_structures() {
         numero_individuos: u64,
     }
 
-    // Definiendo métodos y funciones asociadas de una estructura
+    // creando funciones asociadas
     impl Poblacion {
-        // esto es un método. Requiere una instancia de un struct (note el &self)
+        // esto es un método, un tipo especial de función asociada.
+        // Requiere una instancia de un struct (note el &self)
         fn esta_extinta(&self) -> bool {
             self.numero_individuos == 0
         }
-        // esto es una función asociada, no requiere una instancia
+        // esta no requiere una instancia
         fn homosapiens(numero_individuos: u64) -> Poblacion {
             Poblacion {
                 genero: "Homo".to_string(),
@@ -279,8 +288,8 @@ fn las_structures() {
         }
     }
 
-    // usando una estructura
-    let humanos_actuales = Poblacion::homosapiens(8_057_743_981); // note como se llama una funcion asociada
+    // instanciando structures
+    let humanos_actuales = Poblacion::homosapiens(8_057_743_981); // note como se llama esta funcion asociada
     println!(
         "Especie: {}{}\n\t- Extinta: {}",
         humanos_actuales.genero,
@@ -289,8 +298,8 @@ fn las_structures() {
     )
 
     // Hay tipos especiales de structure, tambien una variedad de shorthands y formas de actualizar
-    // o generar instancias apartir de otras. Pero se requiere entender como funciona el heap y el stack
-    // y las diferencias entre copiar y mover una variable
+    // o generar instancias apartir de otras. Pero se requiere entender como funciona el ownership system
+    // las referencias, y  las diferencias entre copiar y mover una variable
 }
 
 fn los_enums() {
@@ -303,8 +312,8 @@ fn los_enums() {
     }
 
     // Los enums tambien tienen funciones asociadas; por ejemplo, las variantes inducen constructores
-    let _tiene_asignado_variante1 = UnEnum::Variante1;
-    let _este_tiene_asignado_variante2 = UnEnum::Variante2("Hola mundo".to_string());
+    let _tiene_asignado_variante1: UnEnum = UnEnum::Variante1;
+    let _este_tiene_asignado_variante2: UnEnum = UnEnum::Variante2("Hola mundo".to_string());
 }
 
 // ▶▶▶▶▶ 7. Estructuras de control II: match control flow  ◀◀◀◀◀
@@ -372,7 +381,8 @@ fn uso_de_vectores() {
 
 fn uso_de_hashmaps() {
     // Es una implementación de diccionario: almacena pares de llaves y valores.
-    // No esta en el preludio, por lo que debe traerse con la keyword 'use'
+    // No esta en el preludio (https://doc.rust-lang.org/std/prelude/index.html),
+    // por lo que debe traerse con la keyword 'use'
     use std::collections::HashMap;
 
     // Un HashMap vacio
@@ -382,7 +392,7 @@ fn uso_de_hashmaps() {
     numeros_atomicos.insert("C".to_string(), 12);
     numeros_atomicos.insert("P".to_string(), 255);
 
-    // Actualiza la key, o la agrega sí no esta
+    // Actualiza la key, o la agrega sí no está
     numeros_atomicos.entry("P".to_string()).or_insert(15);
 
     // Leer valores con get
