@@ -1,6 +1,5 @@
-use juego::Pantalla;
-
 use gestion_cli::input_movimiento;
+use juego::Pantalla;
 
 const CARACTER_ACTIVOS: char = '🔳';
 const CARACTER_INACTIVOS: char = '🔲';
