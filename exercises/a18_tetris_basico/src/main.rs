@@ -1,3 +1,5 @@
+use std::io;
+
 const CARACTER_ACTIVOS: char = '🔳';
 const CARACTER_INACTIVOS: char = '🔲';
 const FILAS_TABLERO: usize = 10;
@@ -6,19 +8,25 @@ const COLUMNAS_TABLERO: usize = 10;
 fn main() {
     let mut pantalla = Pantalla::default();
     pantalla.imprimir_estado();
-    pantalla.mover_tetromino();
-    pantalla.imprimir_estado();
-    pantalla.mover_tetromino();
-    pantalla.imprimir_estado();
+    loop {
+        if let Some(tipo_movimiento) = input_movimiento() {
+            pantalla.mover_tetromino(tipo_movimiento);
+            pantalla.imprimir_estado();
+        }
+    }
 }
 
+#[derive(Copy, Clone)]
 struct Coordenada {
     fila: isize,
     columna: isize,
 }
 
+/**
+ * Representa un tetrominó, una ficha de Tetris.
+ * Corresponde a una región cuadrada de longitud 3 o 4 cuadrados.
+ */
 struct Tetromino {
-    // Cada Tetromino es un cuadrado de 3x3 o 4x4
     // Esta es la coordenada en el tablero del cuadrado de la esquina inferior izquierda
     coordenada_referencia: Coordenada,
     // El origen de las coordenadas internas (0,0) es el cuadrado central
@@ -38,7 +46,9 @@ impl Tetromino {
             activos,
         }
     }
-
+    /**
+     * Indica las coordenadas reales de los cuadrados activos del tetrominó
+     */
     fn traducir_a_coordenadas_reales(&self) -> Vec<Coordenada> {
         self.activos
             .iter()
@@ -49,15 +59,33 @@ impl Tetromino {
             .collect()
     }
 
-    fn realizar_movimiento(&self) -> Tetromino {
-        // PRIMERO realiza la transformación y almacena temporalmente
-        // EJEMPLO CON ROTAR
-        let nuevos_activos = self.rotar();
-        let nueva_coordenada_referencia = Coordenada {
-            fila: self.coordenada_referencia.fila,
-            columna: self.coordenada_referencia.columna,
+    /**
+     * Se encarga de llamar el movimiento correcto y generar el
+     * tetrominó con la configuración y posición correspondientes.
+     */
+    fn realizar_movimiento(&self, tipo: Movimiento) -> Tetromino {
+        let nuevos_activos: Vec<Coordenada>;
+        let nueva_coordenada_referencia: Coordenada;
+
+        match tipo {
+            Movimiento::Rotacion => {
+                nuevos_activos = self.rotar();
+                nueva_coordenada_referencia = self.coordenada_referencia;
+            }
+            Movimiento::Derecha => {
+                nuevos_activos = self.activos.clone();
+                nueva_coordenada_referencia = self.desplazar(1, 0);
+            }
+            Movimiento::Izquierda => {
+                nuevos_activos = self.activos.clone();
+                nueva_coordenada_referencia = self.desplazar(-1, 0);
+            }
+            Movimiento::Abajo => {
+                nuevos_activos = self.activos.clone();
+                nueva_coordenada_referencia = self.desplazar(0, 1);
+            }
         };
-        // SEGUNDO el tablero mira y valida el movimiento como legal
+
         Tetromino {
             coordenada_referencia: nueva_coordenada_referencia,
             activos: nuevos_activos,
@@ -73,18 +101,29 @@ impl Tetromino {
             })
             .collect()
     }
+
+    fn desplazar(&self, movimiento_horizontal: isize, movimiento_vertical: isize) -> Coordenada {
+        let fila = self.coordenada_referencia.fila + movimiento_vertical;
+        let columna = self.coordenada_referencia.columna + movimiento_horizontal;
+        Coordenada { fila, columna }
+    }
 }
 
+/**
+ * Representa el espacio donde se puede mover las fichas. Se encarga de contener
+ * el tetrominó activo, así como determinar si su configuración es legal
+ */
 struct Pantalla {
     estado: [[char; COLUMNAS_TABLERO]; FILAS_TABLERO],
     tetromino_activo: Tetromino, // Empieza con un activo para la prueba de concepto
 }
 
 impl Pantalla {
+    // Para este ejercicio, la pantalla inicia con una ficha en una posición fija
     fn default() -> Self {
         let estado = [[CARACTER_INACTIVOS; COLUMNAS_TABLERO]; FILAS_TABLERO];
         let tetromino_activo = Tetromino::new(Coordenada {
-            fila: 3,
+            fila: 2,
             columna: 0,
         });
 
@@ -94,6 +133,7 @@ impl Pantalla {
         }
     }
 
+    // TODO Quizá mejor delegar esta tarea fuera de este struct
     fn imprimir_estado(&self) {
         let mut para_imprimir = self.estado;
 
@@ -122,21 +162,64 @@ impl Pantalla {
         true
     }
 
-    fn mover_tetromino(&mut self) {
-        // recibe orden de movimiento
-        let tetromino = self.tetromino_activo.realizar_movimiento();
-        // envia a la ficha el tipo de movimient que debe hacer y espera coordenadas de activos
-        // valida esas coordenadas: esta dentro del tablero?, esta libre el espacio?
+    /**
+     * Se encarga indicarle al tetrominó que se mueva, y de validar la legalidad del
+     * nuevo estado.
+     */
+    fn mover_tetromino(&mut self, tipo: Movimiento) {
+        // La ficha realiza el movimento, el tablero lo valida y sí es valido, actualiza la ficha activa
+        let tetromino = self.tetromino_activo.realizar_movimiento(tipo);
         let bordes_validados = Pantalla::validar_bordes(&tetromino);
-        // sí es valido envia OK a la ficha e imprime con nuevo estado
-        self.tetromino_activo = tetromino;
-        // si no es valida, deniega a la ficha e imprime estado sin modificar
+        if bordes_validados {
+            self.tetromino_activo = tetromino;
+        };
     }
 }
 
+/**
+ * Tipos de movimientos validos
+ */
 enum Movimiento {
     Rotacion,
     Derecha,
     Izquierda,
     Abajo,
+}
+
+/**
+ * Se encarga de imprimir mensajes en consola y del parsing del input del usuario
+ */
+fn input_movimiento() -> Option<Movimiento> {
+    println!(
+        "Ingrese el número de la acción:
+        0 Rotar
+        1 Derecha
+        2 Izquierda
+        3 Abajo"
+    );
+
+    let mut input: String = String::new();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Error al leer la entrada.\n");
+
+    let instruccion = match input.trim().parse::<usize>() {
+        Ok(numero) => numero,
+        Err(_) => {
+            println!("No es un número.\n");
+            return None;
+        }
+    };
+
+    match instruccion {
+        0 => Some(Movimiento::Rotacion),
+        1 => Some(Movimiento::Derecha),
+        2 => Some(Movimiento::Izquierda),
+        3 => Some(Movimiento::Abajo),
+        _ => {
+            println!("Número no valido.\n");
+            None
+        }
+    }
 }
