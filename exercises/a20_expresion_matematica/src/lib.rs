@@ -21,7 +21,7 @@ La expresión valida es equivalente a:
 Sin embargo, Rust NO CUENTA CON métodos para manejar Regular Expressions (regex)
 en su biblioteca estándar (https://doc.rust-lang.org/std/).
 
-Esta solución se limita a la biblioteca estándar.
+Esta solución se limita a usar la biblioteca estándar, por eso no usa regex.
 */
 
 const OPERADORES_VALIDOS: [&str; 5] = ["+", "-", "*", "/", "%"];
@@ -44,6 +44,7 @@ enum Expresion {
  *  - El texto debe contener solo texto ASCII
  *  - El separador decimal es el punto
  *  - Operaciones validas: + - / % *
+ *  - Los números y operadores deben estar separados por espacio (\t or \n no son validos)
  */
 pub fn validar_expresion(expresion: &str) -> bool {
     matches!(validar(expresion), Expresion::Valida)
