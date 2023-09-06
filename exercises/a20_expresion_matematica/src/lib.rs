@@ -103,6 +103,7 @@ mod tests {
         assert_eq!(validar("500 % 6"), Expresion::Valida);
         // expresiones invalidas
         assert_eq!(validar("5 %  6"), Expresion::LongitudInvalida);
+        assert_eq!(validar("5 %\t6"), Expresion::LongitudInvalida);
         assert_eq!(validar("5 % "), Expresion::ValoresNoNumericos);
         assert_eq!(validar("5 %"), Expresion::LongitudInvalida);
         assert_eq!(validar("a % 6"), Expresion::ValoresNoNumericos);
@@ -122,6 +123,8 @@ mod tests {
             validar("0.5 + 60 - -10.345 / 0.314159 * 100 % 5971.12"),
             Expresion::Valida
         );
+
+        assert_eq!(validar("0,5 % 6"), Expresion::ValoresNoNumericos);
     }
 
     #[test]
