@@ -22,11 +22,15 @@ const RUTA_FICHERO_STR: &str = "./text.txt";
 
 fn main() {
     let mut input_buffer = String::new();
-    // Valida que la ruta sea accesible
     let ruta: PathBuf = PathBuf::from(RUTA_FICHERO_STR);
     let mut editor_activo: Editor;
+
+    /*
+    Valida que la ruta sea accesible, sí es accesible y no existe, crea el archivo.
+    Sí es accesible y existe, pregunta sí abrir sobreescribiendo todo el contenido, o
+    agregando las nuevas lineas al final del fichero.
+    */
     if ruta.try_exists().unwrap() {
-        // preguntar sí sobrescribir
         let sobrescribir = cli::obtener_opcion_sobrescritura(&mut input_buffer);
         editor_activo = Editor::desde_fichero_existente(ruta, sobrescribir);
         if !sobrescribir {
@@ -36,17 +40,19 @@ fn main() {
         editor_activo = Editor::desde_fichero_nuevo(ruta)
     };
 
+    /*
+    Inicia ciclo principal del programa.
+    */
     loop {
         cli::input_de_linea_nueva(&mut input_buffer);
         editor_activo.escribir_linea(&input_buffer).unwrap();
     }
 }
 
+/// Modulo encargado de gestionar el fichero
 pub mod mi_editor {
-    use std::fs::File;
-    use std::fs::OpenOptions;
-    use std::io::Read;
-    use std::io::Write;
+    use std::fs::{File, OpenOptions};
+    use std::io::{Read, Write};
     use std::path::PathBuf;
 
     pub struct Editor {
@@ -106,15 +112,17 @@ pub mod mi_editor {
         }
     }
 }
+
+/// modulo encargado de la interacción con el usuario a través de la linea de comandos
 pub mod cli {
+    use std::io;
+
     const PROMPT: &str = "Ingrese el texto >";
     const MSJ_SOBRESCRIBIR: &str = "
     El fichero ya existe, desea sobrescribirlo?
     0: No
     1: Sí:";
     const MSJ_OPCION_NO_VALIDA: &str = "El número ingresado no es una opción valida.";
-
-    use std::io;
 
     // limpia el buffer y espera el input del usuario
     pub fn input_de_linea_nueva(input_buffer: &mut String) {
@@ -123,7 +131,7 @@ pub mod cli {
         io::stdin().read_line(input_buffer).unwrap();
     }
 
-    // pregunta por sí deseea sobreescribir un archivo existente y retorna una opcion valida
+    // Captura el input del usuario sí sobrescribir o no un archivo existente
     pub fn obtener_opcion_sobrescritura(input_buffer: &mut String) -> bool {
         loop {
             println!("{}", MSJ_SOBRESCRIBIR);
