@@ -34,7 +34,7 @@ fn main() {
         let sobrescribir = cli::obtener_opcion_sobrescritura(&mut input_buffer);
         editor_activo = Editor::desde_fichero_existente(ruta, sobrescribir);
         if !sobrescribir {
-            println!("{}", editor_activo.mostrar_buffer());
+            println!("\n{}", editor_activo.mostrar_buffer());
         }
     } else {
         editor_activo = Editor::desde_fichero_nuevo(ruta)
@@ -122,7 +122,7 @@ pub mod cli {
     El fichero ya existe, desea sobrescribirlo?
     0: No
     1: Sí:";
-    const MSJ_OPCION_NO_VALIDA: &str = "El número ingresado no es una opción valida.";
+    const MSJ_OPCION_NO_VALIDA: &str = "Error: El número ingresado no es una opción valida.";
 
     // limpia el buffer y espera el input del usuario
     pub fn input_de_linea_nueva(input_buffer: &mut String) {
