@@ -138,8 +138,8 @@ pub mod cli {
             io::stdin().read_line(input_buffer).unwrap();
 
             match input_buffer.trim().parse::<u8>() {
-                Ok(opcion) if opcion == 0 => return false,
-                Ok(opcion) if opcion == 1 => return true,
+                Ok(0) => return false,
+                Ok(1) => return true,
                 _ => println!("{}", MSJ_OPCION_NO_VALIDA),
             }
         }
