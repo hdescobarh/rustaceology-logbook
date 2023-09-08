@@ -1,5 +1,0 @@
-Esto esta truncado
-esta es la segunda linea
-y la tercera
-Esta es la cuarta linea, y estoy agregando al final del archivo
-quinta linea
