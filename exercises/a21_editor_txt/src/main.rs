@@ -69,6 +69,7 @@ pub mod mi_editor {
             };
             let fichero = OpenOptions::new()
                 .read(true)
+                .write(true) // requerido por create_new
                 .create_new(true) // create_new asegura que el archivo no exista
                 .open(&ruta)
                 .unwrap();
