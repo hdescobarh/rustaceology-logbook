@@ -10,7 +10,7 @@ permutaciones disponibles formadas por las letras de una palabra.
 */
 
 // Este modulo tiene mi solución
-use crate::permutacion_naive::RamaArbol;
+use crate::permutacion_naive::reordenar_texto;
 
 fn main() {
     /*
@@ -28,29 +28,14 @@ fn main() {
             Some(string) => string,
             None => continue,
         };
-
-        // Inicializa el nivel 0
-        let tree_root = RamaArbol::desde_string(texto);
-
-        // caché para la memoización. Se inicia con capacidad n! para reducir el allocation
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
-
-        // El método para generar todas las hojas del arbol es recursivo
-        RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
-
-        // Finalmente, extrae las secuencias de la caché para imprimirlas
-        let para_imprimir: Vec<String> = cache
-            .into_iter()
-            .map(|rama| rama.camino_secuencia)
-            .collect();
-
+        let para_imprimir: Vec<String> = reordenar_texto(texto);
         println!("{:?}", para_imprimir);
     }
 }
 
 mod permutacion_naive {
 
-    /**
+    /*
      * El algoritmo sigue una estructura de arbol en la que cada nodo, representado con el struct RamaArbol,
      * tiene una permutación de tamaño 0 <= t =< longitud_palabra (camino_secuencia) y una colección
      * de los longitud_palabra - t caracteres aún no incluidos (restantes).
@@ -63,10 +48,26 @@ mod permutacion_naive {
      *  - "c" y ['a', 'b', 'f']
      *  - "d" y ['a', 'b', 'c']
      */
+
+    pub fn reordenar_texto(texto: String) -> Vec<String> {
+        // Inicializa el nivel 0
+        let tree_root = RamaArbol::desde_string(texto);
+        // caché para la memoización. Se inicia con capacidad n! para reducir el allocation
+        let mut cache: Vec<RamaArbol> =
+            Vec::with_capacity(util_factorial(tree_root.restantes.len()));
+        // El método para generar todas las hojas del arbol es recursivo
+        RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
+        // Finalmente, extrae las secuencias de la caché para imprimirlas
+        cache
+            .into_iter()
+            .map(|rama| rama.camino_secuencia)
+            .collect()
+    }
+
     #[derive(Clone)]
-    pub struct RamaArbol {
-        pub camino_secuencia: String,
-        pub restantes: Vec<char>,
+    struct RamaArbol {
+        camino_secuencia: String,
+        restantes: Vec<char>,
     }
 
     impl RamaArbol {
@@ -96,7 +97,7 @@ mod permutacion_naive {
             nuevas_ramas
         }
 
-        pub fn generar_hojas(resultado: &mut Vec<RamaArbol>, base: Vec<RamaArbol>) {
+        fn generar_hojas(resultado: &mut Vec<RamaArbol>, base: Vec<RamaArbol>) {
             for rama in base {
                 if rama.restantes.is_empty() {
                     resultado.push(rama);
@@ -107,14 +108,14 @@ mod permutacion_naive {
             }
         }
     }
-}
 
-fn factorial(numero: usize) -> usize {
-    let mut resultado = 1;
-    for valores in 1..(numero + 1) {
-        resultado *= valores;
+    fn util_factorial(numero: usize) -> usize {
+        let mut resultado = 1;
+        for valores in 1..(numero + 1) {
+            resultado *= valores;
+        }
+        resultado
     }
-    resultado
 }
 
 use std::io;
@@ -149,44 +150,28 @@ pub fn entrada_de_texto() -> Option<String> {
 
 // Unit Tests
 #[cfg(test)]
-mod tests {
-    use crate::factorial;
-    use crate::permutacion_naive::RamaArbol;
+mod test {
+    use super::*;
     use std::collections::HashSet;
 
     #[test]
     fn manejo_texto_vacio_correcto() {
-        let texto = String::from("");
-        let tree_root = RamaArbol::desde_string(texto);
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
-        RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
-        assert_eq!("".to_string(), cache[0].camino_secuencia);
+        let resultado: HashSet<String> = reordenar_texto(String::from("")).into_iter().collect();
+        let esperado = HashSet::from(["".to_string()]);
+        assert!(esperado == resultado);
     }
 
     #[test]
     fn reordena_texto_minimo() {
-        let texto = String::from("ab");
-        let tree_root = RamaArbol::desde_string(texto);
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
-        RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
-        let resultado: HashSet<String> = cache
-            .into_iter()
-            .map(|rama| rama.camino_secuencia)
-            .collect();
+        let resultado: HashSet<String> = reordenar_texto(String::from("ab")).into_iter().collect();
         let esperado: HashSet<String> = ["ab", "ba"].into_iter().map(|s| s.to_string()).collect();
         assert!(esperado == resultado);
     }
 
     #[test]
     fn reordena_texto_con_mayusculas() {
-        let texto = String::from("hLOa");
-        let tree_root = RamaArbol::desde_string(texto);
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
-        RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
-        let resultado: HashSet<String> = cache
-            .into_iter()
-            .map(|rama| rama.camino_secuencia)
-            .collect();
+        let resultado: HashSet<String> =
+            reordenar_texto(String::from("hLOa")).into_iter().collect();
         let esperado: HashSet<String> = [
             "hOLa", "OhLa", "LhOa", "hLOa", "OLha", "LOha", "LOah", "OLah", "aLOh", "LaOh", "OaLh",
             "aOLh", "ahLO", "haLO", "LahO", "aLhO", "hLaO", "LhaO", "OhaL", "hOaL", "aOhL", "OahL",
@@ -200,13 +185,8 @@ mod tests {
 
     #[test]
     fn reordena_palabra_longitud_seis() {
-        let texto = String::from("celula");
-        let tree_root = RamaArbol::desde_string(texto);
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
-        RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
-        let resultado: HashSet<String> = cache
+        let resultado: HashSet<String> = reordenar_texto(String::from("celula"))
             .into_iter()
-            .map(|rama| rama.camino_secuencia)
             .collect();
         let esperado: HashSet<String> = [
             "celula", "eclula", "lceula", "cleula", "elcula", "lecula", "leucla", "elucla",
