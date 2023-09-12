@@ -16,11 +16,12 @@ fn main() {
     /*
     Implementación naive O(n!):
         -   case_sensitive
-        -   acepta cualquier caracter Unicode (e.g., el texto '漢字한국어' es valido).
+        -   acepta cualquier carácter Unicode (e.g., el texto '漢字한국어' es valido).
 
     Reordenar la secuencia es equivalente a,
     dada una secuencia de tamaño n, generar un arbol de n! hojas,
-    con (n-k) ramificaciones desde cada nodo en cada nivel, siendo la raíz del arbol el nivel 0
+    con (n-k) ramificaciones desde cada nodo en el nivel k (0<=k<n), n,k\inℕ,
+    siendo la raíz del arbol el nivel 0.
     */
     loop {
         let texto = match entrada_de_texto() {
@@ -32,7 +33,7 @@ fn main() {
         let tree_root = RamaArbol::desde_string(texto);
 
         // caché para la memoización. Se inicia con capacidad n! para reducir el allocation
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorizar(tree_root.restantes.len()));
+        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
 
         // El método para generar todas las hojas del arbol es recursivo
         RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
@@ -40,7 +41,7 @@ fn main() {
         // Finalmente, extrae las secuencias de la caché para imprimirlas
         let para_imprimir: Vec<String> = cache
             .into_iter()
-            .map(|rama| rama.camino_sequencia)
+            .map(|rama| rama.camino_secuencia)
             .collect();
 
         println!("{:?}", para_imprimir);
@@ -50,21 +51,28 @@ fn main() {
 mod permutacion_naive {
 
     /**
-     * Cada nodo tiene una secuencia de caracteres hasta ese nodo y los nodos que faltan por usar.
-     * Por ejemplo, para el texto "abcd" la raíz comienza con un camino de 4 espacios vacio y un restantes de 4;
-     * Uno de los nodos del siguiente nivel tendra una string con un valor y 3 vacios, y un vector
-     * de restantes de tamaño 3. Por ejemplo "a" y ['b', 'c', 'd']
+     * El algoritmo sigue una estructura de arbol en la que cada nodo, representado con el struct RamaArbol,
+     * tiene una permutación de tamaño 0 <= t =< longitud_palabra (camino_secuencia) y una colección
+     * de los longitud_palabra - t caracteres aún no incluidos (restantes).
+     *
+     * Ejemplo: el texto "abcd" la raíz comienza con un camino de 4 espacios vacíos y un restantes de 4;
+     * En el siguiente nivel genera 4 nodos (uno por carácter restante), cada uno permutaciones de
+     * tamaño 1 y un restantes de 3:
+     *  - "a" y ['b', 'c', 'd']
+     *  - "b" y ['a', 'c', 'd']
+     *  - "c" y ['a', 'b', 'f']
+     *  - "d" y ['a', 'b', 'c']
      */
     #[derive(Clone)]
     pub struct RamaArbol {
-        pub camino_sequencia: String,
+        pub camino_secuencia: String,
         pub restantes: Vec<char>,
     }
 
     impl RamaArbol {
         pub fn desde_string(s: String) -> Self {
             RamaArbol {
-                camino_sequencia: String::with_capacity(s.len()),
+                camino_secuencia: String::with_capacity(s.len()),
                 restantes: s.chars().collect(),
             }
         }
@@ -81,7 +89,7 @@ mod permutacion_naive {
                 /*Hace una deep copy de la Rama, remueve un caracter en el indice de los restantes
                 y lo agrega al final de la secuencia */
                 let mut rama: RamaArbol = ramas.clone();
-                rama.camino_sequencia
+                rama.camino_secuencia
                     .push(rama.restantes.swap_remove(indice));
                 nuevas_ramas.push(rama);
             }
@@ -101,7 +109,7 @@ mod permutacion_naive {
     }
 }
 
-fn factorizar(numero: usize) -> usize {
+fn factorial(numero: usize) -> usize {
     let mut resultado = 1;
     for valores in 1..(numero + 1) {
         resultado *= valores;
@@ -132,7 +140,7 @@ pub fn entrada_de_texto() -> Option<String> {
     };
 
     if input.chars().count() > 11 {
-        println!("La longitud es muy grande la el algoritmo implementado.\n");
+        println!("La longitud es muy grande para el algoritmo implementado.\n");
         None
     } else {
         Some(input.trim().to_string())
@@ -142,27 +150,27 @@ pub fn entrada_de_texto() -> Option<String> {
 // Unit Tests
 #[cfg(test)]
 mod tests {
-    use crate::factorizar;
+    use crate::factorial;
     use crate::permutacion_naive::RamaArbol;
 
     #[test]
     fn texto_vacio() {
         let texto = String::from("");
         let tree_root = RamaArbol::desde_string(texto);
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorizar(tree_root.restantes.len()));
+        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
         RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
-        assert_eq!("".to_string(), cache[0].camino_sequencia);
+        assert_eq!("".to_string(), cache[0].camino_secuencia);
     }
 
     #[test]
     fn texto_2() {
         let texto = String::from("ab");
         let tree_root = RamaArbol::desde_string(texto);
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorizar(tree_root.restantes.len()));
+        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
         RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
         let mut resultado: Vec<String> = cache
             .into_iter()
-            .map(|rama| rama.camino_sequencia)
+            .map(|rama| rama.camino_secuencia)
             .collect();
         resultado.sort();
         let esperado = ["ab", "ba"];
@@ -175,11 +183,11 @@ mod tests {
     fn texto_4() {
         let texto = String::from("hLOa");
         let tree_root = RamaArbol::desde_string(texto);
-        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorizar(tree_root.restantes.len()));
+        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
         RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
         let mut resultado: Vec<String> = cache
             .into_iter()
-            .map(|rama| rama.camino_sequencia)
+            .map(|rama| rama.camino_secuencia)
             .collect();
         resultado.sort();
         let mut esperado = [
