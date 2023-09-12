@@ -152,9 +152,10 @@ pub fn entrada_de_texto() -> Option<String> {
 mod tests {
     use crate::factorial;
     use crate::permutacion_naive::RamaArbol;
+    use std::collections::HashSet;
 
     #[test]
-    fn texto_vacio() {
+    fn manejo_texto_vacio_correcto() {
         let texto = String::from("");
         let tree_root = RamaArbol::desde_string(texto);
         let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
@@ -163,41 +164,100 @@ mod tests {
     }
 
     #[test]
-    fn texto_2() {
+    fn reordena_texto_minimo() {
         let texto = String::from("ab");
         let tree_root = RamaArbol::desde_string(texto);
         let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
         RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
-        let mut resultado: Vec<String> = cache
+        let resultado: HashSet<String> = cache
             .into_iter()
             .map(|rama| rama.camino_secuencia)
             .collect();
-        resultado.sort();
-        let esperado = ["ab", "ba"];
-        for index in 0..1 {
-            assert_eq!(esperado[index], resultado[index])
-        }
+        let esperado: HashSet<String> = ["ab", "ba"].into_iter().map(|s| s.to_string()).collect();
+        assert!(esperado == resultado);
     }
 
     #[test]
-    fn texto_4() {
+    fn reordena_texto_con_mayusculas() {
         let texto = String::from("hLOa");
         let tree_root = RamaArbol::desde_string(texto);
         let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
         RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
-        let mut resultado: Vec<String> = cache
+        let resultado: HashSet<String> = cache
             .into_iter()
             .map(|rama| rama.camino_secuencia)
             .collect();
-        resultado.sort();
-        let mut esperado = [
+        let esperado: HashSet<String> = [
             "hOLa", "OhLa", "LhOa", "hLOa", "OLha", "LOha", "LOah", "OLah", "aLOh", "LaOh", "OaLh",
             "aOLh", "ahLO", "haLO", "LahO", "aLhO", "hLaO", "LhaO", "OhaL", "hOaL", "aOhL", "OahL",
             "haOL", "ahOL",
-        ];
-        esperado.sort();
-        for index in 0..24 {
-            assert_eq!(esperado[index], resultado[index])
-        }
+        ]
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect();
+        assert!(esperado == resultado);
+    }
+
+    #[test]
+    fn reordena_palabra_longitud_seis() {
+        let texto = String::from("celula");
+        let tree_root = RamaArbol::desde_string(texto);
+        let mut cache: Vec<RamaArbol> = Vec::with_capacity(factorial(tree_root.restantes.len()));
+        RamaArbol::generar_hojas(&mut cache, vec![tree_root]);
+        let resultado: HashSet<String> = cache
+            .into_iter()
+            .map(|rama| rama.camino_secuencia)
+            .collect();
+        let esperado: HashSet<String> = [
+            "celula", "eclula", "lceula", "cleula", "elcula", "lecula", "leucla", "elucla",
+            "ulecla", "luecla", "eulcla", "uelcla", "uclela", "culela", "lucela", "ulcela",
+            "cluela", "lcuela", "eculla", "ceulla", "ueclla", "euclla", "cuella", "ucella",
+            "lcelua", "clelua", "elclua", "leclua", "cellua", "ecllua", "llecua", "ellcua",
+            "lelcua", "clleua", "lcleua", "llceua", "lulcea", "ullcea", "llucea", "luclea",
+            "ulclea", "clulea", "lculea", "ucllea", "cullea", "clluea", "lcluea", "llcuea",
+            "elulca", "leulca", "uellca", "eullca", "luelca", "ulelca", "ulleca", "luleca",
+            "llueca", "leluca", "elluca", "lleuca", "leluac", "elluac", "lleuac", "leulac",
+            "elulac", "ulelac", "luelac", "eullac", "uellac", "ulleac", "luleac", "llueac",
+            "aleluc", "laeluc", "ealluc", "aelluc", "lealuc", "elaluc", "ellauc", "lelauc",
+            "lleauc", "laleuc", "alleuc", "llaeuc", "ualelc", "aulelc", "luaelc", "ulaelc",
+            "aluelc", "lauelc", "laeulc", "aleulc", "elaulc", "leaulc", "aelulc", "ealulc",
+            "eulalc", "uelalc", "leualc", "elualc", "ulealc", "luealc", "auellc", "uaellc",
+            "eaullc", "aeullc", "ueallc", "euallc", "lualec", "ulalec", "alulec", "laulec",
+            "uallec", "aullec", "llauec", "alluec", "laluec", "ullaec", "lulaec", "lluaec",
+            "aelclu", "ealclu", "laeclu", "aleclu", "elaclu", "leaclu", "lecalu", "elcalu",
+            "clealu", "lcealu", "eclalu", "celalu", "calelu", "aclelu", "lcaelu", "claelu",
+            "alcelu", "lacelu", "eacllu", "aecllu", "ceallu", "ecallu", "acellu", "caellu",
+            "laelcu", "alelcu", "elalcu", "lealcu", "aellcu", "eallcu", "lleacu", "ellacu",
+            "lelacu", "allecu", "lalecu", "llaecu", "lclaeu", "cllaeu", "llcaeu", "lcaleu",
+            "claleu", "alcleu", "lacleu", "calleu", "aclleu", "allceu", "lalceu", "llaceu",
+            "elclau", "leclau", "cellau", "ecllau", "lcelau", "clelau", "clleau", "lcleau",
+            "llceau", "lelcau", "ellcau", "llecau", "leucal", "elucal", "ulecal", "luecal",
+            "eulcal", "uelcal", "ueclal", "euclal", "cuelal", "ucelal", "eculal", "ceulal",
+            "clueal", "lcueal", "ucleal", "culeal", "luceal", "ulceal", "elcual", "lecual",
+            "celual", "eclual", "lceual", "cleual", "aleucl", "laeucl", "ealucl", "aelucl",
+            "leaucl", "elaucl", "eluacl", "leuacl", "uelacl", "eulacl", "lueacl", "uleacl",
+            "uaelcl", "auelcl", "eualcl", "uealcl", "aeulcl", "eaulcl", "lauecl", "aluecl",
+            "ulaecl", "luaecl", "aulecl", "ualecl", "caleul", "acleul", "lcaeul", "claeul",
+            "alceul", "laceul", "laecul", "alecul", "elacul", "leacul", "aelcul", "ealcul",
+            "eclaul", "celaul", "lecaul", "elcaul", "cleaul", "lceaul", "acelul", "caelul",
+            "eaclul", "aeclul", "cealul", "ecalul", "ucalel", "cualel", "auclel", "uaclel",
+            "caulel", "aculel", "acluel", "caluel", "lacuel", "alcuel", "clauel", "lcauel",
+            "luacel", "ulacel", "alucel", "laucel", "ualcel", "aulcel", "culael", "uclael",
+            "lcuael", "cluael", "ulcael", "lucael", "eucall", "uecall", "ceuall", "ecuall",
+            "uceall", "cueall", "cuaell", "ucaell", "acuell", "cauell", "uacell", "aucell",
+            "aecull", "eacull", "caeull", "aceull", "ecaull", "ceaull", "ueacll", "euacll",
+            "auecll", "uaecll", "eaucll", "aeucll", "alucle", "laucle", "ualcle", "aulcle",
+            "luacle", "ulacle", "ulcale", "lucale", "culale", "uclale", "lcuale", "cluale",
+            "caulle", "aculle", "ucalle", "cualle", "auclle", "uaclle", "lacule", "alcule",
+            "claule", "lcaule", "aclule", "calule", "laluce", "alluce", "llauce", "laulce",
+            "alulce", "ulalce", "lualce", "aullce", "uallce", "ullace", "lulace", "lluace",
+            "clalue", "lcalue", "acllue", "callue", "laclue", "alclue", "allcue", "lalcue",
+            "llacue", "lclaue", "cllaue", "llcaue", "luclae", "ulclae", "clulae", "lculae",
+            "ucllae", "cullae", "llcuae", "clluae", "lcluae", "ullcae", "lulcae", "llucae",
+        ]
+        .into_iter()
+        .map(|s| s.to_string())
+        .collect();
+        assert!(esperado == resultado);
     }
 }
