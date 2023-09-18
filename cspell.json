@@ -26,8 +26,11 @@
         {
             "languageId": "rust",
             "includeRegExpList": [
-                "///+.*",
+                "[/]{2,3}.*",
                 "/[*]\n+(.+\n)+[*]/"
+            ],
+            "dictionaries": [
+                "rustDictionary"
             ]
         }
     ],
@@ -36,8 +39,8 @@
     "flagWords": [],
     //
     "enableFiletypes": [
-        "editorconfig",
-        "matlab"
+        "rust",
+        "markdown"
     ],
     // Specify paths/files to ignore.
     "ignorePaths": [
