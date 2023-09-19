@@ -83,8 +83,11 @@ impl TrueColor {
 #[cfg(test)]
 mod tests {
     use super::*;
+    // Crea un alias para tipo existentes
+    type TestCase = (&'static str, (u8, u8, u8), &'static str, &'static str);
+
     // Esto sería mas adecuado en un archivo aparte.
-    const TEST_CASES: [(&str, (u8, u8, u8), &str, &str); 17] = [
+    const VALID_TEST_CASES: [TestCase; 17] = [
         ("Black", (0, 0, 0), "#000000", "(r: 0, g: 0, b: 0)"),
         (
             "White",
@@ -181,7 +184,7 @@ mod tests {
 
     #[test]
     fn traduce_rgb2hex() {
-        for case in TEST_CASES {
+        for case in VALID_TEST_CASES {
             let (_, (red, green, blue), hex_str, _) = case;
             assert_eq!(TrueColor::rgb2hex(red, green, blue), hex_str)
         }
@@ -189,7 +192,7 @@ mod tests {
 
     #[test]
     fn traduce_hex2rgb() {
-        for case in TEST_CASES {
+        for case in VALID_TEST_CASES {
             let (_, _, hex_str, rgb_str) = case;
             assert_eq!(TrueColor::hex2rgb(hex_str.to_string()), rgb_str)
         }
