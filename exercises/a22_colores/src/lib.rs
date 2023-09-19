@@ -182,6 +182,18 @@ mod tests {
         ),
     ];
 
+    const BAD_TEST_CASES: [TestCase; 4] = [
+        ("Sin trailing #", (0, 0, 0), "FFFFFF", ""),
+        ("Formato 3 valores", (0, 0, 0), "FFF", ""),
+        ("Mas valores de los esperados", (0, 0, 0), "#FFFFFFFF", ""),
+        (
+            "No son valores hexadecimales validos",
+            (0, 0, 0),
+            "#FHFHFH",
+            "",
+        ),
+    ];
+
     #[test]
     fn traduce_rgb2hex() {
         for case in VALID_TEST_CASES {
@@ -195,6 +207,15 @@ mod tests {
         for case in VALID_TEST_CASES {
             let (_, _, hex_str, rgb_str) = case;
             assert_eq!(TrueColor::hex2rgb(hex_str.to_string()), rgb_str)
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "Formato invalido")]
+    fn fails_from_hex_string() {
+        for case in BAD_TEST_CASES {
+            let (_, _, hex_str, _) = case;
+            TrueColor::hex2rgb(hex_str.to_string());
         }
     }
 }
