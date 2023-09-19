@@ -14,7 +14,7 @@ const ERROR_MSG: &str = "Formato invalido";
  * Bajo el esquema True Color (24 bits) los colores se representan como una tripleta (Red, Green, Blue),
  * La notación RGB o HEX cambia la forma en que se representan los valores:
  * - RGB, como una tupla de decimales de 8 bits (0-255)
- * - HEX, hexádecimales de 8 bits escritos en dos dígitos (00-FF), concatenados y con trailing "#". Preserva el orden RGB.
+ * - HEX, hexadecimales de 8 bits escritos en dos dígitos (00-FF), concatenados y con trailing "#". Preserva el orden RGB.
  */
 pub struct TrueColor {
     red: u8,
@@ -23,7 +23,8 @@ pub struct TrueColor {
 }
 
 impl TrueColor {
-    /// Crea un TrueColor desde una cadena de texto en formato Hexadecimal de 6 dígitos (e.g. "#F1F2F3")
+    /// Crea un TrueColor desde una cadena de texto en formato Hexadecimal de 6 dígitos
+    /// es case-insensitive: e.g., "#CD853F", "#cd853f", "#cD853f", son validos
     pub fn from_hex(value: String) -> Self {
         /* Transforma la String en un iterador de caracteres y
         valida que tenga "#" como trailing character */
