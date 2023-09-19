@@ -27,7 +27,8 @@
             "languageId": "rust",
             "includeRegExpList": [
                 "[/]{2,3}.*",
-                "/[*]\n+(.+\n)+[*]/"
+                //"/[*]{3}\n+(.+\n)+[ ]+[*]/"
+                "/[*]+\n?([\\S\\s]*?)[*]/"
             ],
             "dictionaries": [
                 "rustDictionary"
@@ -49,7 +50,11 @@
         "*.toml" // Ignore all .toml files.
     ],
     // words - list of words to be always considered correct
-    "words": [],
+    "words": [
+        "iterador",
+        "tripleta",
+        "tupla"
+    ],
     // custom dictionaries
     "dictionaryDefinitions": [
         {
