@@ -8,6 +8,8 @@ RGB a HEX: r: 0, g: 0, b: 0 -> #000000
 HEX a RGB: hex: #000000 -> (r: 0, g: 0, b: 0)
 */
 
+const ERROR_MSG: &str = "Formato invalido";
+
 /***
  * Bajo el esquema True Color (24 bits) los colores se representan como una tripleta (Red, Green, Blue),
  * La notación RGB o HEX cambia la forma en que se representan los valores:
@@ -27,7 +29,7 @@ impl TrueColor {
         valida que tenga "#" como trailing character */
         let mut chars = value.chars();
         if chars.next().unwrap() != '#' {
-            panic!("Invalid")
+            panic!("{ERROR_MSG}")
         };
 
         /* Toma los demas caracteres del iterador, los separa parejas,
@@ -35,10 +37,10 @@ impl TrueColor {
         let valores = chars
             .collect::<Vec<char>>()
             .chunks(2)
-            .map(|chunck| u8::from_str_radix(&String::from_iter(chunck), 16).unwrap())
+            .map(|chunck| u8::from_str_radix(&String::from_iter(chunck), 16).expect("{ERROR_MSG}"))
             .collect::<Vec<u8>>();
         if valores.len() != 3 {
-            panic!("Invalid")
+            panic!("{ERROR_MSG}")
         };
 
         TrueColor {
