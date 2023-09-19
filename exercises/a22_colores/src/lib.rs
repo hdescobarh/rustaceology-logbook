@@ -87,7 +87,7 @@ mod tests {
     type TestCase = (&'static str, (u8, u8, u8), &'static str, &'static str);
 
     // Esto sería mas adecuado en un archivo aparte.
-    const VALID_TEST_CASES: [TestCase; 17] = [
+    const VALID_TEST_CASES: [TestCase; 8] = [
         ("Black", (0, 0, 0), "#000000", "(r: 0, g: 0, b: 0)"),
         (
             "White",
@@ -96,28 +96,10 @@ mod tests {
             "(r: 255, g: 255, b: 255)",
         ),
         (
-            "MediumSlateBlue",
-            (123, 104, 238),
-            "#7B68EE",
-            "(r: 123, g: 104, b: 238)",
-        ),
-        (
-            "DarkGray",
-            (169, 169, 169),
-            "#A9A9A9",
-            "(r: 169, g: 169, b: 169)",
-        ),
-        (
             "RosyBrown",
             (188, 143, 143),
             "#BC8F8F",
             "(r: 188, g: 143, b: 143)",
-        ),
-        (
-            "SlateGray",
-            (112, 128, 144),
-            "#708090",
-            "(r: 112, g: 128, b: 144)",
         ),
         (
             "DarkTurquoise",
@@ -126,59 +108,28 @@ mod tests {
             "(r: 0, g: 206, b: 209)",
         ),
         (
-            "RosyBrown",
-            (188, 143, 143),
-            "#BC8F8F",
-            "(r: 188, g: 143, b: 143)",
-        ),
-        (
             "GhostWhite",
             (248, 248, 255),
             "#F8F8FF",
             "(r: 248, g: 248, b: 255)",
         ),
         (
-            "Turquoise",
+            "Turquoise - lowercase",
             (64, 224, 208),
-            "#40E0D0",
+            "#40e0d0",
             "(r: 64, g: 224, b: 208)",
         ),
         (
-            "Fuchsia",
-            (255, 0, 255),
-            "#FF00FF",
-            "(r: 255, g: 0, b: 255)",
-        ),
-        (
-            "SlateBlue",
+            "SlateBlue - lowercase",
             (106, 90, 205),
-            "#6A5ACD",
+            "#6a5acd",
             "(r: 106, g: 90, b: 205)",
         ),
         (
-            "LightSlateGray",
-            (119, 136, 153),
-            "#778899",
-            "(r: 119, g: 136, b: 153)",
-        ),
-        (
-            "DarkGoldenrod",
-            (184, 134, 11),
-            "#B8860B",
-            "(r: 184, g: 134, b: 11)",
-        ),
-        ("Peru", (205, 133, 63), "#CD853F", "(r: 205, g: 133, b: 63)"),
-        (
-            "OliveDrab",
-            (107, 142, 35),
-            "#6B8E23",
-            "(r: 107, g: 142, b: 35)",
-        ),
-        (
-            "OldLace",
-            (253, 245, 230),
-            "#FDF5E6",
-            "(r: 253, g: 245, b: 230)",
+            "Peru - mixedcase",
+            (205, 133, 63),
+            "#cD853f",
+            "(r: 205, g: 133, b: 63)",
         ),
     ];
 
@@ -198,7 +149,10 @@ mod tests {
     fn traduce_rgb2hex() {
         for case in VALID_TEST_CASES {
             let (_, (red, green, blue), hex_str, _) = case;
-            assert_eq!(TrueColor::rgb2hex(red, green, blue), hex_str)
+            assert_eq!(
+                TrueColor::rgb2hex(red, green, blue),
+                hex_str.to_ascii_uppercase()
+            )
         }
     }
 
