@@ -8,18 +8,13 @@ RGB a HEX: r: 0, g: 0, b: 0 -> #000000
 HEX a RGB: hex: #000000 -> (r: 0, g: 0, b: 0)
 */
 
-fn main() {
-    // "#7B68EE",
-    println!("{}", TrueColor::rgb2hex(123, 104, 2))
-}
-
 /***
  * Bajo el esquema True Color (24 bits) los colores se representan como una tripleta (Red, Green, Blue),
  * La notación RGB o HEX cambia la forma en que se representan los valores:
  * - RGB, como una tupla de decimales de 8 bits (0-255)
  * - HEX, hexádecimales de 8 bits escritos en dos dígitos (00-FF), concatenados y con trailing "#". Preserva el orden RGB.
  */
-struct TrueColor {
+pub struct TrueColor {
     red: u8,
     green: u8,
     blue: u8,
