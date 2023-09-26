@@ -55,12 +55,12 @@ impl Combinacion {
         base: Vec<Combinacion>,
         objetivo: &usize,
     ) {
-        for nodo in base {
-            if let Some(nueva_base) = nodo.derivar_desde_pendientes(objetivo) {
+        for combinacion in base {
+            if let Some(nueva_base) = combinacion.derivar_desde_pendientes(objetivo) {
                 Combinacion::generar_combinaciones(buffer, nueva_base, objetivo);
             }
-            if nodo.suma == *objetivo {
-                buffer.push(nodo);
+            if combinacion.suma == *objetivo {
+                buffer.push(combinacion);
             }
         }
     }
@@ -95,4 +95,34 @@ impl Combinacion {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn el_resultado_suma_objetivo() {
+        let objetivo = 10;
+        let secuencia = [11, 5, 3, 2, 7, 20, 1, 5, 4, 1, 3, 9, 11, 20, 13, 17];
+        let resultado = Combinacion::desde_secuencia(&secuencia, &objetivo);
+        for combinacion in resultado {
+            assert_eq!(objetivo, combinacion.iter().sum());
+        }
+    }
+
+    #[test]
+    fn caso_ejemplo() {
+        let secuencia = [1, 5, 3, 2];
+        let objetivo: usize = 6;
+        let esperado = vec![vec![1, 2, 3], vec![1, 5]];
+        let mut resultado = Combinacion::desde_secuencia(&secuencia, &objetivo);
+        resultado.sort();
+        assert_eq!(esperado, resultado);
+    }
+
+    #[test]
+    fn caso_ejemplo_extendido() {
+        let secuencia = [11, 5, 3, 2, 7, 20, 1, 5, 4];
+        let objetivo: usize = 6;
+        let esperado = vec![vec![1, 5], vec![2, 4], vec![3, 2, 1], vec![5, 1]];
+        let mut resultado = Combinacion::desde_secuencia(&secuencia, &objetivo);
+        resultado.sort();
+        assert_eq!(esperado, resultado);
+    }
 }
