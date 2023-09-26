@@ -27,8 +27,7 @@
             "languageId": "rust",
             "includeRegExpList": [
                 "[/]{2,3}.*",
-                //"/[*]{3}\n+(.+\n)+[ ]+[*]/"
-                "/[*]+\n?([\\S\\s]*?)[*]/"
+                "[/][*]+\n?([\\S\\s]*?)[*][/]"
             ],
             "dictionaries": [
                 "rustDictionary"

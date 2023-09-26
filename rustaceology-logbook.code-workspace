@@ -20,7 +20,6 @@
 	"settings": {
 		"files.eol": "auto",
 		"files.encoding": "utf8",
-		"editor.formatOnPaste": true,
 		"editor.formatOnSave": true,
 		"rust-analyzer.check.command": "clippy",
 		"rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
@@ -30,14 +29,15 @@
 			"editor.defaultFormatter": "rust-lang.rust-analyzer"
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises\\_exercism\\rust\\assembly-line\\Cargo.toml",
+			"exercises\\a23_combinacion_sumas\\Cargo.toml",
 		],
 		"rust-analyzer.cargo.buildScripts.invocationLocation": "root",
 	},
 	"extensions": {
 		"recommendations": [
 			"vadimcn.vscode-lldb",
-			"rust-lang.rust-analyzer"
+			"rust-lang.rust-analyzer",
+			"streetsidesoftware.code-spell-checker"
 		]
 	}
 }
