@@ -1,40 +1,58 @@
 // author: Hans D. Escobar H. (hdescobarh)
-
+#![crate_name = "combinacion_sumas"]
+#![crate_type = "cdylib"]
 /*
- * Crea una función que encuentre todas las combinaciones de los números
- * de una lista que suman el valor objetivo.
- * - La función recibirá una lista de números enteros positivos
- *   y un valor objetivo.
- * - Para obtener las combinaciones sólo se puede usar
- *   una vez cada elemento de la lista (pero pueden existir
- *   elementos repetidos en ella).
- * - Ejemplo: Lista = [1, 5, 3, 2],  Objetivo = 6
- *   Soluciones: [1, 5] y [1, 3, 2] (ambas combinaciones suman 6)
- *   (Si no existen combinaciones, retornar una lista vacía)
- */
+Crea una función que encuentre todas las combinaciones de los números
+de una lista que suman el valor objetivo.
+- La función recibirá una lista de números enteros positivos
+  y un valor objetivo.
+- Para obtener las combinaciones sólo se puede usar
+  una vez cada elemento de la lista (pero pueden existir
+  elementos repetidos en ella).
+- Ejemplo: Lista = [1, 5, 3, 2],  Objetivo = 6
+  Soluciones: [1, 5] y [1, 3, 2] (ambas combinaciones suman 6)
+  (Si no existen combinaciones, retornar una lista vacía)
+*/
 
-/*  Rust no cuenta con funciones para generar combinaciones en su
-biblioteca estándar (https://doc.rust-lang.org/std/).
-La idea es no usar bibliotecas externas, así que implementaré un algoritmo de generar combinaciones,
-pero modificado para que solo busque las combinaciones menores o iguales al Objetivo.
- */
+/*  Rust no cuenta con funciones para generar combinaciones en su biblioteca estándar (https://doc.rust-lang.org/std/).
+Esta solución no usa bibliotecas externas.
+*/
 
-/// Almacena una posible combinación de una secuencia:
-/// valores: la combinación formada
-/// pendientes: valores de la secuencia que no hacen parte de los valores de la combinación
-/// suma: la suma de los valores de la combinación
+//! Dada una secuencia de valores enteros no negativos, encuentra todas las combinaciones
+//! posibles que satisfacen la condición de que la suma de sus valores es igual a un valor objetivo
+//!
+//! Implementa un algoritmo sencillo que realiza una búsqueda en arbol, empezando por las
+//! combinaciones (nCr), r=0. Desde cada combinación se ramifica a todas las combinaciones (nCk+r), r+1<=n
+//! que no hayan sido generadas en otras ramas.
+//!
+//! # Ejemplo:
+//!
+//! ```
+//! use combinacion_sumas::Combinacion;
+//! let resultado = Combinacion::desde_secuencia(&[1, 5, 3, 2], &6);
+//! // Retorna [[1, 2, 3], [1, 5]]
+//! println!("{:?}", resultado);
+//! ```
+
+/// Almacena una posible combinación de una secuencia
 #[derive(Clone)]
 pub struct Combinacion {
+    /// Contiene los valores que hacen parte de la combinación.
     valores: Vec<usize>,
+    /// Contiene los valores de la secuencia original que aun no han sido incluidos
     pendientes: Vec<usize>,
+    /// suma de los valores de la combinación. Se emplea para evitar iterar sobre todos valores
+    /// cada que se agrega un nuevo elemento.
     suma: usize,
 }
 
 impl Combinacion {
     /// Desde una secuencia genera todas las posibles combinaciones que satisfacen
     /// que su suma es igual al valor objetivo.
-    /// secuencia: la secuencia de valores desde la cual generar las combinaciones
-    /// objetivo: el valor que deben satisfacer la suma de los valores de una combinación valida
+    ///
+    /// # Argumentos:
+    /// * `secuencia` - Una secuencia de valores desde la cual generar las combinaciones
+    /// * `objetivo` - El valor que deben satisfacer la suma de los valores de una combinación valida
     pub fn desde_secuencia(secuencia: &[usize], objetivo: &usize) -> Vec<Vec<usize>> {
         // genera la raíz del arbol de búsqueda
         let nodo_inicial = Self {
@@ -52,10 +70,13 @@ impl Combinacion {
             .collect::<Vec<Vec<usize>>>()
     }
 
-    // genera todas las posibles combinaciones desde una secuencia de combinaciones de referencia
-    // buffer: un almacenamiento temporal de las llamadas recursivas (se esta aplicando memoization)
-    // base: es la secuencia de combinaciones de referencia
-    // objetivo: el valor que deben satisfacer la suma de los valores de una combinación valida
+    /// Privada.
+    /// Genera todas las posibles combinaciones desde una secuencia de combinaciones de referencia.
+    ///
+    /// # Argumentos:
+    /// * `buffer` - Almacenamiento temporal de las llamadas recursivas (memoization)
+    /// * `base` - Combinación que actúa como raíz del arbol o sub-arbol de búsqueda
+    /// * `objetivo` - El valor que deben satisfacer la suma de los valores de una combinación valida
     fn generar_combinaciones(
         buffer: &mut Vec<Combinacion>,
         base: Vec<Combinacion>,
@@ -71,9 +92,12 @@ impl Combinacion {
         }
     }
 
-    /// A partir de una combinación de n valores y k > 0 pendientes genera todas las combinaciones
-    /// validas de n+1 valores que derivan de esta.
-    /// Sí no se puede derivar mas combinaciones, retorna None.
+    /// Privada
+    /// Sí contiene k elementos en pendientes, genera 0 a k combinaciones de tamaño r+1
+    /// que los incluye sí su suma <= Objetivo.
+    ///
+    /// # Argumentos:
+    /// * `objetivo` - El valor que deben satisfacer la suma de los valores de una combinación valida
     fn derivar_desde_pendientes(&self, objetivo: &usize) -> Option<Vec<Combinacion>> {
         if self.pendientes.is_empty() {
             return None;
@@ -85,9 +109,9 @@ impl Combinacion {
             if suma > *objetivo {
                 continue;
             }
-            // Genera una nueva combinación, extendiendo la original con el valor del indice i de pendientes.
-            // Los pendiente de la nueva combinación corresponde
-            // a los indices i+1..n de los pendientes de la combinación original. Este paso es el que garantiza que no se repitan posiciones
+            // Genera una nueva combinación extendiendo la original con el valor del indice i de pendientes.
+            // Los pendiente de la nueva combinación corresponde a los indices i+1..n de pendientes de la combinación original.
+            // Este paso es el que garantiza que no se repitan posiciones
             let mut nueva = self.clone();
             nueva.pendientes = nueva.pendientes.split_off(posicion);
             nueva.suma = suma;
