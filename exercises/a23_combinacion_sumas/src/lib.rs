@@ -32,7 +32,9 @@ pub struct Combinacion {
 
 impl Combinacion {
     /// Desde una secuencia genera todas las posibles combinaciones que satisfacen
-    /// que su suma es igual al valor objetivo
+    /// que su suma es igual al valor objetivo.
+    /// secuencia: la secuencia de valores desde la cual generar las combinaciones
+    /// objetivo: el valor que deben satisfacer la suma de los valores de una combinación valida
     pub fn desde_secuencia(secuencia: &[usize], objetivo: &usize) -> Vec<Vec<usize>> {
         // genera la raíz del arbol de búsqueda
         let nodo_inicial = Self {
@@ -50,6 +52,10 @@ impl Combinacion {
             .collect::<Vec<Vec<usize>>>()
     }
 
+    // genera todas las posibles combinaciones desde una secuencia de combinaciones de referencia
+    // buffer: un almacenamiento temporal de las llamadas recursivas (se esta aplicando memoization)
+    // base: es la secuencia de combinaciones de referencia
+    // objetivo: el valor que deben satisfacer la suma de los valores de una combinación valida
     fn generar_combinaciones(
         buffer: &mut Vec<Combinacion>,
         base: Vec<Combinacion>,
