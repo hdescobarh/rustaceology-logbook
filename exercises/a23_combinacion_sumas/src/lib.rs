@@ -137,6 +137,14 @@ mod tests {
     }
 
     #[test]
+    fn no_existe_combinacion() {
+        let objetivo = 5;
+        let secuencia = [11, 20, 15, 42, 13, 17];
+        let resultado = Combinacion::desde_secuencia(&secuencia, &objetivo);
+        assert!(resultado.is_empty());
+    }
+
+    #[test]
     fn caso_ejemplo() {
         let secuencia = [1, 5, 3, 2];
         let objetivo: usize = 6;
