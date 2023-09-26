@@ -13,17 +13,86 @@
  *   (Si no existen combinaciones, retornar una lista vacía)
  */
 
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+/*  Rust no cuenta con funciones para generar combinaciones en su
+biblioteca estándar (https://doc.rust-lang.org/std/).
+La idea es no usar bibliotecas externas, así que implementaré un algoritmo de generar combinaciones,
+pero modificado para que solo busque las combinaciones menores o iguales al Objetivo.
+ */
+
+/// Almacena una posible combinación de una secuencia:
+/// valores: la combinación formada
+/// pendientes: valores de la secuencia que no hacen parte de los valores de la combinación
+/// suma: la suma de los valores de la combinación
+#[derive(Clone)]
+pub struct Combinacion {
+    valores: Vec<usize>,
+    pendientes: Vec<usize>,
+    suma: usize,
+}
+
+impl Combinacion {
+    /// Desde una secuencia genera todas las posibles combinaciones que satisfacen
+    /// que su suma es igual al valor objetivo
+    pub fn desde_secuencia(secuencia: &[usize], objetivo: &usize) -> Vec<Vec<usize>> {
+        // genera la raíz del arbol de búsqueda
+        let nodo_inicial = Self {
+            valores: Vec::new(),
+            pendientes: secuencia.to_vec(),
+            suma: 0,
+        };
+        // La función asociada "generar_combinaciones" de forma recursiva genera combinaciones que cumplen la condición
+        let mut buffer: Vec<Combinacion> = Vec::new();
+        Combinacion::generar_combinaciones(&mut buffer, vec![nodo_inicial], objetivo);
+        // Extrae los valores de cada combinación
+        buffer
+            .into_iter()
+            .map(|combinacion| combinacion.valores)
+            .collect::<Vec<Vec<usize>>>()
+    }
+
+    fn generar_combinaciones(
+        buffer: &mut Vec<Combinacion>,
+        base: Vec<Combinacion>,
+        objetivo: &usize,
+    ) {
+        for nodo in base {
+            if let Some(nueva_base) = nodo.derivar_desde_pendientes(objetivo) {
+                Combinacion::generar_combinaciones(buffer, nueva_base, objetivo);
+            }
+            if nodo.suma == *objetivo {
+                buffer.push(nodo);
+            }
+        }
+    }
+
+    /// A partir de una combinación de n valores y k > 0 pendientes genera todas las combinaciones
+    /// validas de n+1 valores que derivan de esta.
+    /// Sí no se puede derivar mas combinaciones, retorna None.
+    fn derivar_desde_pendientes(&self, objetivo: &usize) -> Option<Vec<Combinacion>> {
+        if self.pendientes.is_empty() {
+            return None;
+        }
+        let mut nuevas_combinaciones: Vec<Combinacion> = Vec::with_capacity(self.pendientes.len());
+        for posicion in 0..self.pendientes.len() {
+            // define la suma y sí esta es mayor al objetivo, no genera una nueva combinación
+            let suma: usize = self.suma + self.pendientes[posicion];
+            if suma > *objetivo {
+                continue;
+            }
+            // Genera una nueva combinación, extendiendo la original con el valor del indice i de pendientes.
+            // Los pendiente de la nueva combinación corresponde
+            // a los indices i+1..n de los pendientes de la combinación original. Este paso es el que garantiza que no se repitan posiciones
+            let mut nueva = self.clone();
+            nueva.pendientes = nueva.pendientes.split_off(posicion);
+            nueva.suma = suma;
+            nueva.valores.push(nueva.pendientes.swap_remove(0));
+            nuevas_combinaciones.push(nueva)
+        }
+        Some(nuevas_combinaciones)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
 }
