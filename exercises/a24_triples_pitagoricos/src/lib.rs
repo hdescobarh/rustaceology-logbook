@@ -63,11 +63,11 @@ fn maximo_comun_divisor(numero_1: &usize, numero_2: &usize) -> usize {
     }
 }
 
-// encuentra todos los divisores de un número entero positivo
+// encuentra los divisores diferentes de 1 y el mismo número
 // implementación naive
-fn obtener_todos_los_divisores(numero: &usize) -> Vec<usize> {
+fn obtener_divisores(numero: &usize) -> Vec<usize> {
     let mut divisores: Vec<usize> = Vec::with_capacity(*numero);
-    for candidato in 1..(numero + 1) {
+    for candidato in 2..*numero {
         if (numero % candidato) == 0 {
             divisores.push(candidato)
         }
@@ -89,16 +89,17 @@ mod tests {
     }
 
     #[test]
-    fn encuentra_los_divisores_de_un_numero() {
+    fn encuentra_divisores_de_un_numero() {
         let test_cases = [
-            (7, vec![1, 7]),
-            (12, vec![1, 2, 3, 4, 6, 12]),
-            (25, vec![1, 5, 25]),
-            (42, vec![1, 2, 3, 6, 7, 14, 21, 42]),
+            (7, vec![]),
+            (12, vec![2, 3, 4, 6]),
+            (25, vec![5]),
+            (42, vec![2, 3, 6, 7, 14, 21]),
+            (97, vec![]),
         ];
 
         for case in test_cases {
-            assert_eq!(case.1, obtener_todos_los_divisores(&case.0));
+            assert_eq!(case.1, obtener_divisores(&case.0));
         }
     }
 }
