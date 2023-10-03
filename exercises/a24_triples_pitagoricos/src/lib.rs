@@ -13,6 +13,16 @@ Reto #39: Triples pitagóricos
    formados por (3, 4, 5) y (6, 8, 10).
  */
 
+/*
+ Un triple pitagórico es un conjunto de números enteros que satisface el teorema de Pitágoras.
+ Por trigonometría sabemos que:
+ - el máximo valor es la hipotenusa.
+ - los múltiplos comunes de un triple también es un triple.
+
+Mi propuesta consiste en encontrar los dos valores restantes que satisfacen el triple, y encontrar
+los divisores comunes para con ellos calcular los triples menores.
+  */
+
 #[cfg(test)]
 mod tests {
     //use super::*;
