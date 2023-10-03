@@ -29,7 +29,7 @@
 			"editor.defaultFormatter": "rust-lang.rust-analyzer"
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises\\a23_combinacion_sumas\\Cargo.toml",
+			"exercises\\a24_triples_pitagoricos\\Cargo.toml",
 		],
 		"rust-analyzer.cargo.buildScripts.invocationLocation": "root",
 	},
