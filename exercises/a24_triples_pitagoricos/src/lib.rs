@@ -14,14 +14,14 @@ Reto #39: Triples pitagóricos
  */
 
 /*
- Un triple pitagórico es un conjunto de números enteros que satisface el teorema de Pitágoras.
- Por trigonometría sabemos que:
- - el máximo valor es la hipotenusa.
- - los múltiplos comunes de un triple también es un triple.
+ Un triple pitagórico es un conjunto de tres números enteros positivos que satisface el teorema de Pitágoras.
+ Por trigonometría se tiene que:
+ 1. El máximo valor es la hipotenusa.
+ 2. El resultado de multiplicar un triple por una constante también es un triple.
 
-Mi propuesta consiste en encontrar los dos valores restantes que satisfacen el triple, y encontrar
-los divisores comunes para con ellos calcular los triples menores.
-  */
+Mi estrategia consiste en aplicar (1) para encontrar los dos valores restantes que satisfacen el triple;
+posteriormente, a través de los divisores comunes (2) encontrar los triples menores asociados.
+*/
 
 #[cfg(test)]
 mod tests {
