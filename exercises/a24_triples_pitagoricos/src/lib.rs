@@ -16,15 +16,15 @@ Reto #39: Triples pitagóricos
  */
 
 /*
- Un triple pitagórico es un conjunto de tres números enteros positivos que satisface el teorema de Pitágoras.
- Por trigonometría se tiene que:
- 1. El máximo valor es la hipotenusa.
- 2. El resultado de multiplicar un triple por una constante también es un triple.
-
-Mi estrategia consiste en aplicar (1) para encontrar los dos valores restantes que satisfacen el triple;
-posteriormente, a través de los divisores comunes (2) encontrar los triples menores asociados.
+El problema es equivalente a, dada una constante r ∈ ℤ⁺ tal que existe un triple (a', b', r),
+encontrar a todos pares (a,b) tales que
+a² + b² = c², c² ≤ r²
+⇒ a² ≤ r² - b², b < r
 */
 
+/// Un triple pitagórico es un conjunto de tres números {a, b, c} que satisface a² + b² = c² tal que a,b,c ∈ ℤ⁺.
+/// Un triple cumple que a > b > c, por lo que se puede anotar como (a,b,c)
+#[derive(PartialEq, Debug, Eq, Hash)]
 pub struct TriplePitagorico {
     cateto_a: usize,
     cateto_b: usize,
@@ -32,82 +32,90 @@ pub struct TriplePitagorico {
 }
 
 impl TriplePitagorico {
-    // crea un Tripe Pitagórico a partir de un numero, el cual se asume que es el máximo del trio y , por lo tanto
-    // la hipotenusa
-    pub fn desde_numero_maximo(numero: &usize) {}
-
-    // devuelve una lista de los divisores comunes del triple diferentes de 1
-    // si el máximo común divisor es uno, retorna None
-    fn encontrar_divisores_comunes(&self) {
-        // primero encuentra el máximo común divisor para los tres números. Se aplica la propiedad:
-        // gcd(a, b, c) = gcd(a, gcd(b, c)) = gcd(gcd(a, b), c) = gcd(gcd(a, c), b).
-        let triple_mcd = maximo_comun_divisor(
-            &self.hipotenusa,
-            &maximo_comun_divisor(&self.cateto_a, &self.cateto_b),
-        );
-        // seguido, se encuentra todos los divisores del mcd.
-        // Estos serán todos los divisores posibles de triple
-    }
-
-    //
-    fn generar_triples_menores(&self) {}
-}
-
-// encuentra el máximo común divisor de un par de números enteros positivos
-// implementación naive del algoritmo de Euclides
-fn maximo_comun_divisor(numero_1: &usize, numero_2: &usize) -> usize {
-    match numero_1.cmp(&numero_2) {
-        Ordering::Equal => *numero_1,
-        Ordering::Greater => maximo_comun_divisor(&(numero_1 - numero_2), numero_2),
-        Ordering::Less => maximo_comun_divisor(numero_1, &(numero_2 - numero_1)),
-    }
-}
-
-<<<<<<< HEAD
-// encuentra los divisores diferentes de 1 y el mismo número
-// implementación naive
-fn obtener_divisores(numero: &usize) -> Vec<usize> {
-    let mut divisores: Vec<usize> = Vec::with_capacity(*numero);
-    for candidato in 2..*numero {
-        if (numero % candidato) == 0 {
-            divisores.push(candidato)
+    /// Genera todos los triples pitagóricos que satisfacen que su máximo valor es menor o igual
+    /// al número especificado
+    pub fn desde_numero_maximo(numero: &usize) -> Option<Vec<TriplePitagorico>> {
+        let mut triples: Vec<Self> = Vec::new();
+        for b in 3..*numero {
+            for a in 2..b {
+                if let Some(c) = raiz_cuadrada_perfecta(&(a.pow(2) + b.pow(2))) {
+                    if c <= *numero {
+                        triples.push(Self {
+                            cateto_a: a,
+                            cateto_b: b,
+                            hipotenusa: c,
+                        })
+                    }
+                };
+            }
+        }
+        if triples.is_empty() {
+            None
+        } else {
+            Some(triples)
         }
     }
-    divisores
 }
-=======
-fn divisores_entero_positivo() {}
->>>>>>> parent of e7609de (feat(a24): ahora encuentra todos los divisores de un número))
+
+fn raiz_cuadrada_perfecta(numero: &usize) -> Option<usize> {
+    let raiz_entera = (*numero as f64).sqrt().floor() as usize;
+    if raiz_entera.pow(2) == *numero {
+        Some(raiz_entera)
+    } else {
+        None
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashSet;
 
     #[test]
-    fn calcula_correctamente_mcd() {
-        let test_cases: [[usize; 3]; 4] =
-            [[36, 60, 12], [154, 374, 22], [2377, 1284, 1], [57, 87, 3]];
-        for case in test_cases {
-<<<<<<< HEAD
-            assert_eq!(case[2], maximo_comun_divisor(&case[0], &case[1]))
-        }
+    fn no_hay_triple_para_valor() {
+        let resultado = TriplePitagorico::desde_numero_maximo(&4);
+        assert_eq!(None, resultado);
+    }
+    #[test]
+    fn genera_triple_y_multiplo() {
+        let resultado: HashSet<TriplePitagorico> = TriplePitagorico::desde_numero_maximo(&10)
+            .unwrap()
+            .into_iter()
+            .collect();
+        let esperado: HashSet<TriplePitagorico> = [[3, 4, 5], [6, 8, 10]]
+            .into_iter()
+            .map(|tripla| TriplePitagorico {
+                cateto_a: tripla[0],
+                cateto_b: tripla[1],
+                hipotenusa: tripla[2],
+            })
+            .collect();
+        assert_eq!(esperado, resultado);
     }
 
     #[test]
-    fn encuentra_divisores_de_un_numero() {
-        let test_cases = [
-            (7, vec![]),
-            (12, vec![2, 3, 4, 6]),
-            (25, vec![5]),
-            (42, vec![2, 3, 6, 7, 14, 21]),
-            (97, vec![]),
-        ];
-
-        for case in test_cases {
-            assert_eq!(case.1, obtener_divisores(&case.0));
-=======
-            assert_eq!(case[2], maximo_comun_divisor_dupla(&case[0], &case[1]))
->>>>>>> parent of e7609de (feat(a24): ahora encuentra todos los divisores de un número))
-        }
+    fn genera_triples_menores_o_iguales() {
+        let resultado: HashSet<TriplePitagorico> = TriplePitagorico::desde_numero_maximo(&25)
+            .unwrap()
+            .into_iter()
+            .collect();
+        let esperado: HashSet<TriplePitagorico> = [
+            [3, 4, 5],
+            [6, 8, 10],
+            [5, 12, 13],
+            [9, 12, 15],
+            [8, 15, 17],
+            [12, 16, 20],
+            [15, 20, 25],
+            [7, 24, 25],
+        ]
+        .into_iter()
+        .map(|tripla| TriplePitagorico {
+            cateto_a: tripla[0],
+            cateto_b: tripla[1],
+            hipotenusa: tripla[2],
+        })
+        .collect();
+        assert_eq!(esperado, resultado);
     }
 }
