@@ -1,6 +1,7 @@
 // author: Hans D. Escobar H. (hdescobarh)
 #![crate_name = "triples_pitagoricos"]
 #![crate_type = "cdylib"]
+use std::cmp::min;
 
 /*
 Reto #39: Triples pitagóricos
@@ -12,7 +13,6 @@ Reto #39: Triples pitagóricos
  - Ejemplo: Los triples menores o iguales a 10 están
    formados por (3, 4, 5) y (6, 8, 10).
  */
-use std::cmp::min;
 
 /// Representa un triple pitagórico.
 ///
@@ -27,24 +27,46 @@ pub struct TriplePitagorico {
 }
 
 impl TriplePitagorico {
-    /// Genera todos los triples pitagóricos que satisfacen que su máximo valor es menor o igual al número especificado.
+    /// Genera todos los triples pitagóricos que satisfacen que su máximo
+    /// valor es menor o igual a un entero positivo r constante.
     ///
-    /// Equivalente a, dada una constante r ∈ ℤ⁺, encontrar todos pares (a,b) tales que
-    /// a² + b² = c², c² ≤ r²
-    /// ⇒ a² ≤ r² - b², a < b < r
-    /// ⇒ a² < min(b, r² - b² + 1)
+    /// # Descripción:
+    /// Como un triple pitagórico satisface que a < b < c, una estrategia sencilla es por cada
+    /// b < r explorar cada a < b y encontrar los sqrt(a² + b²) enteros menores o iguales a r.
+    /// Esta implementación además aprovecha que a < sqrt(r² - b²) + 1.
+    ///
+    /// El problema es equivalente a, dada una constante constante r ∈ ℤ⁺ y las variables a,b,c ∈ ℤ⁺,
+    /// encontrar los triples pitagóricos (a,b,c) tales que a² + b² = c² ≤ r².
+    ///
+    /// * (1) a, b, c, r ∈ ℤ⁺ (condición)
+    /// * (2) a² + b² = c² ≤ r² (condición)
+    /// * (3) 1 ≤ a < b < c ≤ r (por 1 y 2)
+    /// * (4) a² ≤ r² - b² ⇒ a ≤ sqrt(r² - b²) ⇒ a < sqrt(r² - b²) + 1 (por 2 y 3)
+    /// * (5) a < min(b, sqrt(r² - b²) + 1) (por 3 y 4)
     ///
     /// # Argumentos:
     /// * `numero` - indica el máximo valor que puede aparecer en los triples pitagóricos generados.
+    ///
+    /// # Ejemplo:
+    ///
+    /// ```
+    /// use triples_pitagoricos::TriplePitagorico;
+    /// let resultado = TriplePitagorico::desde_numero_maximo(&14).unwrap();
+    /// //Retorna los triples (3,4,5), (6,8,10), (5,12,13)
+    /// println!("{:?}", resultado);
+    ///
+    /// ```
     pub fn desde_numero_maximo(numero: &usize) -> Option<Vec<TriplePitagorico>> {
         let mut triples: Vec<Self> = Vec::new();
+        // Sí (a, b, c) es un triple pitagórico, 2 < a < b < c <= numero
         for b in 3..*numero {
-            for a in 2..b {
+            let limite_busqueda = min(
+                b,
+                ((numero.pow(2) - b.pow(2)) as f64).sqrt().floor() as usize + 1,
+            );
+            for a in 2..limite_busqueda {
+                // Sí a² + b² son catetos de un triple pitagórico, necesariamente forman un cuadrado perfecto
                 if let Some(c) = raiz_cuadrada_perfecta(&(a.pow(2) + b.pow(2))) {
-                    if c > *numero {
-                        continue;
-                    }
-
                     triples.push(Self {
                         cateto_menor: a,
                         cateto_mayor: b,
@@ -61,6 +83,7 @@ impl TriplePitagorico {
     }
 }
 
+/// Retorna la raíz de número sí este es un cuadrado perfecto
 fn raiz_cuadrada_perfecta(numero: &usize) -> Option<usize> {
     let raiz_entera = (*numero as f64).sqrt().floor() as usize;
     if raiz_entera.pow(2) == *numero {
