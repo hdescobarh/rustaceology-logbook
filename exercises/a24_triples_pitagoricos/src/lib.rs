@@ -2,8 +2,6 @@
 #![crate_name = "triples_pitagoricos"]
 #![crate_type = "cdylib"]
 
-use std::cmp::Ordering;
-
 /*
 Reto #39: Triples pitagóricos
  Crea una función que encuentre todos los triples pitagóricos
@@ -24,10 +22,10 @@ a² + b² = c², c² ≤ r²
 
 /// Un triple pitagórico es un conjunto de tres números {a, b, c} que satisface a² + b² = c² tal que a,b,c ∈ ℤ⁺.
 /// Un triple cumple que a > b > c, por lo que se puede anotar como (a,b,c)
-#[derive(PartialEq, Debug, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct TriplePitagorico {
-    cateto_a: usize,
-    cateto_b: usize,
+    cateto_menor: usize,
+    cateto_mayor: usize,
     hipotenusa: usize,
 }
 
@@ -39,13 +37,15 @@ impl TriplePitagorico {
         for b in 3..*numero {
             for a in 2..b {
                 if let Some(c) = raiz_cuadrada_perfecta(&(a.pow(2) + b.pow(2))) {
-                    if c <= *numero {
-                        triples.push(Self {
-                            cateto_a: a,
-                            cateto_b: b,
-                            hipotenusa: c,
-                        })
+                    if c > *numero {
+                        continue;
                     }
+
+                    triples.push(Self {
+                        cateto_menor: a,
+                        cateto_mayor: b,
+                        hipotenusa: c,
+                    })
                 };
             }
         }
@@ -85,8 +85,8 @@ mod tests {
         let esperado: HashSet<TriplePitagorico> = [[3, 4, 5], [6, 8, 10]]
             .into_iter()
             .map(|tripla| TriplePitagorico {
-                cateto_a: tripla[0],
-                cateto_b: tripla[1],
+                cateto_menor: tripla[0],
+                cateto_mayor: tripla[1],
                 hipotenusa: tripla[2],
             })
             .collect();
@@ -111,8 +111,8 @@ mod tests {
         ]
         .into_iter()
         .map(|tripla| TriplePitagorico {
-            cateto_a: tripla[0],
-            cateto_b: tripla[1],
+            cateto_menor: tripla[0],
+            cateto_mayor: tripla[1],
             hipotenusa: tripla[2],
         })
         .collect();
