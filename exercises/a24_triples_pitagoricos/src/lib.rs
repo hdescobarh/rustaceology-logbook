@@ -20,7 +20,8 @@ a² + b² = c², c² ≤ r²
 ⇒ a² ≤ r² - b², b < r
 */
 
-/// Un triple pitagórico es un conjunto de tres números {a, b, c} que satisface a² + b² = c² tal que a,b,c ∈ ℤ⁺.
+/// Representa un triple pitagórico, el cual se define como un conjunto de tres números {a, b, c}
+/// que satisfacen que a² + b² = c² tal que a,b,c ∈ ℤ⁺.
 /// Un triple cumple que a > b > c, por lo que se puede anotar como (a,b,c)
 #[derive(PartialEq, Eq, Hash, Debug)]
 pub struct TriplePitagorico {
@@ -30,8 +31,7 @@ pub struct TriplePitagorico {
 }
 
 impl TriplePitagorico {
-    /// Genera todos los triples pitagóricos que satisfacen que su máximo valor es menor o igual
-    /// al número especificado
+    /// Genera todos los triples pitagóricos que satisfacen que su máximo valor es menor o igual al número especificado.
     pub fn desde_numero_maximo(numero: &usize) -> Option<Vec<TriplePitagorico>> {
         let mut triples: Vec<Self> = Vec::new();
         for b in 3..*numero {
