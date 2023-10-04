@@ -12,16 +12,12 @@ Reto #39: Triples pitagóricos
  - Ejemplo: Los triples menores o iguales a 10 están
    formados por (3, 4, 5) y (6, 8, 10).
  */
+use std::cmp::min;
 
-/*
-El problema es equivalente a, dada una constante r ∈ ℤ⁺ tal que existe un triple (a', b', r),
-encontrar a todos pares (a,b) tales que
-a² + b² = c², c² ≤ r²
-⇒ a² ≤ r² - b², b < r
-*/
-
-/// Representa un triple pitagórico, el cual se define como un conjunto de tres números {a, b, c}
-/// que satisfacen que a² + b² = c² tal que a,b,c ∈ ℤ⁺.
+/// Representa un triple pitagórico.
+///
+/// Un triple pitagórico se define como un conjunto de tres números {a, b, c}
+/// que satisfacen a² + b² = c², tal que a,b,c ∈ ℤ⁺.
 /// Un triple cumple que a > b > c, por lo que se puede anotar como (a,b,c)
 #[derive(PartialEq, Eq, Hash, Debug)]
 pub struct TriplePitagorico {
@@ -32,6 +28,14 @@ pub struct TriplePitagorico {
 
 impl TriplePitagorico {
     /// Genera todos los triples pitagóricos que satisfacen que su máximo valor es menor o igual al número especificado.
+    ///
+    /// Equivalente a, dada una constante r ∈ ℤ⁺, encontrar todos pares (a,b) tales que
+    /// a² + b² = c², c² ≤ r²
+    /// ⇒ a² ≤ r² - b², a < b < r
+    /// ⇒ a² < min(b, r² - b² + 1)
+    ///
+    /// # Argumentos:
+    /// * `numero` - indica el máximo valor que puede aparecer en los triples pitagóricos generados.
     pub fn desde_numero_maximo(numero: &usize) -> Option<Vec<TriplePitagorico>> {
         let mut triples: Vec<Self> = Vec::new();
         for b in 3..*numero {
