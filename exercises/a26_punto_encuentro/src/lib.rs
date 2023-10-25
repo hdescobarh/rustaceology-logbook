@@ -32,6 +32,15 @@ impl Mul<Vector2D> for Vector2D {
     }
 }
 
+impl From<[f64; 2]> for Vector2D {
+    fn from(value: [f64; 2]) -> Self {
+        Self {
+            x: value[0],
+            y: value[1],
+        }
+    }
+}
+
 impl Add for Vector2D {
     type Output = Vector2D;
 
@@ -57,6 +66,15 @@ impl Sub for Vector2D {
 pub struct Object2D {
     location: Vector2D,
     velocity: Vector2D,
+}
+
+impl Object2D {
+    pub fn new(location: [f64; 2], velocity: [f64; 2]) -> Self {
+        Self {
+            location: Vector2D::from(location),
+            velocity: Vector2D::from(velocity),
+        }
+    }
 }
 
 impl UniformLinearMotion for Object2D {
