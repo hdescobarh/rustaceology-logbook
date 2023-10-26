@@ -10,12 +10,14 @@ Reto Mouredev #42: Punto de encuentro
  - La función debe tener en cuenta que los objetos pueden no llegar a encontrarse.
  */
 
-/*
-La lógica de la solución es, sí los dos objetos se encuentran, necesariamente existe un tiempo 𝘵
+/*La lógica de la solución es, sí los dos objetos se encuentran, necesariamente existe un tiempo 𝘵≥0
 tal que la distancia euclídea entre las posiciones de los objetos es cero */
 
 #![crate_name = "punto_de_encuentro"]
 use std::ops::{Mul, Sub};
+
+// Para tener en cuenta el impacto del redondeo en valores cercanos al cero
+pub const TOLERANCE: f64 = 1E-10_f64;
 
 /// Representa un elemento de un espacio vectorial en ℝ² en coordenadas cartesianas.
 #[derive(Clone, Copy)]
@@ -83,11 +85,13 @@ impl UniformLinearMotion for Object2D {
     /// * `other` - El segundo objeto con el que se evaluara la colisión
     ///
     /// # Ejemplo:
+    ///
     /// ```
     /// use punto_de_encuentro::*;
-    /// let object_1 = Object2D::new(&[0.0, 0.0], &[0.0, 0.0]);
-    /// let object_2 = Object2D::new(&[0.0, 0.0], &[0.0, 0.0]);
-    /// let time = object_1.ulm_collision_time(&object_2);
+    /// let object_1 = Object2D::new(&[6.0, 7.0], &[-1.8, -0.6]);
+    /// let object_2 = Object2D::new(&[2.0, 2.0], &[-1.0, 0.4]);
+    /// let time: f64 = object_1.ulm_collision_time(&object_2).unwrap();
+    /// assert!((5.0-time).abs() < TOLERANCE);
     /// ```
     ///
     /// # Explicación de la física:
@@ -113,9 +117,9 @@ impl UniformLinearMotion for Object2D {
         let b: f64 = delta_velocity * delta_initial_position * 2.0;
         let c: f64 = delta_initial_position * delta_initial_position;
         // sí ambos objetos llevan la misma velocidad, a=0 y b=0. El problema es lineal 0x + c = 0
-        if a == 0.0_f64 {
+        if a.abs() < TOLERANCE {
             // sí parten de la misma posición, c=0. Hay infinitas soluciones: ∀x(0x = 0)
-            if c.abs() < f64::EPSILON {
+            if c.abs() < TOLERANCE {
                 return Some(0.0);
             // sí por el contrario, c≠0. No hay solución: ∄x(0x = c)
             } else {
@@ -124,8 +128,12 @@ impl UniformLinearMotion for Object2D {
         }
         // Cuando a≠0 es un problema cuadrático y aplicamos
         // la formula cuadrática: ( -b +- sqrt(b² - 4 ac) ) / (2a),
+
+        let mut discriminant = (b * b) - (4.0 * a * c);
+        if discriminant.abs() < TOLERANCE {
+            discriminant = 0.0;
+        }
         // sí tiene solución en los reales, necesariamente b² - 4ac ≧ 0
-        let discriminant = b.powi(2) - (4.0 * a * c);
         if discriminant < 0.0_f64 {
             return None;
         }
@@ -154,36 +162,93 @@ mod tests {
 
     #[test]
     fn ulm_collision_time_by_axis() {
-        // collision with static object
         let test_cases = [
+            // same origin and velocity
             (
                 [[9.0, 0.0], [60.0, 0.0], [9.0, 0.0], [60.0, 0.0]],
                 Some(0.0),
-            ), // same origin and velocity
+            ),
+            // same origin, different velocity
             (
                 [[15.8, 0.0], [80.3, 0.0], [15.8, 0.0], [-50.0, 0.0]],
                 Some(0.0),
-            ), // same origin, different velocity
-            ([[17.0, 0.0], [123.5, 0.0], [1.8, 0.0], [123.5, 0.0]], None), // different origin, same velocity
+            ), // different origin, same velocity
+            ([[17.0, 0.0], [123.5, 0.0], [1.8, 0.0], [123.5, 0.0]], None),
             // from here, different origin and velocity
+            ([[98.0, 0.0], [30.0, 0.0], [15.0, 0.0], [-42.0, 0.0]], None),
             ([[0.0, 0.0], [0.5, 0.0], [6.0, 0.0], [0.0, 0.0]], Some(12.0)),
             (
                 [[-2.5, 0.0], [2.406, 0.0], [4.5, 0.0], [2.1, 0.0]],
-                Some(22.8758169),
+                Some(22.8758169934),
             ),
-            ([[98.0, 0.0], [30.0, 0.0], [15.0, 0.0], [-42.0, 0.0]], None),
             (
                 [[12.0, 0.0], [2.7, 0.0], [179.0, 0.0], [-3.1, 0.0]],
-                Some(28.7931034),
+                Some(28.7931031275),
+            ),
+            (
+                [[-10.0, 0.0], [34.0, 0.0], [200.0, 0.0], [-36.0, 0.0]],
+                Some(3.0),
             ),
         ];
+
+        // check axis X
         for ([loc1, vel1, loc2, vel2], expected) in &test_cases {
             let object_1 = Object2D::new(loc1, vel1);
             let object_2 = Object2D::new(loc2, vel2);
             let solution = object_1.ulm_collision_time(&object_2);
             if expected.is_some() && solution.is_some() {
                 assert!(
-                    (expected.unwrap() - solution.unwrap()).abs() < 1E-6,
+                    (expected.unwrap() - solution.unwrap()).abs() < TOLERANCE,
+                    "Axis X. Expected {:?}, obtained {:?}",
+                    expected,
+                    solution
+                )
+            } else {
+                assert_eq!(*expected, solution)
+            };
+        }
+
+        // now check axis Y
+        for ([loc1, vel1, loc2, vel2], expected) in &test_cases {
+            let object_1 = Object2D::new(&[loc1[1], loc1[0]], &[vel1[1], vel1[0]]);
+            let object_2 = Object2D::new(&[loc2[1], loc2[0]], &[vel2[1], vel2[0]]);
+            let solution = object_1.ulm_collision_time(&object_2);
+            if expected.is_some() && solution.is_some() {
+                assert!(
+                    (expected.unwrap() - solution.unwrap()).abs() < TOLERANCE,
+                    "Axis Y. Expected {:?}, obtained {:?}",
+                    expected,
+                    solution
+                )
+            } else {
+                assert_eq!(*expected, solution)
+            };
+        }
+    }
+
+    #[test]
+    fn ulm_collision_time_bidimensional() {
+        let test_cases = [
+            // meet
+            (
+                [[6.0, 7.0], [-9.0, -3.0], [2.0, 2.0], [-5.0, 2.0]],
+                Some(1.0),
+            ),
+            (
+                [[6.0, 7.0], [-1.8, -0.6], [2.0, 2.0], [-1.0, 0.4]],
+                Some(5.0),
+            ),
+            // never meet
+            ([[6.0, 7.0], [-1.8, -0.6], [2.0, 2.0], [1.0, 0.4]], None),
+        ];
+
+        for ([loc1, vel1, loc2, vel2], expected) in &test_cases {
+            let object_1 = Object2D::new(loc1, vel1);
+            let object_2 = Object2D::new(loc2, vel2);
+            let solution = object_1.ulm_collision_time(&object_2);
+            if expected.is_some() && solution.is_some() {
+                assert!(
+                    (expected.unwrap() - solution.unwrap()).abs() < TOLERANCE,
                     "Expected {:?}, obtained {:?}",
                     expected,
                     solution
