@@ -11,16 +11,14 @@ Reto Mouredev #42: Punto de encuentro
  */
 
 /*
-- El ejercicio no especifica el tipo de movimiento. Asumiré que se trata de
-Movimiento Rectilíneo Uniforme; es decir, el vector aceleración es nulo para todo tiempo t.
+La lógica de la solución es, sí los dos objetos se encuentran, necesariamente existe un tiempo 𝘵
+tal que la distancia euclídea entre las posiciones de los objetos es cero */
 
-- En el sentido estricto los vectores velocidad y desplazamiento son dos conceptos diferentes,
-el vector velocidad
- */
-
+#![crate_name = "punto_de_encuentro"]
 use std::iter::FromIterator;
 use std::ops::{Mul, Sub};
 
+/// Representa un elemento de un espacio vectorial en ℝ² en coordenadas cartesianas.
 #[derive(Clone, Copy)]
 pub struct Vector2D {
     x: f64,
@@ -54,13 +52,21 @@ impl Sub for Vector2D {
     }
 }
 
+/// Representa una entidad arbitraria en un espacio vectorial ℝ²
 pub struct Object2D {
+    /// Vector posición 𝗽.
     location: Vector2D,
+    /// Vector velocidad 𝐯. Es decir, desplazamiento (𝗽(𝘵+𝑖) - 𝗽(𝘵)) por unidad de tiempo 𝑖
     velocity: Vector2D,
 }
 
 impl Object2D {
-    // constructor
+    /// Retorna una entidad en un espacio vectorial ℝ²
+    ///
+    /// # Argumentos:
+    ///
+    /// * `location` - La posición actual del objeto (x,y)
+    /// * `velocity` - La velocidad (x,y) con la que se mueve el objeto
     pub fn new(location: &[f64; 2], velocity: &[f64; 2]) -> Self {
         Self {
             location: Vector2D::from(location),
@@ -70,16 +76,35 @@ impl Object2D {
 }
 
 impl UniformLinearMotion for Object2D {
-    /*
-    La lógica es que sí los dos objetos se encuentran, entonces necesariamente existe un tiempo 𝘵,
-    tal que la distancia euclídea entre las posiciones 𝗽 y 𝗽' del primer y segundo objeto,
-    respectivamente, es cero:
-    (1)    ∃𝘵‖𝗽(𝘵)-𝗽'(𝘵)‖ = ‖Δ𝗽(𝘵)‖ = 0
-    En movimiento linear uniforme, la velocidad 𝐯 es constante para todo tiempo 𝘵; por lo tanto:
-    (2)    𝗽(𝘵) = 𝗽₀ + 𝘵𝐯
-    Por propiedades del producto punto, (1) y (2):
-    (3)    ⟨Δ𝗽(𝘵), Δ𝗽(𝘵)⟩ = 𝘵² ⟨Δ𝐯,Δ𝐯⟩ + 𝘵 2⟨Δ𝐯,Δ𝗽₀⟩ + ⟨Δ𝗽₀,Δ𝗽₀⟩ = 0
-    */
+    /// Retorna el tiempo dentro del cual el objeto va a colisionar con otro objeto.
+    /// Retorna None sí nunca se encuentran.
+    ///
+    /// # Argumentos:
+    ///
+    /// * `other` - El segundo objeto con el que se evaluara la colisión
+    ///
+    /// # Ejemplo:
+    /// ```
+    /// use punto_de_encuentro::*;
+    /// let object_1 = Object2D::new(&[0.0, 0.0], &[0.0, 0.0]);
+    /// let object_2 = Object2D::new(&[0.0, 0.0], &[0.0, 0.0]);
+    /// let time = object_1.ulm_collision_time(&object_2);
+    /// ```
+    ///
+    /// # Explicación de la física:
+    ///
+    /// Sí los dos objetos se encuentran, necesariamente existe un tiempo 𝘵,
+    /// tal que la distancia euclídea 𝓓(a,b) = ‖a-b‖ entre las posiciones 𝗽 y 𝗽'
+    /// del primer y segundo objeto, respectivamente, es cero; es decir:
+    ///
+    /// * (1)    ∃𝘵‖𝗽(𝘵)-𝗽'(𝘵)‖ = ‖Δ𝗽(𝘵)‖ = 0
+    ///
+    /// En movimiento linear uniforme, la velocidad 𝐯 es constante para todo tiempo 𝘵; por lo tanto:
+    /// * (2)    𝗽(𝘵) = 𝗽₀ + 𝘵𝐯
+    ///
+    /// Por (1) y (2), y por propiedades del producto punto ⟨·,·⟩:
+    /// * (3)    ⟨Δ𝗽(𝘵), Δ𝗽(𝘵)⟩ = 𝘵² ⟨Δ𝐯,Δ𝐯⟩ + 𝘵 2⟨Δ𝐯,Δ𝗽₀⟩ + ⟨Δ𝗽₀,Δ𝗽₀⟩ = 0
+    ///
     fn ulm_collision_time(&self, other: &Self) -> Option<f64> {
         // obtenemos Δ𝗽₀ y Δ𝐯
         let delta_initial_position: Vector2D = self.location - other.location;
@@ -90,10 +115,10 @@ impl UniformLinearMotion for Object2D {
         let c: f64 = delta_initial_position * delta_initial_position;
         // sí ambos objetos llevan la misma velocidad, a=0 y b=0. El problema es lineal 0x + c = 0
         if a == 0.0_f64 {
-            // sí c=0. Hay infinitas soluciones: 0x = 0
+            // sí parten de la misma posición, c=0. Hay infinitas soluciones: ∀x(0x = 0)
             if c.abs() < f64::EPSILON {
                 return Some(0.0);
-            // sí por el contrario, c≠0, no hay solución: 0x = c
+            // sí por el contrario, c≠0. No hay solución: ∄x(0x = c)
             } else {
                 return None;
             }
@@ -121,7 +146,6 @@ impl UniformLinearMotion for Object2D {
 }
 
 trait UniformLinearMotion {
-    ///
     fn ulm_collision_time(&self, other: &Self) -> Option<f64>;
 }
 
