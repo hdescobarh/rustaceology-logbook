@@ -15,7 +15,6 @@ La lógica de la solución es, sí los dos objetos se encuentran, necesariamente
 tal que la distancia euclídea entre las posiciones de los objetos es cero */
 
 #![crate_name = "punto_de_encuentro"]
-use std::iter::FromIterator;
 use std::ops::{Mul, Sub};
 
 /// Representa un elemento de un espacio vectorial en ℝ² en coordenadas cartesianas.
@@ -145,7 +144,7 @@ impl UniformLinearMotion for Object2D {
     }
 }
 
-trait UniformLinearMotion {
+pub trait UniformLinearMotion {
     fn ulm_collision_time(&self, other: &Self) -> Option<f64>;
 }
 
