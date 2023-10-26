@@ -1,3 +1,4 @@
+// author: Hans D. Escobar H. (hdescobarh)
 /*
 Reto Mouredev #42: Punto de encuentro
  Crea una función que calcule el punto de encuentro de dos objetos en movimiento
@@ -17,6 +18,7 @@ Movimiento Rectilíneo Uniforme; es decir, el vector aceleración es nulo para t
 el vector velocidad
  */
 
+use std::iter::FromIterator;
 use std::ops::{Mul, Sub};
 
 #[derive(Clone, Copy)]
@@ -32,8 +34,8 @@ impl Mul<Vector2D> for Vector2D {
     }
 }
 
-impl From<[f64; 2]> for Vector2D {
-    fn from(value: [f64; 2]) -> Self {
+impl From<&[f64; 2]> for Vector2D {
+    fn from(value: &[f64; 2]) -> Self {
         Self {
             x: value[0],
             y: value[1],
@@ -59,7 +61,7 @@ pub struct Object2D {
 
 impl Object2D {
     // constructor
-    pub fn new(location: [f64; 2], velocity: [f64; 2]) -> Self {
+    pub fn new(location: &[f64; 2], velocity: &[f64; 2]) -> Self {
         Self {
             location: Vector2D::from(location),
             velocity: Vector2D::from(velocity),
@@ -86,15 +88,26 @@ impl UniformLinearMotion for Object2D {
         let a: f64 = delta_velocity * delta_velocity;
         let b: f64 = delta_velocity * delta_initial_position * 2.0;
         let c: f64 = delta_initial_position * delta_initial_position;
-        // Aplicando la formula cuadrática: ( -b +- sqrt(b² - 4 ac) ) / (2a),
+        // sí ambos objetos llevan la misma velocidad, a=0 y b=0. El problema es lineal 0x + c = 0
+        if a == 0.0_f64 {
+            // sí c=0. Hay infinitas soluciones: 0x = 0
+            if c.abs() < f64::EPSILON {
+                return Some(0.0);
+            // sí por el contrario, c≠0, no hay solución: 0x = c
+            } else {
+                return None;
+            }
+        }
+        // Cuando a≠0 es un problema cuadrático y aplicamos
+        // la formula cuadrática: ( -b +- sqrt(b² - 4 ac) ) / (2a),
         // sí tiene solución en los reales, necesariamente b² - 4ac ≧ 0
         let discriminant = b.powi(2) - (4.0 * a * c);
         if discriminant < 0.0_f64 {
             return None;
         }
         let sqrt_discriminant = discriminant.sqrt();
-        let solution_1 = (-b + sqrt_discriminant) / (2.0 * a);
-        let solution_2 = (-b - sqrt_discriminant) / (2.0 * a);
+        let solution_1 = (-b - sqrt_discriminant) / (2.0 * a);
+        let solution_2 = (-b + sqrt_discriminant) / (2.0 * a);
         // es movimiento rectilíneo uniforme en un espacio euclídea; por lo tanto,
         // a lo sumo existe solo una solución
         if solution_1 >= 0.0_f64 {
@@ -115,11 +128,46 @@ trait UniformLinearMotion {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
-    fn predics_axis_x() {
-        let object_1 = Object2D::new([0.0, 0.0], [1.0, 0.0]);
-        let object_2 = Object2D::new([5.0, 0.0], [0.0, 0.0]);
-        let solution = object_1.ulm_collision_time(&object_2).unwrap();
-        assert!((5.0 - solution).abs() < f64::EPSILON)
+    fn ulm_collision_time_by_axis() {
+        // collision with static object
+        let test_cases = [
+            (
+                [[9.0, 0.0], [60.0, 0.0], [9.0, 0.0], [60.0, 0.0]],
+                Some(0.0),
+            ), // same origin and velocity
+            (
+                [[15.8, 0.0], [80.3, 0.0], [15.8, 0.0], [-50.0, 0.0]],
+                Some(0.0),
+            ), // same origin, different velocity
+            ([[17.0, 0.0], [123.5, 0.0], [1.8, 0.0], [123.5, 0.0]], None), // different origin, same velocity
+            // from here, different origin and velocity
+            ([[0.0, 0.0], [0.5, 0.0], [6.0, 0.0], [0.0, 0.0]], Some(12.0)),
+            (
+                [[-2.5, 0.0], [2.406, 0.0], [4.5, 0.0], [2.1, 0.0]],
+                Some(22.8758169),
+            ),
+            ([[98.0, 0.0], [30.0, 0.0], [15.0, 0.0], [-42.0, 0.0]], None),
+            (
+                [[12.0, 0.0], [2.7, 0.0], [179.0, 0.0], [-3.1, 0.0]],
+                Some(28.7931034),
+            ),
+        ];
+        for ([loc1, vel1, loc2, vel2], expected) in &test_cases {
+            let object_1 = Object2D::new(loc1, vel1);
+            let object_2 = Object2D::new(loc2, vel2);
+            let solution = object_1.ulm_collision_time(&object_2);
+            if expected.is_some() && solution.is_some() {
+                assert!(
+                    (expected.unwrap() - solution.unwrap()).abs() < 1E-6,
+                    "Expected {:?}, obtained {:?}",
+                    expected,
+                    solution
+                )
+            } else {
+                assert_eq!(*expected, solution)
+            };
+        }
     }
 }
