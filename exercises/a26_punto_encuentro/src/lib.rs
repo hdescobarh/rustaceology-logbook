@@ -17,7 +17,7 @@ Movimiento Rectilíneo Uniforme; es decir, el vector aceleración es nulo para t
 el vector velocidad
  */
 
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Mul, Sub};
 
 #[derive(Clone, Copy)]
 pub struct Vector2D {
@@ -41,17 +41,6 @@ impl From<[f64; 2]> for Vector2D {
     }
 }
 
-impl Add for Vector2D {
-    type Output = Vector2D;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Vector2D {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-        }
-    }
-}
-
 impl Sub for Vector2D {
     type Output = Vector2D;
 
@@ -69,6 +58,7 @@ pub struct Object2D {
 }
 
 impl Object2D {
+    // constructor
     pub fn new(location: [f64; 2], velocity: [f64; 2]) -> Self {
         Self {
             location: Vector2D::from(location),
@@ -86,20 +76,20 @@ impl UniformLinearMotion for Object2D {
     En movimiento linear uniforme, la velocidad 𝐯 es constante para todo tiempo 𝘵; por lo tanto:
     (2)    𝗽(𝘵) = 𝗽₀ + 𝘵𝐯
     Por propiedades del producto punto, (1) y (2):
-    (3)    ⟨Δ𝗽(𝘵), Δ𝗽(𝘵)⟩ = 𝘵² ⟨Δ𝐯,Δ𝐯⟩ + 𝘵 ⟨Δ𝐯,Δ𝗽₀⟩ + ⟨Δ𝗽₀,Δ𝗽₀⟩ = 0
+    (3)    ⟨Δ𝗽(𝘵), Δ𝗽(𝘵)⟩ = 𝘵² ⟨Δ𝐯,Δ𝐯⟩ + 𝘵 2⟨Δ𝐯,Δ𝗽₀⟩ + ⟨Δ𝗽₀,Δ𝗽₀⟩ = 0
     */
-    fn collision_time(&self, other: &Self) -> Option<f64> {
+    fn ulm_collision_time(&self, other: &Self) -> Option<f64> {
         // obtenemos Δ𝗽₀ y Δ𝐯
         let delta_initial_position: Vector2D = self.location - other.location;
         let delta_velocity: Vector2D = self.velocity - other.velocity;
-        // Es un polinomio de la forma ax² + bx + c, donde a=⟨Δ𝐯,Δ𝐯⟩, b=⟨Δ𝐯,Δ𝗽₀⟩, c=⟨Δ𝗽₀,Δ𝗽₀⟩
-        let a = delta_velocity * delta_velocity;
-        let b = delta_velocity * delta_initial_position;
-        let c = delta_initial_position * delta_initial_position;
+        // Es un polinomio de la forma ax² + bx + c, donde a=⟨Δ𝐯,Δ𝐯⟩, b=2⟨Δ𝐯,Δ𝗽₀⟩, c=⟨Δ𝗽₀,Δ𝗽₀⟩
+        let a: f64 = delta_velocity * delta_velocity;
+        let b: f64 = delta_velocity * delta_initial_position * 2.0;
+        let c: f64 = delta_initial_position * delta_initial_position;
         // Aplicando la formula cuadrática: ( -b +- sqrt(b² - 4 ac) ) / (2a),
         // sí tiene solución en los reales, necesariamente b² - 4ac ≧ 0
-        let discriminant = b.powi(2) - 4.0 * a * c;
-        if discriminant < f64::EPSILON {
+        let discriminant = b.powi(2) - (4.0 * a * c);
+        if discriminant < 0.0_f64 {
             return None;
         }
         let sqrt_discriminant = discriminant.sqrt();
@@ -107,9 +97,9 @@ impl UniformLinearMotion for Object2D {
         let solution_2 = (-b - sqrt_discriminant) / (2.0 * a);
         // es movimiento rectilíneo uniforme en un espacio euclídea; por lo tanto,
         // a lo sumo existe solo una solución
-        if solution_1 >= f64::EPSILON {
+        if solution_1 >= 0.0_f64 {
             Some(solution_1)
-        } else if solution_2 > f64::EPSILON {
+        } else if solution_2 > 0.0_f64 {
             Some(solution_2)
         } else {
             None
@@ -119,10 +109,17 @@ impl UniformLinearMotion for Object2D {
 
 trait UniformLinearMotion {
     ///
-    fn collision_time(&self, other: &Self) -> Option<f64>;
+    fn ulm_collision_time(&self, other: &Self) -> Option<f64>;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn predics_axis_x() {
+        let object_1 = Object2D::new([0.0, 0.0], [1.0, 0.0]);
+        let object_2 = Object2D::new([5.0, 0.0], [0.0, 0.0]);
+        let solution = object_1.ulm_collision_time(&object_2).unwrap();
+        assert!((5.0 - solution).abs() < f64::EPSILON)
+    }
 }
