@@ -11,30 +11,32 @@ Reto Mouredev #42: Punto de encuentro
  */
 
 /*La lógica de la solución es la siguiente. Sí los dos objetos se encuentran, necesariamente
-existe un tiempo 𝘵 ≥ 0 tal que la distancia euclídea entre las posiciones de los dos objetos es cero */
+existe un tiempo 𝘵 ≥ 0 tal que la distancia euclídea entre las posiciones de los dos objetos es cero. */
 
 #![crate_name = "punto_de_encuentro"]
+#![crate_type = "cdylib"]
 use std::ops::{Mul, Sub};
 
-// Parámetro introducido para controlar el impacto de errores de redondeo en valores cercanos al cero
-// para mis información: https://en.wikipedia.org/wiki/Catastrophic_cancellation
+/// Parámetro introducido para controlar el impacto de errores de redondeo en valores cercanos al cero [^note].
+///
+/// [^note]: Para mis información: [Catastrophic cancellation](https://en.wikipedia.org/wiki/Catastrophic_cancellation).
 pub const TOLERANCE: f64 = 1E-10_f64;
 
-/// Representa una entidad arbitraria en un espacio vectorial ℝ²
+/// Representa una entidad arbitraria en un espacio vectorial ℝ².
 pub struct Object2D {
     /// Vector posición 𝗽.
     location: Vector2D,
-    /// Vector velocidad 𝐯. Es decir, desplazamiento (𝗽(𝘵+𝑖) - 𝗽(𝘵)) por unidad de tiempo 𝑖
+    /// Vector velocidad 𝐯. Es decir, desplazamiento (𝗽(𝘵+𝑖) - 𝗽(𝘵)) por unidad de tiempo 𝑖.
     velocity: Vector2D,
 }
 
 impl Object2D {
-    /// Retorna una entidad en un espacio vectorial ℝ²
+    /// Retorna una entidad en un espacio vectorial ℝ².
     ///
     /// # Argumentos:
     ///
-    /// * `location` - La posición actual del objeto (x,y)
-    /// * `velocity` - La velocidad (x,y) con la que se mueve el objeto
+    /// * `location` - La posición actual del objeto (x,y).
+    /// * `velocity` - La velocidad (x,y) con la que se mueve el objeto.
     pub fn new(location: &[f64; 2], velocity: &[f64; 2]) -> Self {
         Self {
             location: Vector2D::from(location),
@@ -49,7 +51,7 @@ impl UniformLinearMotion for Object2D {
     ///
     /// # Argumentos:
     ///
-    /// * `other` - El segundo objeto con el que se evaluara la colisión
+    /// * `other` - El segundo objeto con el que se evaluara la colisión.
     ///
     /// # Ejemplo:
     ///
@@ -97,6 +99,7 @@ impl UniformLinearMotion for Object2D {
         // la formula cuadrática: ( -b +- sqrt(b² - 4 ac) ) / (2a),
 
         let mut discriminant = (b * b) - (4.0 * a * c);
+        // Sí v satisface que -TOLERANCE < v < TOLERANCE, entonces es un cero efectivo
         if discriminant.abs() < TOLERANCE {
             discriminant = 0.0;
         }
@@ -107,8 +110,8 @@ impl UniformLinearMotion for Object2D {
         let sqrt_discriminant = discriminant.sqrt();
         let solution_1 = (-b - sqrt_discriminant) / (2.0 * a);
         let solution_2 = (-b + sqrt_discriminant) / (2.0 * a);
-        // es movimiento rectilíneo uniforme en un espacio euclídea; por lo tanto,
-        // a lo sumo existe solo una solución
+        // es movimiento rectilíneo uniforme en un espacio euclídeo; por lo tanto,
+        // a lo sumo existe solo una solución valida (t>=0)
         if solution_1 >= 0.0_f64 {
             Some(solution_1)
         } else if solution_2 > 0.0_f64 {
@@ -130,6 +133,7 @@ pub struct Vector2D {
     y: f64,
 }
 
+/// Construye un Vector desde un Array [f64; 2]
 impl From<&[f64; 2]> for Vector2D {
     fn from(value: &[f64; 2]) -> Self {
         Self {
@@ -139,6 +143,7 @@ impl From<&[f64; 2]> for Vector2D {
     }
 }
 
+/// Producto punto con otro vector ⟨self,other⟩
 impl Mul<Vector2D> for Vector2D {
     type Output = f64;
     fn mul(self, rhs: Vector2D) -> Self::Output {
@@ -146,6 +151,7 @@ impl Mul<Vector2D> for Vector2D {
     }
 }
 
+/// Diferencia con otro vector self - other
 impl Sub for Vector2D {
     type Output = Vector2D;
 
