@@ -10,48 +10,15 @@ Reto Mouredev #42: Punto de encuentro
  - La función debe tener en cuenta que los objetos pueden no llegar a encontrarse.
  */
 
-/*La lógica de la solución es, sí los dos objetos se encuentran, necesariamente existe un tiempo 𝘵≥0
-tal que la distancia euclídea entre las posiciones de los objetos es cero */
+/*La lógica de la solución es la siguiente. Sí los dos objetos se encuentran, necesariamente
+existe un tiempo 𝘵 ≥ 0 tal que la distancia euclídea entre las posiciones de los dos objetos es cero */
 
 #![crate_name = "punto_de_encuentro"]
 use std::ops::{Mul, Sub};
 
-// Para tener en cuenta el impacto del redondeo en valores cercanos al cero
+// Parámetro introducido para controlar el impacto de errores de redondeo en valores cercanos al cero
+// para mis información: https://en.wikipedia.org/wiki/Catastrophic_cancellation
 pub const TOLERANCE: f64 = 1E-10_f64;
-
-/// Representa un elemento de un espacio vectorial en ℝ² en coordenadas cartesianas.
-#[derive(Clone, Copy)]
-pub struct Vector2D {
-    x: f64,
-    y: f64,
-}
-
-impl Mul<Vector2D> for Vector2D {
-    type Output = f64;
-    fn mul(self, rhs: Vector2D) -> Self::Output {
-        (self.x * rhs.x) + (self.y * rhs.y)
-    }
-}
-
-impl From<&[f64; 2]> for Vector2D {
-    fn from(value: &[f64; 2]) -> Self {
-        Self {
-            x: value[0],
-            y: value[1],
-        }
-    }
-}
-
-impl Sub for Vector2D {
-    type Output = Vector2D;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Vector2D {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-        }
-    }
-}
 
 /// Representa una entidad arbitraria en un espacio vectorial ℝ²
 pub struct Object2D {
@@ -154,6 +121,40 @@ impl UniformLinearMotion for Object2D {
 
 pub trait UniformLinearMotion {
     fn ulm_collision_time(&self, other: &Self) -> Option<f64>;
+}
+
+/// Representa un elemento de un espacio vectorial en ℝ² en coordenadas cartesianas.
+#[derive(Clone, Copy)]
+pub struct Vector2D {
+    x: f64,
+    y: f64,
+}
+
+impl From<&[f64; 2]> for Vector2D {
+    fn from(value: &[f64; 2]) -> Self {
+        Self {
+            x: value[0],
+            y: value[1],
+        }
+    }
+}
+
+impl Mul<Vector2D> for Vector2D {
+    type Output = f64;
+    fn mul(self, rhs: Vector2D) -> Self::Output {
+        (self.x * rhs.x) + (self.y * rhs.y)
+    }
+}
+
+impl Sub for Vector2D {
+    type Output = Vector2D;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Vector2D {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
 }
 
 #[cfg(test)]
