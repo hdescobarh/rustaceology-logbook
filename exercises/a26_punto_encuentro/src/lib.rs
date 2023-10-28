@@ -10,8 +10,20 @@ Reto Mouredev #42: Punto de encuentro
  - La función debe tener en cuenta que los objetos pueden no llegar a encontrarse.
  */
 
-/*La lógica de la solución es la siguiente. Sí los dos objetos se encuentran, necesariamente
-existe un tiempo 𝘵 ≥ 0 tal que la distancia euclídea entre las posiciones de los dos objetos es cero. */
+//! La lógica de la solución es la siguiente. Sí los dos objetos se encuentran, necesariamente
+//! existe un tiempo 𝘵 ≥ 0 tal que la distancia euclídea entre las posiciones de los dos objetos es cero.
+//! Primero calcula ese tiempo 𝘵, y luego lo usa como parámetro para obtener la posición.
+//!
+//! # Ejemplo:
+//! ```
+//! use punto_de_encuentro::*;
+//! let object_1 = Object2D::new(&[6.0, 7.0], &[-1.8, -0.6]);
+//! let object_2 = Object2D::new(&[2.0, 2.0], &[-1.0, 0.4]);
+//! let (collision_point, collision_time) = object_1.ulm_collision(&object_2).unwrap();
+//! assert!((collision_time - 5.0).abs() < TOLERANCE);
+//! assert!((collision_point.x - -3.0).abs() < TOLERANCE);
+//! assert!((collision_point.y - 4.0).abs() < TOLERANCE);
+//! ```
 
 #![crate_name = "punto_de_encuentro"]
 #![crate_type = "cdylib"]
