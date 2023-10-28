@@ -15,7 +15,7 @@ existe un tiempo 𝘵 ≥ 0 tal que la distancia euclídea entre las posiciones 
 
 #![crate_name = "punto_de_encuentro"]
 #![crate_type = "cdylib"]
-use std::ops::{Mul, Sub};
+use std::ops::{Add, Mul, Sub};
 
 /// Parámetro introducido para controlar el impacto de errores de redondeo en valores cercanos al cero [^note].
 ///
@@ -120,13 +120,39 @@ impl UniformLinearMotion for Object2D {
             None
         }
     }
+
+    /// Calcula la posición del objeto tomando como punto de partida (𝗽₀ = 𝗽(0)) la
+    /// ubicación actual del objeto (location). 𝗽(𝘵) = 𝗽₀ + 𝘵𝐯
+    ///
+    /// # Argumentos:
+    ///
+    /// * `time` - tiempo 𝘵 transcurrido.
+    ///
+    /// # Ejemplo:
+    ///
+    /// ```
+    /// use punto_de_encuentro::*;
+    /// let object_1 = Object2D::new(&[6.0, 7.0], &[-1.8, -0.6]);
+    /// //assert!((5.0-time).abs() < TOLERANCE);
+    /// ```
+    fn ulm_position_delta_time(&self, time: f64) -> Option<f64> {
+        todo!()
+    }
 }
 
 pub trait UniformLinearMotion {
     fn ulm_collision_time(&self, other: &Self) -> Option<f64>;
+    fn ulm_position_delta_time(&self, time: f64) -> Option<f64>;
+    fn ulm_collision_point(&self, other: &Self) -> Option<f64> {
+        match self.ulm_collision_time(other) {
+            Some(time) => self.ulm_position_delta_time(time),
+            None => None,
+        }
+    }
 }
 
 /// Representa un elemento de un espacio vectorial en ℝ² en coordenadas cartesianas.
+/// Tiene definidas las operaciones de suma y resta vectorial, producto punto, y producto escalar.
 #[derive(Clone, Copy)]
 pub struct Vector2D {
     x: f64,
@@ -143,7 +169,7 @@ impl From<&[f64; 2]> for Vector2D {
     }
 }
 
-/// Producto punto con otro vector ⟨self,other⟩
+/// Producto punto con otro vector. self * other = ⟨self,other⟩
 impl Mul<Vector2D> for Vector2D {
     type Output = f64;
     fn mul(self, rhs: Vector2D) -> Self::Output {
@@ -151,7 +177,15 @@ impl Mul<Vector2D> for Vector2D {
     }
 }
 
-/// Diferencia con otro vector self - other
+/// Producto escalar. self * scalar
+impl Mul<f64> for Vector2D {
+    type Output = f64;
+    fn mul(self, rhs: f64) -> Self::Output {
+        (self.x * rhs) + (self.y * rhs)
+    }
+}
+
+/// Diferencia con otro vector. self - other
 impl Sub for Vector2D {
     type Output = Vector2D;
 
@@ -159,6 +193,18 @@ impl Sub for Vector2D {
         Vector2D {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
+        }
+    }
+}
+
+/// Suma vectorial. self + other
+impl Add for Vector2D {
+    type Output = Vector2D;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Vector2D {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
         }
     }
 }
