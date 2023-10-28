@@ -45,7 +45,7 @@ impl Object2D {
     }
 }
 
-impl UniformLinearMotion for Object2D {
+impl UniformLinearMotion<Vector2D> for Object2D {
     /// Retorna el tiempo dentro del cual el objeto va a colisionar con otro objeto.
     /// Retorna None sí nunca se encuentran.
     ///
@@ -132,31 +132,33 @@ impl UniformLinearMotion for Object2D {
     ///
     /// ```
     /// use punto_de_encuentro::*;
-    /// let object_1 = Object2D::new(&[6.0, 7.0], &[-1.8, -0.6]);
-    /// //assert!((5.0-time).abs() < TOLERANCE);
+    /// let object_1 = Object2D::new(&[11.0, 17.0], &[1.64383561643, 3.69863013698]);
+    /// let position: Vector2D = object_1.ulm_position_delta_time(&7.3);
+    /// assert!((position.x - 23.0).abs() < TOLERANCE
+    ///     && (position.y - 44.0).abs() < TOLERANCE);
     /// ```
-    fn ulm_position_delta_time(&self, time: f64) -> Option<f64> {
-        todo!()
+    fn ulm_position_delta_time(&self, time: &f64) -> Vector2D {
+        //  𝗽(𝘵) = 𝗽₀ + 𝘵𝐯
+        let delta_position: Vector2D = self.location + (self.velocity * *time);
+        delta_position
     }
 }
 
-pub trait UniformLinearMotion {
+pub trait UniformLinearMotion<T> {
     fn ulm_collision_time(&self, other: &Self) -> Option<f64>;
-    fn ulm_position_delta_time(&self, time: f64) -> Option<f64>;
-    fn ulm_collision_point(&self, other: &Self) -> Option<f64> {
-        match self.ulm_collision_time(other) {
-            Some(time) => self.ulm_position_delta_time(time),
-            None => None,
-        }
+    fn ulm_position_delta_time(&self, time: &f64) -> T;
+    fn ulm_collision(&self, other: &Self) -> Option<(T, f64)> {
+        self.ulm_collision_time(other)
+            .map(|time| (self.ulm_position_delta_time(&time), time))
     }
 }
 
 /// Representa un elemento de un espacio vectorial en ℝ² en coordenadas cartesianas.
 /// Tiene definidas las operaciones de suma y resta vectorial, producto punto, y producto escalar.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vector2D {
-    x: f64,
-    y: f64,
+    pub x: f64,
+    pub y: f64,
 }
 
 /// Construye un Vector desde un Array [f64; 2]
@@ -305,6 +307,41 @@ mod tests {
             if expected.is_some() && solution.is_some() {
                 assert!(
                     (expected.unwrap() - solution.unwrap()).abs() < TOLERANCE,
+                    "Expected {:?}, obtained {:?}",
+                    expected,
+                    solution
+                )
+            } else {
+                assert_eq!(*expected, solution)
+            };
+        }
+    }
+
+    #[test]
+    fn ulm_collision_point_bidimensional() {
+        let test_cases = [
+            // meet
+            (
+                [[6.0, 7.0], [-1.8, -0.6], [2.0, 2.0], [-1.0, 0.4]],
+                Some((Vector2D::from(&[-3.0, 4.0]), 5.0)),
+            ),
+            // never meet
+            ([[6.0, 7.0], [-1.8, -0.6], [2.0, 2.0], [1.0, 0.4]], None),
+        ];
+
+        for ([loc1, vel1, loc2, vel2], expected) in &test_cases {
+            let object_1 = Object2D::new(loc1, vel1);
+            let object_2 = Object2D::new(loc2, vel2);
+            let solution = object_1.ulm_collision(&object_2);
+            if expected.is_some() && solution.is_some() {
+                let (expected_position, expected_time) = expected.unwrap();
+                let (solution_position, solution_time) = solution.unwrap();
+                let diff_position = expected_position - solution_position;
+                let diff_time = expected_time - solution_time;
+                assert!(
+                    diff_position.x.abs() < TOLERANCE
+                        && diff_position.y.abs() < TOLERANCE
+                        && diff_time < TOLERANCE,
                     "Expected {:?}, obtained {:?}",
                     expected,
                     solution
