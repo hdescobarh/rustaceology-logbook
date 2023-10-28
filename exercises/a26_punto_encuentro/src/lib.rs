@@ -179,9 +179,12 @@ impl Mul<Vector2D> for Vector2D {
 
 /// Producto escalar. self * scalar
 impl Mul<f64> for Vector2D {
-    type Output = f64;
+    type Output = Vector2D;
     fn mul(self, rhs: f64) -> Self::Output {
-        (self.x * rhs) + (self.y * rhs)
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
     }
 }
 
