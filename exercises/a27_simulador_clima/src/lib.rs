@@ -17,7 +17,7 @@
  * - También mostrará la temperatura máxima y mínima de ese periodo y cuántos días va a llover.
  */
 
-use rand::distributions::{Bernoulli, Distribution, Standard};
+use rand::distributions::{Bernoulli, Standard};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
@@ -104,8 +104,7 @@ impl Forecast {
 
     // Genera un resultado aleatorio de lluvia para el día siguiente
     fn rain_get_random(next_rain_probability: f64) -> bool {
-        let bernoulli_distribution = Bernoulli::new(next_rain_probability).unwrap();
-        bernoulli_distribution.sample(&mut rand::thread_rng())
+        StdRng::from_entropy().sample(Bernoulli::new(next_rain_probability).unwrap())
     }
 }
 
