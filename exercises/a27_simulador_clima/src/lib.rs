@@ -17,8 +17,9 @@
  * - También mostrará la temperatura máxima y mínima de ese periodo y cuántos días va a llover.
  */
 
-use rand::distributions::Standard;
-use rand::prelude::*;
+use rand::distributions::{Bernoulli, Distribution, Standard};
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 
 pub const FLOAT_TOLERANCE: f64 = 1E-10;
 /// Máximo valor permitido en el modelo
@@ -55,12 +56,13 @@ impl Forecast {
     // Genera predicciones para el día siguiente
     pub fn next_day(&self) -> Self {
         // Temperatura
-
+        let next_temperature: f64 = self.temperature_control();
         // Probabilidad de lluvia
-
+        let next_rain_probability: f64 = self.rain_probability_control();
         // Resultado efectivo
+        let next_rained: bool = Self::rain_get_random(next_rain_probability);
 
-        todo!()
+        Self::new(next_rained, next_temperature, next_rain_probability)
     }
 
     // Controla como cambia la temperatura del día t+1 según sí llovió en el día t
@@ -69,21 +71,41 @@ impl Forecast {
         if self.rained {
             next_temperature = self.temperature - 1.0;
         } else {
-            // La P(cambio ±2ºC) = 0.1, asumiendo que P(suba 2 | cambió) = P(disminuya 2 | cambió),
+            // Genera un número aleatorio entre [0, 1) a partir de una distribución uniforme
+            let val: f64 = StdRng::from_entropy().sample(Standard);
+            // La P(cambio ±2ºC) = 0.1, asumiendo que P(suba 2 | cambió) = P(disminuya 2 | cambió) = 0.5,
             // se tiene que P(suba 2) = P(disminuya 2) = 0.05
+            if (0.0..0.05).contains(&val) {
+                next_temperature = self.temperature + 2.0;
+            } else if (0.05..0.1).contains(&val) {
+                next_temperature = self.temperature - 2.0;
+            } else if (0.1..1.0).contains(&val) {
+                next_temperature = self.temperature;
+            } else {
+                panic!("Unexpected error. Value out of [0, 1)")
+            }
         };
-
-        todo!()
+        next_temperature
     }
 
     // Controla como cambia la probabilidad de lluvia del día t+1 según la temperatura del día t
     fn rain_probability_control(&self) -> f64 {
-        todo!()
+        let next_rain_probability: f64;
+
+        if self.temperature > 25.0 {
+            next_rain_probability = f64::min(self.rain_probability + 0.2, 1.0);
+        } else if self.temperature < 5.0 {
+            next_rain_probability = f64::max(self.rain_probability - 0.2, 0.0)
+        } else {
+            next_rain_probability = self.rain_probability
+        }
+        next_rain_probability
     }
 
-    // Genera un resultado aleatorio para el día siguiente
-    fn rain_get_random() -> bool {
-        todo!()
+    // Genera un resultado aleatorio de lluvia para el día siguiente
+    fn rain_get_random(next_rain_probability: f64) -> bool {
+        let bernoulli_distribution = Bernoulli::new(next_rain_probability).unwrap();
+        bernoulli_distribution.sample(&mut rand::thread_rng())
     }
 }
 
