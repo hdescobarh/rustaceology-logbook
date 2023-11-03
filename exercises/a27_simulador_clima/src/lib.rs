@@ -21,11 +21,78 @@ use rand::distributions::{Bernoulli, Standard};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
-pub const FLOAT_TOLERANCE: f64 = 1E-10;
 /// Máximo valor permitido en el modelo
 pub const MAX_ALLOWED_TEMPERATURE: f64 = 90.0;
 /// Mínimo valor permitido en el modelo
 pub const MIN_ALLOWED_TEMPERATURE: f64 = -110.0;
+
+pub struct Simulation {
+    total_days: usize,
+    sample: Vec<Forecast>,
+}
+
+impl Simulation {
+    pub fn run(days: usize, init_temperature: f64, init_rain_probability: f64) -> Self {
+        let mut sample: Vec<Forecast> = Vec::with_capacity(days);
+        sample.push(Forecast::new(
+            false,
+            init_temperature,
+            init_rain_probability,
+        ));
+        let mut simulation = Self {
+            total_days: days,
+            sample,
+        };
+        simulation.sample();
+        simulation
+    }
+
+    fn sample(&mut self) {
+        while self.sample.len() < self.total_days {
+            let lastest_forecast = &self.sample[self.sample.len() - 1];
+            let next_forecast = lastest_forecast.next_day();
+            self.sample.push(next_forecast);
+        }
+    }
+
+    fn get_stats(&self) -> (usize, f64, f64) {
+        let days_with_rain = self
+            .sample
+            .iter()
+            .filter(|forecast| forecast.rained)
+            .count();
+        let max_temperature = self
+            .sample
+            .iter()
+            .map(|forecast| forecast.temperature)
+            .reduce(f64::max)
+            .unwrap();
+        let min_temperature = self
+            .sample
+            .iter()
+            .map(|forecast| forecast.temperature)
+            .reduce(f64::min)
+            .unwrap();
+        (days_with_rain, max_temperature, min_temperature)
+    }
+
+    pub fn report(&self) -> String {
+        let mut msg = "Day\tTemperature\tRain".to_string();
+        for (day, forecast) in self.sample.iter().enumerate() {
+            let temperature = forecast.temperature;
+            let rained = forecast.rained;
+            msg.push_str(&format!("{day}\t{temperature}\t{rained}\n"));
+        }
+        let (days_with_rain, max_temperature, min_temperature) = self.get_stats();
+        msg.push_str(&format!(
+            "
+            - Days with rain: {days_with_rain}
+            - Max. temperature (ºC): {max_temperature}
+            - Min. temperature (ºC): {min_temperature}"
+        ));
+        msg
+    }
+}
 
 /// Representa las predicciones de un día
 pub struct Forecast {
@@ -38,7 +105,7 @@ pub struct Forecast {
 }
 
 impl Forecast {
-    pub fn new(rained: bool, temperature: f64, rain_probability: f64) -> Self {
+    fn new(rained: bool, temperature: f64, rain_probability: f64) -> Self {
         if !(0.0..=1.0).contains(&rain_probability) {
             panic!("Probability must be in the close interval [0, 1].")
         }
@@ -54,7 +121,7 @@ impl Forecast {
     }
 
     // Genera predicciones para el día siguiente
-    pub fn next_day(&self) -> Self {
+    fn next_day(&self) -> Self {
         // Temperatura
         let next_temperature: f64 = self.temperature_control();
         // Probabilidad de lluvia
