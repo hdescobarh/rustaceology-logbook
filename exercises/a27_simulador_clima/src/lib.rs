@@ -21,10 +21,10 @@ use rand::distributions::{Bernoulli, Standard};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
-/// Máximo valor permitido en el modelo
-pub const MAX_ALLOWED_TEMPERATURE: f64 = 90.0;
-/// Mínimo valor permitido en el modelo
-pub const MIN_ALLOWED_TEMPERATURE: f64 = -110.0;
+// Máximo valor permitido en el modelo
+const MAX_ALLOWED_TEMPERATURE: f64 = 90.0;
+// Mínimo valor permitido en el modelo
+const MIN_ALLOWED_TEMPERATURE: f64 = -110.0;
 
 pub struct Simulation {
     total_days: usize,
@@ -77,7 +77,7 @@ impl Simulation {
     }
 
     pub fn report(&self) -> String {
-        let mut msg = "Day\tTemperature\tRain".to_string();
+        let mut msg = "Day\tTemperature\tRain\n".to_string();
         for (day, forecast) in self.sample.iter().enumerate() {
             let temperature = forecast.temperature;
             let rained = forecast.rained;
@@ -85,17 +85,17 @@ impl Simulation {
         }
         let (days_with_rain, max_temperature, min_temperature) = self.get_stats();
         msg.push_str(&format!(
-            "
-            - Days with rain: {days_with_rain}
-            - Max. temperature (ºC): {max_temperature}
-            - Min. temperature (ºC): {min_temperature}"
+            "\
+            - Days with rain: {days_with_rain}\n\
+            - Max. temperature (ºC): {max_temperature}\n\
+            - Min. temperature (ºC): {min_temperature}\n"
         ));
         msg
     }
 }
 
 /// Representa las predicciones de un día
-pub struct Forecast {
+struct Forecast {
     /// Temperatura en Celsius
     temperature: f64,
     /// Probabilidad de lluvia
