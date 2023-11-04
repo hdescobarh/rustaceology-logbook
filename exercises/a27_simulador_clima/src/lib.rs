@@ -29,6 +29,9 @@ const MIN_ALLOWED_TEMPERATURE: f64 = -110.0;
 pub struct Simulation {
     total_days: usize,
     sample: Vec<Forecast>,
+    days_with_rain: Option<usize>,
+    max_temperature: Option<f64>,
+    min_temperature: Option<f64>,
 }
 
 impl Simulation {
@@ -42,9 +45,41 @@ impl Simulation {
         let mut simulation = Self {
             total_days: days,
             sample,
+            days_with_rain: None,
+            max_temperature: None,
+            min_temperature: None,
         };
         simulation.sample();
+        simulation.fill_stats();
         simulation
+    }
+
+    pub fn report(&self) -> String {
+        let mut msg = "Day\tTemperature\tRain\n".to_string();
+        for (day, forecast) in self.sample.iter().enumerate() {
+            let temperature = forecast.temperature;
+            let rained = forecast.rained;
+            msg.push_str(&format!("{day}\t{temperature}\t{rained}\n"));
+        }
+
+        if self.days_with_rain.is_none()
+            || self.max_temperature.is_none()
+            || self.min_temperature.is_none()
+        {
+            return msg;
+        }
+
+        msg.push_str(&format!(
+            "\
+            - Days with rain: {}\n\
+            - Max. temperature (ºC): {}\n\
+            - Min. temperature (ºC): {}\n",
+            self.days_with_rain.unwrap(),
+            self.max_temperature.unwrap(),
+            self.min_temperature.unwrap()
+        ));
+
+        msg
     }
 
     fn sample(&mut self) {
@@ -55,42 +90,30 @@ impl Simulation {
         }
     }
 
-    fn get_stats(&self) -> (usize, f64, f64) {
+    fn fill_stats(&mut self) {
+        // obtiene los dias que llovieron y cuenta su número
         let days_with_rain = self
             .sample
             .iter()
             .filter(|forecast| forecast.rained)
             .count();
+        self.days_with_rain = Some(days_with_rain);
+        // obtiene la máxima temperatura
         let max_temperature = self
             .sample
             .iter()
             .map(|forecast| forecast.temperature)
             .reduce(f64::max)
             .unwrap();
+        self.max_temperature = Some(max_temperature);
+        // obtiene la temperatura mínima
         let min_temperature = self
             .sample
             .iter()
             .map(|forecast| forecast.temperature)
             .reduce(f64::min)
             .unwrap();
-        (days_with_rain, max_temperature, min_temperature)
-    }
-
-    pub fn report(&self) -> String {
-        let mut msg = "Day\tTemperature\tRain\n".to_string();
-        for (day, forecast) in self.sample.iter().enumerate() {
-            let temperature = forecast.temperature;
-            let rained = forecast.rained;
-            msg.push_str(&format!("{day}\t{temperature}\t{rained}\n"));
-        }
-        let (days_with_rain, max_temperature, min_temperature) = self.get_stats();
-        msg.push_str(&format!(
-            "\
-            - Days with rain: {days_with_rain}\n\
-            - Max. temperature (ºC): {max_temperature}\n\
-            - Min. temperature (ºC): {min_temperature}\n"
-        ));
-        msg
+        self.min_temperature = Some(min_temperature)
     }
 }
 
@@ -177,5 +200,43 @@ impl Forecast {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // Solo unas básicas.
+    // Testear correctamente un modelo estocástico es dispendioso y
+    // creo que va mas allá de los propósitos del ejercicio.
+    use crate::*;
+
+    #[should_panic]
+    #[test]
+    fn invalid_forecast_max_temperature() {
+        Forecast::new(false, MAX_ALLOWED_TEMPERATURE + 1.0, 0.1);
+    }
+
+    #[should_panic]
+    #[test]
+    fn invalid_forecast_min_temperature() {
+        Forecast::new(false, MIN_ALLOWED_TEMPERATURE - 1.0, 0.1);
+    }
+
+    #[should_panic]
+    #[test]
+    fn higher_than_valid_probability() {
+        let temperature = (MAX_ALLOWED_TEMPERATURE + MIN_ALLOWED_TEMPERATURE) / 2.0;
+        Forecast::new(false, temperature, 1.1);
+    }
+
+    #[should_panic]
+    #[test]
+    fn lower_than_valid_probability() {
+        let temperature = (MAX_ALLOWED_TEMPERATURE + MIN_ALLOWED_TEMPERATURE) / 2.0;
+        Forecast::new(false, temperature, -1.0);
+    }
+
+    #[test]
+    fn initialize_valid_forecast() {
+        let temperature = (MAX_ALLOWED_TEMPERATURE + MIN_ALLOWED_TEMPERATURE) / 2.0;
+        Forecast::new(false, temperature, 1.0);
+        Forecast::new(true, temperature, 1.0);
+        Forecast::new(false, temperature, 0.0);
+        Forecast::new(true, temperature, 0.0);
+    }
 }
