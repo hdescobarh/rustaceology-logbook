@@ -16,7 +16,10 @@
  *   y si llueve durante todos esos días.
  * - También mostrará la temperatura máxima y mínima de ese periodo y cuántos días va a llover.
  */
+#![crate_name = "simulador_clima"]
+#![crate_type = "cdylib"]
 
+// rand es la biblioteca para generación de números aleatorios
 use rand::distributions::{Bernoulli, Standard};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -26,15 +29,53 @@ const MAX_ALLOWED_TEMPERATURE: f64 = 90.0;
 // Mínimo valor permitido en el modelo
 const MIN_ALLOWED_TEMPERATURE: f64 = -110.0;
 
+/// Representa una simulación del clima dadas unas condiciones iniciales de temperatura y lluvia
 pub struct Simulation {
+    /// Número de días de simulación, incluyendo el día inicial
     total_days: usize,
+    /// Almacena las predicciones de clima para cada día
     sample: Vec<Forecast>,
+    /// Número de días con lluvia
     days_with_rain: Option<usize>,
+    /// Máxima temperatura observada
     max_temperature: Option<f64>,
+    /// Mínima temperatura observada
     min_temperature: Option<f64>,
 }
 
 impl Simulation {
+    /// Inicializa y corre la simulación
+    ///
+    /// # Argumentos:
+    /// * `days` - numero de días de simulación
+    /// * `init_temperature` - temperatura inicial
+    /// * `init_rain_probability` - probabilidad de lluvia inicial
+    ///
+    /// # Ejemplo:
+    /// ```
+    /// use simulador_clima::*;
+    /// // simulación de 10 días, temperatura inicial de 24.0ºC
+    /// // y probabilidad de lluvia inicial del 20%
+    /// let simulation = Simulation::run(10, 24.0, 0.20);
+    /// let report = simulation.report();
+    /// println!("{report}");
+    ///
+    /// // Ejemplo del output (los valores pueden ser diferentes por le componente aleatorio)
+    /// // Day     Temperature     Rain
+    /// // 0       24      false
+    /// // 1       24      false
+    /// // 2       24      true
+    /// // 3       23      true
+    /// // 4       22      false
+    /// // 5       22      false
+    /// // 6       22      false
+    /// // 7       22      false
+    /// // 8       22      false
+    /// // 9       22      false
+    /// // - Days with rain: 2
+    /// // - Max. temperature (ºC): 24
+    /// // - Min. temperature (ºC): 22
+    /// ```
     pub fn run(days: usize, init_temperature: f64, init_rain_probability: f64) -> Self {
         let mut sample: Vec<Forecast> = Vec::with_capacity(days);
         sample.push(Forecast::new(
@@ -55,20 +96,20 @@ impl Simulation {
     }
 
     pub fn report(&self) -> String {
+        // inicializa la plantilla y extrae la información de cada día
         let mut msg = "Day\tTemperature\tRain\n".to_string();
         for (day, forecast) in self.sample.iter().enumerate() {
             let temperature = forecast.temperature;
             let rained = forecast.rained;
             msg.push_str(&format!("{day}\t{temperature}\t{rained}\n"));
         }
-
+        // Verifica que exista estadísticas
         if self.days_with_rain.is_none()
             || self.max_temperature.is_none()
             || self.min_temperature.is_none()
         {
             return msg;
         }
-
         msg.push_str(&format!(
             "\
             - Days with rain: {}\n\
@@ -82,6 +123,7 @@ impl Simulation {
         msg
     }
 
+    // simula los demás días a partir del día inicial
     fn sample(&mut self) {
         while self.sample.len() < self.total_days {
             let lastest_forecast = &self.sample[self.sample.len() - 1];
@@ -121,9 +163,9 @@ impl Simulation {
 struct Forecast {
     /// Temperatura en Celsius
     temperature: f64,
-    /// Probabilidad de lluvia
+    /// Probabilidad de lluvia, [0.0, 1.0]
     rain_probability: f64,
-    /// Sí efectivamente llovió es `true`
+    /// Sí efectivamente llovió, es `true`
     rained: bool,
 }
 
