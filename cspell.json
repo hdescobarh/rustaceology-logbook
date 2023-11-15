@@ -46,13 +46,21 @@
     "ignorePaths": [
         "**/node_modules", // this will ignore anything the node_modules directory
         ".git", // Ignore the .git directory
-        "*.toml" // Ignore all .toml files.
+        "*.toml", // Ignore all .toml files.
+        "/*.code-workspace"
     ],
     // words - list of words to be always considered correct
     "words": [
+        "euclídeo",
+        "euclídea",
         "iterador",
+        "Mouredev",
+        "tetrominoes",
         "tripleta",
-        "tupla"
+        "tupla",
+        "𝘵𝐯",
+        "𝘵ǁ𝗽",
+        "ǁΔ𝗽"
     ],
     // custom dictionaries
     "dictionaryDefinitions": [
