@@ -28,8 +28,30 @@ use rand::{Rng, SeedableRng};
 
 fn main() {
     let mut game = Game::default();
-    game.make_question();
-    println!("{game}")
+
+    let mut input_buffer = String::new();
+
+    loop {
+        // make question
+        game.make_question();
+        println!("{game}");
+
+        // wait and verify answer
+        std::io::stdin()
+            .read_line(&mut input_buffer)
+            .expect("Unexpected error while reading input.");
+        let game_over = match input_buffer.trim().parse() {
+            Ok(answer) => !game.check_answer(answer),
+            Err(_) => true,
+        };
+
+        // Check if the game continues
+        if game_over {
+            println!("Game Over\nScore: {}", game.get_score());
+            std::process::exit(0);
+        }
+        input_buffer.clear();
+    }
 }
 
 pub enum Operator {
@@ -72,10 +94,10 @@ impl Default for Game {
 
 impl Game {
     // construye la operación y almacena la respuesta valida
-    fn make_question(&mut self) {
+    pub fn make_question(&mut self) {
         // llama generate_numbers para obtener el par de operando
         // = U+003D Equals Sign
-        let (first_digits, second_digits) = self.get_operands_digits();
+        let (first_digits, second_digits) = self.generate_operands_digits();
         let first_operand = Self::sample_operand(first_digits);
         let second_operand = Self::sample_operand(second_digits);
 
@@ -90,7 +112,7 @@ impl Game {
         self.question = (first_operand, second_operand, operator);
     }
 
-    fn get_operands_digits(&self) -> (usize, usize) {
+    fn generate_operands_digits(&self) -> (usize, usize) {
         let total_digits: usize = self.difficulty_level + 1;
         let second_operand: usize = total_digits / 2;
         let first_operand: usize = total_digits - second_operand;
@@ -109,15 +131,24 @@ impl Game {
         StdRng::from_entropy().sample(Standard)
     }
 
+    pub fn check_answer(&mut self, answer: isize) -> bool {
+        if self.answer == answer {
+            self.score += 1;
+            self.update();
+            return true;
+        }
+        false
+    }
+
     // Actualiza los contadores internos
-    fn update(&mut self, correct_answer: bool) {
-        if self.difficulty_level % 5 == 0 {
+    fn update(&mut self) {
+        if self.score % 5 == 0 {
             self.difficulty_level += 1;
         }
+    }
 
-        if correct_answer {
-            self.score += 1;
-        }
+    pub fn get_score(&self) -> &usize {
+        &self.score
     }
 }
 
@@ -148,18 +179,18 @@ mod test {
     #[test]
     fn operand_digits_works() {
         let mut game = Game::default();
-        assert_eq!((1, 1), game.get_operands_digits());
+        assert_eq!((1, 1), game.generate_operands_digits());
         game.difficulty_level = 2;
-        assert_eq!((2, 1), game.get_operands_digits());
+        assert_eq!((2, 1), game.generate_operands_digits());
         game.difficulty_level = 3;
-        assert_eq!((2, 2), game.get_operands_digits());
+        assert_eq!((2, 2), game.generate_operands_digits());
         game.difficulty_level = 4;
-        assert_eq!((3, 2), game.get_operands_digits());
+        assert_eq!((3, 2), game.generate_operands_digits());
         game.difficulty_level = 12;
-        assert_eq!((7, 6), game.get_operands_digits());
+        assert_eq!((7, 6), game.generate_operands_digits());
         game.difficulty_level = 13;
-        assert_eq!((7, 7), game.get_operands_digits());
+        assert_eq!((7, 7), game.generate_operands_digits());
         game.difficulty_level = 81;
-        assert_eq!((41, 41), game.get_operands_digits());
+        assert_eq!((41, 41), game.generate_operands_digits());
     }
 }
