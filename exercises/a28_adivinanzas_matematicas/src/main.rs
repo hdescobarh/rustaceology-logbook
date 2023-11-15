@@ -27,7 +27,9 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
 fn main() {
-    println!("Hello, world!");
+    let mut game = Game::default();
+    game.make_question();
+    println!("{game}")
 }
 
 pub enum Operator {
@@ -53,8 +55,8 @@ impl Distribution<Operator> for Standard {
 pub struct Game {
     score: usize,
     difficulty_level: usize,
-    question: (usize, usize, Operator),
-    answer: usize,
+    question: (isize, isize, Operator),
+    answer: isize,
 }
 
 impl Default for Game {
@@ -70,15 +72,22 @@ impl Default for Game {
 
 impl Game {
     // construye la operación y almacena la respuesta valida
-    fn make_operation(&mut self) {
+    fn make_question(&mut self) {
         // llama generate_numbers para obtener el par de operando
         // = U+003D Equals Sign
-        todo!()
-    }
+        let (first_digits, second_digits) = self.get_operands_digits();
+        let first_operand = Self::sample_operand(first_digits);
+        let second_operand = Self::sample_operand(second_digits);
 
-    // Genera una dupla de números aleatorios
-    fn get_random_operands(&self) -> (usize, usize) {
-        todo!()
+        let operator = Self::sample_operator();
+        let answer: isize = match operator {
+            Operator::Addition => first_operand + second_operand,
+            Operator::Subtraction => first_operand - second_operand,
+            Operator::Division => first_operand / second_operand,
+            Operator::Multiplication => first_operand * second_operand,
+        };
+        self.answer = answer;
+        self.question = (first_operand, second_operand, operator);
     }
 
     fn get_operands_digits(&self) -> (usize, usize) {
@@ -88,10 +97,16 @@ impl Game {
         (first_operand, second_operand)
     }
 
+    // Obtiene un valor de operador aleatorio entre en el intervalo [0, 9*D],
+    // donde D es un numero de la forma 1111... conteniendo digit_number dígitos.
+    fn sample_operand(digit_number: usize) -> isize {
+        let upper_bound = "9".repeat(digit_number).parse().unwrap();
+        StdRng::from_entropy().gen_range(0..=upper_bound)
+    }
+
     // Escoge aleatoriamente la operación a realizar
-    fn get_random_operator() -> Operator {
-        let operator: Operator = StdRng::from_entropy().sample(Standard);
-        operator
+    fn sample_operator() -> Operator {
+        StdRng::from_entropy().sample(Standard)
     }
 
     // Actualiza los contadores internos
@@ -121,7 +136,7 @@ impl Display for Game {
 
         write!(
             f,
-            "({} {} {})",
+            "{} {} {}",
             self.question.0, operator_str, self.question.1
         )
     }
