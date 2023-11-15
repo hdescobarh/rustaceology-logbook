@@ -19,14 +19,40 @@ de la operación (cada vez en un operando):
 
  */
 
+// Biblioteca para la generación de valores aleatorios
+use rand::distributions::{Distribution, Standard};
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
+
 fn main() {
     println!("Hello, world!");
+}
+
+pub enum Operator {
+    Addition,
+    Subtraction,
+    Division,
+    Multiplication,
+}
+
+// Distribución de probabilidad para generar operadores aleatorios
+impl Distribution<Operator> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Operator {
+        let n: u8 = rng.gen_range(0..=4);
+        match n {
+            0 => Operator::Addition,
+            1 => Operator::Subtraction,
+            2 => Operator::Division,
+            _ => Operator::Multiplication,
+        }
+    }
 }
 
 pub struct Game {
     score: usize,
     difficulty_level: usize,
-    question: (String, usize),
+    question: (usize, usize, Operator),
+    answer: usize,
 }
 
 impl Default for Game {
@@ -34,22 +60,17 @@ impl Default for Game {
         Self {
             score: 0,
             difficulty_level: 1,
-            question: (String::new(), 0),
+            question: (0, 0, Operator::Addition),
+            answer: 0,
         }
     }
-}
-
-pub enum Operators {
-    Addition,
-    Subtraction,
-    Division,
-    Multiplication,
 }
 
 impl Game {
     // construye la operación y almacena la respuesta valida
     fn make_operation(&mut self) {
         // llama generate_numbers para obtener el par de operando
+        // = U+003D Equals Sign
         todo!()
     }
 
@@ -66,8 +87,9 @@ impl Game {
     }
 
     // Escoge aleatoriamente la operación a realizar
-    fn get_random_operator() -> Operators {
-        todo!()
+    fn get_random_operator() -> Operator {
+        let operator: Operator = StdRng::from_entropy().sample(Standard);
+        operator
     }
 
     // Actualiza los contadores internos
