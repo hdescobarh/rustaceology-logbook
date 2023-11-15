@@ -19,6 +19,8 @@ de la operación (cada vez en un operando):
 
  */
 
+use std::fmt::Display;
+
 // Biblioteca para la generación de valores aleatorios
 use rand::distributions::{Distribution, Standard};
 use rand::rngs::StdRng;
@@ -101,6 +103,27 @@ impl Game {
         if correct_answer {
             self.score += 1;
         }
+    }
+}
+
+impl Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let operator_str = match self.question.2 {
+            // U+002B Plus Sign
+            Operator::Addition => "+",
+            // U+2212 Minus Sign
+            Operator::Subtraction => "−",
+            // U+00F7 Division Sign
+            Operator::Division => "÷",
+            // U+00D7 Multiplication Sign
+            Operator::Multiplication => "×",
+        };
+
+        write!(
+            f,
+            "({} {} {})",
+            self.question.0, operator_str, self.question.1
+        )
     }
 }
 
