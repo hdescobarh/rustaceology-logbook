@@ -19,7 +19,14 @@ de la operación (cada vez en un operando):
 
  */
 
+/*
+Solución limitando el número de bibliotecas externas.
+Solo usa rand porque en la biblioteca estándar de Rust no hay herramientas
+para generar números aleatorios.
+ */
+
 use std::fmt::Display;
+use std::io::{stdout, Write};
 use std::num::ParseIntError;
 use std::sync::mpsc::{channel, Receiver, TryRecvError};
 use std::thread;
@@ -37,15 +44,23 @@ pub const MAX_TICKS_PER_QUESTION: usize = 3;
 
 fn main() {
     let mut game = Game::default();
+
     // initial question
     game.make_question();
-    println!("{game}");
+    let mut stdout = stdout();
 
+    // Canal para capturar desde otro hilo el input.
     let stdin_rx = stdin_channel();
     let mut ticks: usize = 0;
+    let clean_line = " ".repeat(20);
+
+    // Ciclo principal del juego
     loop {
         ticks += 1;
-        //println!("{ticks}");
+        // refresca el stdout
+        let _ = stdout.write_fmt(format_args!("{clean_line}\r"));
+        let _ = stdout.write_fmt(format_args!("{game}\ttime: {ticks}s:\t"));
+        let _ = stdout.flush();
         thread::sleep(Duration::from_millis(TICK_LENGTH));
 
         let game_over: bool = if ticks >= MAX_TICKS_PER_QUESTION {
@@ -60,12 +75,11 @@ fn main() {
         };
 
         if game_over {
-            println!("Game Over\nScore: {}", game.get_score());
+            println!("\nGame Over\nScore: {}", game.get_score());
             std::process::exit(0);
         }
 
         game.make_question();
-        println!("{game}");
         ticks = 0;
     }
 }
