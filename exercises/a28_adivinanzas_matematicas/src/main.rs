@@ -159,7 +159,8 @@ impl Game {
     // donde D es un numero de la forma 1111... conteniendo digit_number dígitos.
     fn sample_operand(digit_number: usize) -> isize {
         let upper_bound = "9".repeat(digit_number).parse().unwrap();
-        StdRng::from_entropy().gen_range(0..=upper_bound)
+        // para permitir el cero es necesario agregar un control cuando el divisor es 0.
+        StdRng::from_entropy().gen_range(1..=upper_bound)
     }
 
     // Escoge aleatoriamente la operación a realizar
