@@ -20,7 +20,10 @@ de la operación (cada vez en un operando):
  */
 
 use std::fmt::Display;
-
+use std::io::{self, stdout, Write};
+use std::sync::mpsc::{self, TryRecvError};
+use std::thread;
+use std::time::Duration;
 // Biblioteca para la generación de valores aleatorios
 use rand::distributions::{Distribution, Standard};
 use rand::rngs::StdRng;
@@ -28,14 +31,20 @@ use rand::{Rng, SeedableRng};
 
 fn main() {
     let mut game = Game::default();
-
     let mut input_buffer = String::new();
+    let (tx, rx) = mpsc::channel();
+    let mut stdout = stdout();
+
+    // Contador de tiempo
+    let _ = timer(rx);
 
     loop {
         // make question
         game.make_question();
-        println!("{game}");
-
+        let _ = stdout.write_fmt(format_args!("{game}\n"));
+        stdout.flush().unwrap();
+        // activate counter
+        let _ = tx.send(true);
         // wait and verify answer
         std::io::stdin()
             .read_line(&mut input_buffer)
@@ -51,7 +60,34 @@ fn main() {
             std::process::exit(0);
         }
         input_buffer.clear();
+        let _ = tx.send(false);
     }
+}
+
+fn timer(rx: mpsc::Receiver<bool>) -> thread::JoinHandle<()> {
+    thread::spawn(move || {
+        let mut run_clock = false;
+        let mut ticks: u8 = 0;
+        loop {
+            if run_clock {
+                thread::sleep(Duration::from_millis(1000));
+                ticks += 1;
+            }
+            match rx.try_recv() {
+                Ok(true) => {
+                    run_clock = true;
+                    ticks = 0;
+                }
+                Ok(false) => run_clock = false,
+                Err(TryRecvError::Empty) => {
+                    continue;
+                }
+                Err(TryRecvError::Disconnected) => {
+                    break;
+                }
+            }
+        }
+    })
 }
 
 pub enum Operator {
