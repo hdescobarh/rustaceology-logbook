@@ -24,15 +24,16 @@ use std::num::ParseIntError;
 use std::sync::mpsc::{channel, Receiver, TryRecvError};
 use std::thread;
 use std::time::Duration;
+
 // Biblioteca para la generación de valores aleatorios
 use rand::distributions::{Distribution, Standard};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
-// Cuanto dura cada pausa del reloj en ms
-const TICK_LENGHT: u64 = 1000;
-// Numero de conteos por pregunta
-const MAX_TICKS_PER_QUESTION: usize = 5;
+/// Indica cuanto tiempo (en ms) dura cada tick del juego
+pub const TICK_LENGTH: u64 = 1000;
+/// Indica los conteos máximos por pregunta. Multiplicado por TICK_LENGTH resulta en el tiempo en ms por pregunta.
+pub const MAX_TICKS_PER_QUESTION: usize = 3;
 
 fn main() {
     let mut game = Game::default();
@@ -43,10 +44,9 @@ fn main() {
     let stdin_rx = stdin_channel();
     let mut ticks: usize = 0;
     loop {
-        // make question
         ticks += 1;
-        println!("{ticks}");
-        thread::sleep(Duration::from_millis(TICK_LENGHT));
+        //println!("{ticks}");
+        thread::sleep(Duration::from_millis(TICK_LENGTH));
 
         let game_over: bool = if ticks >= MAX_TICKS_PER_QUESTION {
             true
@@ -82,6 +82,7 @@ fn stdin_channel() -> Receiver<Result<isize, ParseIntError>> {
     rx
 }
 
+/// Operadores validos a emplear en el juego
 pub enum Operator {
     Addition,
     Subtraction,
@@ -89,7 +90,7 @@ pub enum Operator {
     Multiplication,
 }
 
-// Distribución de probabilidad para generar operadores aleatorios
+/// Distribución de probabilidad para generar operadores de forma aleatoria
 impl Distribution<Operator> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Operator {
         let n: u8 = rng.gen_range(0..=4);
@@ -102,10 +103,15 @@ impl Distribution<Operator> for Standard {
     }
 }
 
+/// Implementa el juego y sus normas
 pub struct Game {
+    /// Marcador de puntos. Otorga un punto por cada respuesta correcta. Cada 5 puntos incrementa la dificultad en uno.
     score: usize,
+    /// Indica la dificultad del juego. El número de dígitos totales de cada pregunta es la dificultad + 1.
     difficulty_level: usize,
+    /// Contiene el primer y segundo operando y el operador.
     question: (isize, isize, Operator),
+    /// Contiene el resultado correcto de la operación.
     answer: isize,
 }
 
@@ -121,7 +127,7 @@ impl Default for Game {
 }
 
 impl Game {
-    // construye la operación y almacena la respuesta valida
+    /// Genera una operación valida y su respuesta correcta.
     pub fn make_question(&mut self) {
         // llama generate_numbers para obtener el par de operando
         // = U+003D Equals Sign
@@ -140,6 +146,7 @@ impl Game {
         self.question = (first_operand, second_operand, operator);
     }
 
+    // Determina los dígitos del primer y segunda operando
     fn generate_operands_digits(&self) -> (usize, usize) {
         let total_digits: usize = self.difficulty_level + 1;
         let second_operand: usize = total_digits / 2;
@@ -160,6 +167,10 @@ impl Game {
         StdRng::from_entropy().sample(Standard)
     }
 
+    /// Verifica si la respuesta ingresada es correcta. Retorna true sí es correcta.
+    ///
+    /// # Argumentos:
+    /// * `answer` - respuesta ingresada
     pub fn check_answer(&mut self, answer: isize) -> bool {
         if self.answer == answer {
             self.score += 1;
@@ -176,11 +187,13 @@ impl Game {
         }
     }
 
+    /// Presenta la tabla de puntuación
     pub fn get_score(&self) -> &usize {
         &self.score
     }
 }
 
+// Implementación de la vista para Game
 impl Display for Game {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let operator_str = match self.question.2 {
