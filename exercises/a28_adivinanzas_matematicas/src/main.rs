@@ -20,8 +20,8 @@ de la operación (cada vez en un operando):
  */
 
 use std::fmt::Display;
-use std::io::{self, stdout, Write};
-use std::sync::mpsc::{self, TryRecvError};
+use std::num::ParseIntError;
+use std::sync::mpsc::{channel, Receiver, TryRecvError};
 use std::thread;
 use std::time::Duration;
 // Biblioteca para la generación de valores aleatorios
@@ -29,65 +29,57 @@ use rand::distributions::{Distribution, Standard};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
+// Cuanto dura cada pausa del reloj en ms
+const TICK_LENGHT: u64 = 1000;
+// Numero de conteos por pregunta
+const MAX_TICKS_PER_QUESTION: usize = 5;
+
 fn main() {
     let mut game = Game::default();
-    let mut input_buffer = String::new();
-    let (tx, rx) = mpsc::channel();
-    let mut stdout = stdout();
+    // initial question
+    game.make_question();
+    println!("{game}");
 
-    // Contador de tiempo
-    let _ = timer(rx);
-
+    let stdin_rx = stdin_channel();
+    let mut ticks: usize = 0;
     loop {
         // make question
-        game.make_question();
-        let _ = stdout.write_fmt(format_args!("{game}\n"));
-        stdout.flush().unwrap();
-        // activate counter
-        let _ = tx.send(true);
-        // wait and verify answer
-        std::io::stdin()
-            .read_line(&mut input_buffer)
-            .expect("Unexpected error while reading input.");
-        let game_over = match input_buffer.trim().parse() {
-            Ok(answer) => !game.check_answer(answer),
-            Err(_) => true,
+        ticks += 1;
+        println!("{ticks}");
+        thread::sleep(Duration::from_millis(TICK_LENGHT));
+
+        let game_over: bool = if ticks >= MAX_TICKS_PER_QUESTION {
+            true
+        } else {
+            match stdin_rx.try_recv() {
+                Ok(Ok(answer)) => !game.check_answer(answer),
+                Ok(Err(_)) => true,
+                Err(TryRecvError::Empty) => continue,
+                Err(TryRecvError::Disconnected) => break,
+            }
         };
 
-        // Check if the game continues
         if game_over {
             println!("Game Over\nScore: {}", game.get_score());
             std::process::exit(0);
         }
-        input_buffer.clear();
-        let _ = tx.send(false);
+
+        game.make_question();
+        println!("{game}");
+        ticks = 0;
     }
 }
 
-fn timer(rx: mpsc::Receiver<bool>) -> thread::JoinHandle<()> {
-    thread::spawn(move || {
-        let mut run_clock = false;
-        let mut ticks: u8 = 0;
-        loop {
-            if run_clock {
-                thread::sleep(Duration::from_millis(1000));
-                ticks += 1;
-            }
-            match rx.try_recv() {
-                Ok(true) => {
-                    run_clock = true;
-                    ticks = 0;
-                }
-                Ok(false) => run_clock = false,
-                Err(TryRecvError::Empty) => {
-                    continue;
-                }
-                Err(TryRecvError::Disconnected) => {
-                    break;
-                }
-            }
-        }
-    })
+fn stdin_channel() -> Receiver<Result<isize, ParseIntError>> {
+    let (tx, rx) = channel();
+    thread::spawn(move || loop {
+        let mut input_buffer = String::new();
+        std::io::stdin()
+            .read_line(&mut input_buffer)
+            .expect("Unexpected error while reading input.");
+        tx.send(input_buffer.trim().parse::<isize>()).unwrap();
+    });
+    rx
 }
 
 pub enum Operator {
