@@ -13,4 +13,69 @@ pulsar enter. (Avisando de si lo has eliminado o el nombre no existe)
 - Si seleccionas salir, el programa finalizará.
  */
 
+use data::*;
+
 fn main() {}
+
+pub mod data {
+    // Las nombres de usuario de Twitter son únicos, por lo que pueden usarse como identificadores únicos del participante
+    pub trait Repository<'a, K> {
+        fn create(&mut self, username: K) -> Result<(), ErrorKind>;
+        fn read_all(&'a self) -> Result<&'a [K], ErrorKind>;
+        fn delete(&mut self, username: K) -> Result<(), ErrorKind>;
+    }
+
+    #[non_exhaustive]
+    pub enum ErrorKind {
+        NotFound,
+        AlreadyExist,
+        Empty,
+    }
+
+    // Para el ejercicio, la "conexión" sera una simple lista, pero puede ser cualquier recurso
+    pub struct ListParticipants<'a> {
+        database_connection: &'a mut Vec<String>,
+    }
+
+    impl<'a> ListParticipants<'a> {
+        pub fn new(database_connection: &'a mut Vec<String>) -> Self {
+            Self {
+                database_connection,
+            }
+        }
+
+        fn get_username_index(&self, username: &str) -> Result<usize, ErrorKind> {
+            for (index, entry) in self.database_connection.iter().enumerate() {
+                if entry == username {
+                    return Ok(index);
+                }
+            }
+            Err(ErrorKind::NotFound)
+        }
+    }
+
+    impl<'a> Repository<'a, String> for ListParticipants<'a> {
+        fn create(&mut self, username: String) -> Result<(), ErrorKind> {
+            if self.database_connection.contains(&username) {
+                return Err(ErrorKind::AlreadyExist);
+            }
+
+            self.database_connection.push(username);
+            Ok(())
+        }
+
+        fn read_all(&'a self) -> Result<&'a [String], ErrorKind> {
+            if self.database_connection.is_empty() {
+                Err(ErrorKind::Empty)
+            } else {
+                Ok(self.database_connection)
+            }
+        }
+
+        fn delete(&mut self, username: String) -> Result<(), ErrorKind> {
+            let index = self.get_username_index(&username)?;
+            self.database_connection.swap_remove(index);
+            Ok(())
+        }
+    }
+}
