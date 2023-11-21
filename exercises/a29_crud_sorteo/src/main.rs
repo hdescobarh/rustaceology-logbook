@@ -13,16 +13,57 @@ pulsar enter. (Avisando de si lo has eliminado o el nombre no existe)
 - Si seleccionas salir, el programa finalizará.
  */
 
-use data::*;
-
 fn main() {}
 
-pub mod data {
+pub mod giveaway {
+
+    use rand::distributions::Slice;
+    use rand::Rng;
+
+    use crate::giveaway_data::*;
+
+    pub struct Giveaway {
+        participants: Box<dyn for<'a> Repository<'a, String> + 'static>,
+    }
+
+    impl Giveaway {
+        /// Agrega un nuevo participante
+        pub fn add_participant(&mut self, username: String) -> Result<(), ErrorKind> {
+            self.participants.create(username)
+        }
+
+        /// Lista todos los participantes
+        pub fn all_participants(&self) -> Result<&[String], ErrorKind> {
+            self.participants.read_all()
+        }
+
+        /// Remueve por nombre de usuario a un participante
+        pub fn remove_participant(&mut self, username: &String) -> Result<(), ErrorKind> {
+            self.participants.delete(username)
+        }
+
+        /// Obtiene un ganador y lo remueve de la lista de participantes
+        pub fn draw(&mut self) -> Result<String, ErrorKind> {
+            let draw_distribution = match Slice::new(self.participants.read_all()?) {
+                Ok(d) => d,
+                Err(_) => return Err(ErrorKind::Empty),
+            };
+
+            let winner = rand::thread_rng().sample(draw_distribution).to_owned();
+            match self.participants.delete(&winner) {
+                Ok(_) => Ok(winner),
+                Err(error) => Err(error),
+            }
+        }
+    }
+}
+
+pub mod giveaway_data {
     // Las nombres de usuario de Twitter son únicos, por lo que pueden usarse como identificadores únicos del participante
     pub trait Repository<'a, K> {
         fn create(&mut self, username: K) -> Result<(), ErrorKind>;
         fn read_all(&'a self) -> Result<&'a [K], ErrorKind>;
-        fn delete(&mut self, username: K) -> Result<(), ErrorKind>;
+        fn delete(&mut self, username: &K) -> Result<(), ErrorKind>;
     }
 
     #[non_exhaustive]
@@ -72,8 +113,8 @@ pub mod data {
             }
         }
 
-        fn delete(&mut self, username: String) -> Result<(), ErrorKind> {
-            let index = self.get_username_index(&username)?;
+        fn delete(&mut self, username: &String) -> Result<(), ErrorKind> {
+            let index = self.get_username_index(username)?;
             self.database_connection.swap_remove(index);
             Ok(())
         }
