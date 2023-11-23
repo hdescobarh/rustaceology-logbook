@@ -15,9 +15,18 @@ pulsar enter. (Avisando de si lo has eliminado o el nombre no existe)
 
 fn main() {}
 
+pub mod cli {}
+
 pub mod giveaway {
-    use crate::giveaway_data::*;
+    use crate::giveaway_data::{ErrorKind, Participant, Repository};
     use rand::seq::SliceRandom;
+    use std::fmt::Display;
+
+    const MSG_ERR_NOT_FOUND: &str = "The participant does not exists.";
+    const MSG_ERR_ALREADY_EXIST: &str = "The participant already exists.";
+    const MSG_ERR_EMPTY_DATA: &str = "There are not participants.";
+    const MSG_SUCCESS_ADDING: &str = "The participant was added.";
+    const MSG_SUCCESS_DELETING: &str = "The Participant was removed.";
 
     pub struct Giveaway {
         repository: Box<dyn Repository + 'static>,
@@ -30,49 +39,59 @@ pub mod giveaway {
             }
         }
 
-        pub fn request(kind: Request) -> String {
+        pub fn request(&mut self, kind: Request, username: Option<&str>) -> String {
             match kind {
-                Request::AddParticipant => todo!(),
-                Request::ListParticipants => todo!(),
-                Request::RemoveParticipant => todo!(),
-                Request::Draw => todo!(),
+                Request::AddParticipant => self.add_participant(username.unwrap()),
+                Request::ListParticipants => self.get_all_participants(),
+                Request::RemoveParticipant => self.remove_participant(username.unwrap()),
+                Request::Draw => self.draw(),
             }
         }
 
         /// Agrega un nuevo participante
-        fn add_participant(&mut self, username: &str) -> Result<(), ErrorKind> {
-            self.repository.create(Participant {
+        fn add_participant(&mut self, username: &str) -> String {
+            match self.repository.create(Participant {
                 username: username.to_owned(),
-            })
+            }) {
+                Ok(_) => MSG_SUCCESS_ADDING.to_string(),
+                Err(e) => format!("{e}"),
+            }
         }
 
         /// Lista todos los participantes
-        fn all_participants(self) -> Result<Vec<String>, ErrorKind> {
-            Ok(self
-                .repository
-                .read_all()?
-                .into_iter()
-                .map(|participant| participant.username)
-                .collect::<Vec<String>>())
+        fn get_all_participants(&self) -> String {
+            match self.repository.read_all() {
+                Ok(l) => String::from_iter(
+                    l.into_iter()
+                        .map(|participant| format!("- {}\n", participant.username)),
+                ),
+                Err(e) => format!("{e}"),
+            }
         }
 
         /// Remueve por nombre de usuario a un participante
-        fn remove_participant(&mut self, username: &str) -> Result<(), ErrorKind> {
-            self.repository.delete(username)
+        fn remove_participant(&mut self, username: &str) -> String {
+            match self.repository.delete(username) {
+                Ok(_) => MSG_SUCCESS_DELETING.to_string(),
+                Err(e) => format!("{e}"),
+            }
         }
 
         /// Obtiene un ganador y lo remueve de la lista de participantes
-        fn draw(&mut self) -> Result<String, ErrorKind> {
+        fn draw(&mut self) -> String {
             let mut rng = rand::thread_rng();
-            let winner = {
-                match self.repository.read_all()?.choose(&mut rng) {
-                    Some(participant) => participant.username.to_owned(),
-                    None => return Err(ErrorKind::Empty),
-                }
+            let participants = match self.repository.read_all() {
+                Ok(l) => l,
+                Err(e) => return format!("{e}"),
+            };
+
+            let winner = match participants.choose(&mut rng) {
+                Some(participant) => participant.username.to_owned(),
+                None => return format!("{}", ErrorKind::Empty),
             };
             match self.repository.delete(&winner) {
-                Ok(_) => Ok(winner),
-                Err(error) => Err(error),
+                Ok(_) => winner,
+                Err(e) => format!("{e}"),
             }
         }
     }
@@ -83,10 +102,20 @@ pub mod giveaway {
         RemoveParticipant,
         Draw,
     }
+
+    impl Display for ErrorKind {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let msg = match self {
+                ErrorKind::NotFound => MSG_ERR_NOT_FOUND,
+                ErrorKind::AlreadyExist => MSG_ERR_ALREADY_EXIST,
+                ErrorKind::Empty => MSG_ERR_EMPTY_DATA,
+            };
+            write!(f, "{msg}")
+        }
+    }
 }
 
 pub mod giveaway_data {
-
     // Las nombres de usuario de Twitter son únicos, por lo que pueden usarse como identificadores únicos del participante
     #[derive(PartialEq, Clone)]
     pub struct Participant {
