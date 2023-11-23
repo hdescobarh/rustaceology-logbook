@@ -13,20 +13,91 @@ pulsar enter. (Avisando de si lo has eliminado o el nombre no existe)
 - Si seleccionas salir, el programa finalizará.
  */
 
-fn main() {}
+use giveaway::Giveaway;
+use giveaway_cli::Cli;
+use giveaway_data::MockRepository;
 
-pub mod cli {}
+fn main() {
+    let mut cli = Cli::default();
+    let mut giveaway = Giveaway::new(MockRepository::default());
+    loop {
+        let state = cli.run(&mut giveaway);
+        println!("{}", state);
+    }
+}
+
+// command line interface module
+pub mod giveaway_cli {
+
+    use crate::giveaway::{Giveaway, Request};
+
+    const PROMPT_OPTION: &str = "\
+    Ingrese el número de la acción que desea realizar:
+    1 Agregar participante.
+    2 Mostrar todos los participantes.
+    3 Eliminar a un participante.
+    4 Realizar el sorteo.
+    5 Salir.";
+    const PROMPT_USERNAME: &str = "Por favor ingrese el nombre de usuario del participante.";
+    const MSG_INVALID_OPTION: &str = "La opción ingresada no es valida.";
+    const MSG_EXIT: &str = "Cerrando el programa. Hasta pronto.";
+
+    #[derive(Default)]
+    pub struct Cli {
+        buffer: String,
+    }
+
+    impl Cli {
+        pub fn run(&mut self, giveaway: &mut Giveaway) -> String {
+            self.buffer.clear();
+            println!("{}", PROMPT_OPTION);
+
+            std::io::stdin().read_line(&mut self.buffer).unwrap();
+
+            let choice = match self.buffer.trim().parse::<usize>() {
+                Ok(number) => {
+                    if (1..=5).contains(&number) {
+                        number
+                    } else {
+                        return MSG_INVALID_OPTION.to_string();
+                    }
+                }
+                Err(_) => return MSG_INVALID_OPTION.to_string(),
+            };
+
+            match choice {
+                1 => giveaway.request(Request::AddParticipant, Some(self.ask_username())),
+                2 => giveaway.request(Request::ListParticipants, None),
+                3 => giveaway.request(Request::RemoveParticipant, Some(self.ask_username())),
+                4 => giveaway.request(Request::Draw, None),
+                5 => {
+                    println!("{}", MSG_EXIT);
+                    std::process::exit(0)
+                }
+                _ => panic!("Unexpected error: allowed choice out of bounds."),
+            }
+        }
+
+        fn ask_username(&mut self) -> &str {
+            self.buffer.clear();
+            println!("{}", PROMPT_USERNAME);
+            std::io::stdin().read_line(&mut self.buffer).unwrap();
+            self.buffer.trim()
+        }
+    }
+}
 
 pub mod giveaway {
     use crate::giveaway_data::{ErrorKind, Participant, Repository};
     use rand::seq::SliceRandom;
     use std::fmt::Display;
 
-    const MSG_ERR_NOT_FOUND: &str = "The participant does not exists.";
-    const MSG_ERR_ALREADY_EXIST: &str = "The participant already exists.";
-    const MSG_ERR_EMPTY_DATA: &str = "There are not participants.";
-    const MSG_SUCCESS_ADDING: &str = "The participant was added.";
-    const MSG_SUCCESS_DELETING: &str = "The Participant was removed.";
+    const MSG_ERR_NOT_FOUND: &str = "El participante no existe.";
+    const MSG_ERR_ALREADY_EXIST: &str = "El participante ya se encuentra en el sorteo.";
+    const MSG_ERR_EMPTY_DATA: &str = "No hay participantes en el sorteo.";
+    const MSG_SUCCESS_ADDING: &str = "Se ha agregado un al participante.";
+    const MSG_SUCCESS_DELETING: &str = "El participante ha sido removido.";
+    const MSG_WARNING_MISSING: &str = "Faltó el nombre de usaurio.";
 
     pub struct Giveaway {
         repository: Box<dyn Repository + 'static>,
@@ -41,9 +112,15 @@ pub mod giveaway {
 
         pub fn request(&mut self, kind: Request, username: Option<&str>) -> String {
             match kind {
-                Request::AddParticipant => self.add_participant(username.unwrap()),
+                Request::AddParticipant => match username {
+                    Some(username) => self.add_participant(username),
+                    None => MSG_WARNING_MISSING.to_string(),
+                },
                 Request::ListParticipants => self.get_all_participants(),
-                Request::RemoveParticipant => self.remove_participant(username.unwrap()),
+                Request::RemoveParticipant => match username {
+                    Some(username) => self.remove_participant(username),
+                    None => MSG_WARNING_MISSING.to_string(),
+                },
                 Request::Draw => self.draw(),
             }
         }
