@@ -16,54 +16,87 @@ pulsar enter. (Avisando de si lo has eliminado o el nombre no existe)
 fn main() {}
 
 pub mod giveaway {
-
-    use rand::distributions::Slice;
-    use rand::Rng;
-
     use crate::giveaway_data::*;
+    use rand::seq::SliceRandom;
 
     pub struct Giveaway {
-        participants: Box<dyn for<'a> Repository<'a, String> + 'static>,
+        repository: Box<dyn Repository + 'static>,
     }
 
     impl Giveaway {
+        pub fn new(repository: impl Repository + 'static) -> Self {
+            Self {
+                repository: Box::new(repository),
+            }
+        }
+
+        pub fn request(kind: Request) -> String {
+            match kind {
+                Request::AddParticipant => todo!(),
+                Request::ListParticipants => todo!(),
+                Request::RemoveParticipant => todo!(),
+                Request::Draw => todo!(),
+            }
+        }
+
         /// Agrega un nuevo participante
-        pub fn add_participant(&mut self, username: String) -> Result<(), ErrorKind> {
-            self.participants.create(username)
+        fn add_participant(&mut self, username: &str) -> Result<(), ErrorKind> {
+            self.repository.create(Participant {
+                username: username.to_owned(),
+            })
         }
 
         /// Lista todos los participantes
-        pub fn all_participants(&self) -> Result<&[String], ErrorKind> {
-            self.participants.read_all()
+        fn all_participants(self) -> Result<Vec<String>, ErrorKind> {
+            Ok(self
+                .repository
+                .read_all()?
+                .into_iter()
+                .map(|participant| participant.username)
+                .collect::<Vec<String>>())
         }
 
         /// Remueve por nombre de usuario a un participante
-        pub fn remove_participant(&mut self, username: &String) -> Result<(), ErrorKind> {
-            self.participants.delete(username)
+        fn remove_participant(&mut self, username: &str) -> Result<(), ErrorKind> {
+            self.repository.delete(username)
         }
 
         /// Obtiene un ganador y lo remueve de la lista de participantes
-        pub fn draw(&mut self) -> Result<String, ErrorKind> {
-            let draw_distribution = match Slice::new(self.participants.read_all()?) {
-                Ok(d) => d,
-                Err(_) => return Err(ErrorKind::Empty),
+        fn draw(&mut self) -> Result<String, ErrorKind> {
+            let mut rng = rand::thread_rng();
+            let winner = {
+                match self.repository.read_all()?.choose(&mut rng) {
+                    Some(participant) => participant.username.to_owned(),
+                    None => return Err(ErrorKind::Empty),
+                }
             };
-
-            let winner = rand::thread_rng().sample(draw_distribution).to_owned();
-            match self.participants.delete(&winner) {
+            match self.repository.delete(&winner) {
                 Ok(_) => Ok(winner),
                 Err(error) => Err(error),
             }
         }
     }
+
+    pub enum Request {
+        AddParticipant,
+        ListParticipants,
+        RemoveParticipant,
+        Draw,
+    }
 }
 
 pub mod giveaway_data {
+
     // Las nombres de usuario de Twitter son únicos, por lo que pueden usarse como identificadores únicos del participante
-    pub trait Repository<'a, K> {
-        fn create(&mut self, username: K) -> Result<(), ErrorKind>;
-        fn read_all(&'a self) -> Result<&'a [K], ErrorKind>;
-        fn delete(&mut self, username: &K) -> Result<(), ErrorKind>;
+    #[derive(PartialEq, Clone)]
+    pub struct Participant {
+        pub username: String,
+    }
+
+    pub trait Repository {
+        fn create(&mut self, participant: Participant) -> Result<(), ErrorKind>;
+        fn read_all(&self) -> Result<Vec<Participant>, ErrorKind>;
+        fn delete(&mut self, username: &str) -> Result<(), ErrorKind>;
     }
 
     #[non_exhaustive]
@@ -73,21 +106,15 @@ pub mod giveaway_data {
         Empty,
     }
 
-    // Para el ejercicio, la "conexión" sera una simple lista, pero puede ser cualquier recurso
-    pub struct ListParticipants<'a> {
-        database_connection: &'a mut Vec<String>,
+    // Para el ejercicio la "conexión" será falseada por una simple colección
+    pub struct MockRepository {
+        connection: Vec<Participant>,
     }
 
-    impl<'a> ListParticipants<'a> {
-        pub fn new(database_connection: &'a mut Vec<String>) -> Self {
-            Self {
-                database_connection,
-            }
-        }
-
+    impl MockRepository {
         fn get_username_index(&self, username: &str) -> Result<usize, ErrorKind> {
-            for (index, entry) in self.database_connection.iter().enumerate() {
-                if entry == username {
+            for (index, entry) in self.connection.iter().enumerate() {
+                if entry.username == username {
                     return Ok(index);
                 }
             }
@@ -95,27 +122,39 @@ pub mod giveaway_data {
         }
     }
 
-    impl<'a> Repository<'a, String> for ListParticipants<'a> {
-        fn create(&mut self, username: String) -> Result<(), ErrorKind> {
-            if self.database_connection.contains(&username) {
+    impl Default for MockRepository {
+        fn default() -> Self {
+            Self {
+                connection: Vec::from(["AkiraToriyama", "mouredev", "midudev", "sama"].map(|i| {
+                    Participant {
+                        username: i.to_string(),
+                    }
+                })),
+            }
+        }
+    }
+
+    impl Repository for MockRepository {
+        fn create(&mut self, participant: Participant) -> Result<(), ErrorKind> {
+            if self.connection.contains(&participant) {
                 return Err(ErrorKind::AlreadyExist);
             }
 
-            self.database_connection.push(username);
+            self.connection.push(participant);
             Ok(())
         }
 
-        fn read_all(&'a self) -> Result<&'a [String], ErrorKind> {
-            if self.database_connection.is_empty() {
+        fn read_all(&self) -> Result<Vec<Participant>, ErrorKind> {
+            if self.connection.is_empty() {
                 Err(ErrorKind::Empty)
             } else {
-                Ok(self.database_connection)
+                Ok(Vec::from_iter(self.connection.iter().cloned()))
             }
         }
 
-        fn delete(&mut self, username: &String) -> Result<(), ErrorKind> {
+        fn delete(&mut self, username: &str) -> Result<(), ErrorKind> {
             let index = self.get_username_index(username)?;
-            self.database_connection.swap_remove(index);
+            self.connection.swap_remove(index);
             Ok(())
         }
     }
