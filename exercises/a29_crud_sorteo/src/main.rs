@@ -47,7 +47,6 @@ fn main() {
 
 // command line interface module
 pub mod giveaway_cli {
-
     use crate::giveaway::{Giveaway, Request};
 
     const PROMPT_OPTION: &str = "\n\
@@ -145,7 +144,7 @@ pub mod giveaway {
             }
         }
 
-        /// Agrega un nuevo participante
+        // Agrega un nuevo participante
         fn add_participant(&mut self, username: &str) -> String {
             match self.repository.create(Participant {
                 username: username.to_owned(),
@@ -155,7 +154,7 @@ pub mod giveaway {
             }
         }
 
-        /// Lista todos los participantes
+        // Lista todos los participantes
         fn get_all_participants(&self) -> String {
             match self.repository.read_all() {
                 Ok(l) => String::from_iter(
@@ -166,7 +165,7 @@ pub mod giveaway {
             }
         }
 
-        /// Remueve por nombre de usuario a un participante
+        // Remueve por nombre de usuario a un participante
         fn remove_participant(&mut self, username: &str) -> String {
             match self.repository.delete(username) {
                 Ok(_) => MSG_SUCCESS_DELETING.to_string(),
@@ -174,7 +173,7 @@ pub mod giveaway {
             }
         }
 
-        /// Obtiene un ganador y lo remueve de la lista de participantes
+        // Obtiene un ganador y lo remueve de la lista de participantes
         fn draw(&mut self) -> String {
             let mut rng = rand::thread_rng();
             let participants = match self.repository.read_all() {
@@ -213,6 +212,7 @@ pub mod giveaway {
 }
 
 pub mod giveaway_data {
+
     // Las nombres de usuario de Twitter son únicos, por lo que pueden usarse como identificadores únicos del participante
     #[derive(PartialEq, Clone)]
     pub struct Participant {
@@ -251,11 +251,19 @@ pub mod giveaway_data {
     impl Default for MockRepository {
         fn default() -> Self {
             Self {
-                connection: Vec::from(["AkiraToriyama", "mouredev", "midudev", "sama"].map(|i| {
-                    Participant {
+                connection: Vec::from(
+                    [
+                        "QuantumFracture",
+                        "mouredev",
+                        "midudev",
+                        "sama",
+                        "neiltyson",
+                        "HiromuArakawa",
+                    ]
+                    .map(|i| Participant {
                         username: i.to_string(),
-                    }
-                })),
+                    }),
+                ),
             }
         }
     }
