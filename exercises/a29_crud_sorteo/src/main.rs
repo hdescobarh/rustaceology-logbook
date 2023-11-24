@@ -31,7 +31,7 @@ pub mod giveaway_cli {
 
     use crate::giveaway::{Giveaway, Request};
 
-    const PROMPT_OPTION: &str = "\
+    const PROMPT_OPTION: &str = "\n\
     Ingrese el número de la acción que desea realizar:
     1 Agregar participante.
     2 Mostrar todos los participantes.
@@ -98,6 +98,7 @@ pub mod giveaway {
     const MSG_SUCCESS_ADDING: &str = "Se ha agregado un al participante.";
     const MSG_SUCCESS_DELETING: &str = "El participante ha sido removido.";
     const MSG_WARNING_MISSING: &str = "Faltó el nombre de usaurio.";
+    const MSG_WINNER: &str = "El ganador es el usuario";
 
     pub struct Giveaway {
         repository: Box<dyn Repository + 'static>,
@@ -167,7 +168,7 @@ pub mod giveaway {
                 None => return format!("{}", ErrorKind::Empty),
             };
             match self.repository.delete(&winner) {
-                Ok(_) => winner,
+                Ok(_) => format!("{} {}.", MSG_WINNER, winner),
                 Err(e) => format!("{e}"),
             }
         }
