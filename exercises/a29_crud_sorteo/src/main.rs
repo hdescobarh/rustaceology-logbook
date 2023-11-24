@@ -13,12 +13,31 @@ pulsar enter. (Avisando de si lo has eliminado o el nombre no existe)
 - Si seleccionas salir, el programa finalizará.
  */
 
+/*
+Solución con el mínimo de bibliotecas externas. Solo emplea rand para generar números aleatorios.
+
+Tiene tres módulos:
+- giveaway_data: contiene las entidades encargadas del acceso a los medios de persistencia.
+- giveaway: se encarga de la logica de negocio
+- giveaway_cli: es la interfaz de linea de comandos
+
+Cargo manifest:
+[package]
+name = "giveaway"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+rand = "0.8.5"
+*/
+
 use giveaway::Giveaway;
 use giveaway_cli::Cli;
 use giveaway_data::MockRepository;
 
 fn main() {
+    // inicializa la interfaz de linea de comandos
     let mut cli = Cli::default();
+    // inicializa el controlador y el repositorio, uno falso para el ejercicio.
     let mut giveaway = Giveaway::new(MockRepository::default());
     loop {
         let state = cli.run(&mut giveaway);
