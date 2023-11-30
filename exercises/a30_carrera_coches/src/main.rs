@@ -19,8 +19,27 @@ uno de ellos (o los dos a la vez) llega a la meta.
   - Cuando la carrera finalice, se muestra el coche ganador o el empate.
  */
 
+use std::process::exit;
+use std::thread;
+use std::time::Duration;
+
+// Tiempo en ms entre ticks del juego
+const TICK_TIME: u64 = 1000;
 fn main() {
-    println!("Hello, world!");
+    let mut race = game::Race::default();
+
+    loop {
+        println!("{race}");
+        thread::sleep(Duration::from_millis(TICK_TIME));
+        match race.tick() {
+            Some(_) => continue,
+            None => {
+                println!("{race}");
+                println!("Game over. Player {:?} wins", race.winner());
+                exit(0)
+            }
+        }
+    }
 }
 
 /// Modulo encargado de la lógica interna del juego
@@ -227,10 +246,10 @@ pub mod rendering {
     const C_FLAG: &str = "🏁";
     const C_CAR_A: &str = "🚙";
     const C_CAR_B: &str = "🚗";
-    const C_CAR: &str = "⛍";
     const C_CRASH: &str = "💥";
     const C_TREE: &str = "🌲";
-    const C_TRACK: &str = "_";
+    // Reemplace el underscore por Fullwidth Low Line (U+FF3F)
+    const C_TRACK: &str = "＿"; //"_";
 
     impl Display for Track {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -245,11 +264,22 @@ pub mod rendering {
             let (car_loc, car_status) = self.get_car_info();
 
             let car_char = match car_status {
-                CarStatus::OK => C_CAR,
+                CarStatus::OK => C_CAR_B,
                 CarStatus::Crashed(_) => C_CRASH,
             };
             line[*car_loc] = car_char;
             write!(f, "{}", line.join(""))
+        }
+    }
+
+    impl Display for Race {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            writeln!(
+                f,
+                "{a}\n{b}",
+                a = self.get_track_a(),
+                b = self.get_track_b()
+            )
         }
     }
 }
