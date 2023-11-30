@@ -24,7 +24,7 @@ use std::thread;
 use std::time::Duration;
 
 // Tiempo en ms entre ticks del juego
-const TICK_TIME: u64 = 1000;
+const TICK_TIME: u64 = 1;
 fn main() {
     let mut race = game::Race::default();
 
@@ -35,7 +35,7 @@ fn main() {
             Some(_) => continue,
             None => {
                 println!("{race}");
-                println!("Game over. Player {:?} wins", race.winner());
+                println!("Game over. {}", race.winner().as_ref().unwrap());
                 exit(0)
             }
         }
@@ -172,7 +172,6 @@ pub mod game {
         }
     }
 
-    #[derive(Debug)]
     pub enum Winner {
         A,
         B,
@@ -252,6 +251,7 @@ pub mod rendering {
     const C_FLAG: &str = "🏁";
     const C_CAR_A: &str = "🚙";
     const C_CAR_B: &str = "🚗";
+    const C_CAR_AB: &str = "🚙🚗";
     const C_CRASH: &str = "💥";
     const C_TREE: &str = "🌲";
     // Reemplacé el underscore por Full width Low Line (U+FF3F)
@@ -271,16 +271,11 @@ pub mod rendering {
             let (car_id, car_loc, car_status) = self.get_car_info();
 
             let car_char = match car_status {
-                CarStatus::OK => {
-                    if *car_id == 1 {
-                        C_CAR_A
-                    } else {
-                        C_CAR_B
-                    }
-                }
+                CarStatus::OK => car_id_to_char(car_id),
                 CarStatus::Crashed(_) => C_CRASH,
             };
             line[*car_loc] = car_char;
+            line.reverse();
             write!(f, "{}", line.join(""))
         }
     }
@@ -293,6 +288,27 @@ pub mod rendering {
                 a = self.get_track_a(),
                 b = self.get_track_b()
             )
+        }
+    }
+
+    fn car_id_to_char(car_id: &usize) -> &'static str {
+        if *car_id == 1 {
+            C_CAR_A
+        } else if *car_id == 2 {
+            C_CAR_B
+        } else {
+            C_CAR_AB
+        }
+    }
+
+    impl Display for Winner {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let s = match self {
+                Winner::A => car_id_to_char(&1),
+                Winner::B => car_id_to_char(&2),
+                Winner::Both => car_id_to_char(&0),
+            };
+            write!(f, "🥇 {s}")
         }
     }
 }
