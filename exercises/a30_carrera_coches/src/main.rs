@@ -108,6 +108,8 @@ pub mod game {
         }
         /// Corre la lógica correspondiente para cada paso de tiempo
         fn tick(&mut self) -> CarEvent {
+            // el carro valida sí puede moverse en este turno
+            self.car.check_status();
             let next_car_position = self.car.try_to_advance() + self.car.position;
             // Verifica el carro no haya pasado la meta
             if next_car_position >= self.length {
