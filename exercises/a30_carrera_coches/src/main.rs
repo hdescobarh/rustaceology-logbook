@@ -1,3 +1,4 @@
+//! author: Hans D. Escobar H. (hdescobarh)
 /*
 Reto #46: La carrera de coches
 Crea un programa que simule la competición de dos coches en una pista.
@@ -23,11 +24,10 @@ use std::process::exit;
 use std::thread;
 use std::time::Duration;
 
-// Tiempo en ms entre ticks del juego
+/// Tiempo en ms entre ticks del juego
 const TICK_TIME: u64 = 1;
 fn main() {
     let mut race = game::Race::default();
-
     loop {
         println!("{race}");
         thread::sleep(Duration::from_millis(TICK_TIME));
@@ -45,16 +45,16 @@ fn main() {
 /// Modulo encargado de la lógica interna del juego
 pub mod game {
 
+    // Biblioteca para la generación de valores aleatorios
+    use rand::rngs::StdRng;
+    use rand::{Rng, SeedableRng};
+
     /// Número de ticks el carro no puede moverse después de estrellarse.
     const CRASHED_TICKS: usize = 1;
     /// Tamaño mínimo permitido para el circuito
     const TRACK_MIN_LENGTH: usize = 10;
     /// Tamaño máximo permitido para el circuito
     const TRACK_MAX_LENGTH: usize = 30;
-
-    // Biblioteca para la generación de valores aleatorios
-    use rand::rngs::StdRng;
-    use rand::{Rng, SeedableRng};
 
     /// Representa el estado del carro. El valor numérico, cuando esta presente,
     /// indica el tiempo que lleva en ese estado
@@ -66,18 +66,23 @@ pub mod game {
 
     #[non_exhaustive]
     #[derive(PartialEq)]
+    /// Representa eventos del juego relacionados con el vehículo.
     pub enum CarEvent {
         /// Efectivamente se mueve
         Advances,
         /// Se choca
         Crash,
-        /// A cruzado la linea de meta
+        /// Ha cruzado la linea de meta
         FinishLine,
     }
 
+    /// Representa los vehículos del juego
     pub struct Car {
+        /// Identificador único del vehículo
         id: usize,
+        /// Posición actual sobre la pista
         position: usize,
+        /// Estado del carro. Condiciona las acciones que puede llevar a cabo.
         status: CarStatus,
     }
 
@@ -99,7 +104,7 @@ pub mod game {
                 CarStatus::Crashed(_) => 0,
             }
         }
-
+        /// Actualiza estados dependientes del tiempo. Pensado para ser usado únicamente por el mismo objeto.
         fn update_status(&mut self) {
             if let CarStatus::Crashed(t) = self.status {
                 if t >= CRASHED_TICKS {
@@ -113,16 +118,22 @@ pub mod game {
 
     /// Representación de un arbol
     pub struct Tree {
+        /// Posición actual sobre la pista
         position: usize,
     }
 
+    /// Representación de las pistas del juego.
     pub struct Track {
+        /// Longitud de la pista. Invariable.
         length: usize,
+        /// Vehículo ocupando esa pista.
         car: Car,
+        /// Árboles sobre la pista. Invariables.
         trees: Vec<Tree>,
     }
 
     impl Track {
+        /// Crea una nueva pista de tamaño y con un vehículo ocupándola.
         fn new(car: Car, length: usize) -> Self {
             // escoge aleatoriamente el número de árboles y sus posiciones
             // Los arboles NO pueden estar ni la meta ni el punto de salida.
@@ -135,7 +146,8 @@ pub mod game {
 
             Self { length, trees, car }
         }
-        /// Corre la lógica correspondiente para cada paso de tiempo
+
+        /// Corre la lógica correspondiente para cada turno
         fn tick(&mut self) -> CarEvent {
             let next_car_position = self.car.try_to_advance() + self.car.position;
             // Verifica el carro no haya pasado la meta
@@ -163,25 +175,31 @@ pub mod game {
                 .any(|tree| tree.position == self.car.position)
         }
 
+        /// Lectura de las posiciones que ocupan los arboles
         pub fn get_tree_positions(&self) -> Vec<&usize> {
             self.trees.iter().map(|tree| &tree.position).collect()
         }
 
+        /// Lectura de la longitud de la pista
         pub fn get_length(&self) -> &usize {
             &self.length
         }
 
+        /// Lectura de la información del vehículo.
+        /// Retorna ( ID_del_carro, posición_actual_en_pista, estado_de_carro)
         pub fn get_car_info(&self) -> (&usize, &usize, &CarStatus) {
             (&self.car.id, &self.car.position, &self.car.status)
         }
     }
 
+    /// Representación del ganador o ganadores de la carrera
     pub enum Winner {
         A,
         B,
         Both,
     }
 
+    /// Contiene todos los elementos del juego y estados del juego.
     pub struct Race {
         track_a: Track,
         track_b: Track,
@@ -232,18 +250,24 @@ pub mod game {
             None
         }
 
+        /// Lectura de la pista A dela carrera
         pub fn get_track_a(&self) -> &Track {
             &self.track_a
         }
+
+        /// Lectura de la pista B dela carrera
         pub fn get_track_b(&self) -> &Track {
             &self.track_b
         }
+
+        /// Lectura del ganador del juego. None sí aun no existe, Some(ganador) sí existe.
         pub fn winner(&self) -> &Option<Winner> {
             &self.winner
         }
     }
 }
 
+/// Modulo encargado de formatear el texto a presentar en consola.
 pub mod rendering {
 
     use std::fmt::Display;
