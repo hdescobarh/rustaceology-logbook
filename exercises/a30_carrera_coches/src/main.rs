@@ -77,8 +77,9 @@ pub mod game {
             if let CarStatus::Crashed(t) = self.status {
                 if t >= CRASHED_TICKS {
                     self.status = CarStatus::OK
+                } else {
+                    self.status = CarStatus::Crashed(t + 1)
                 }
-                self.status = CarStatus::Crashed(t - 1)
             }
         }
     }
@@ -101,7 +102,7 @@ pub mod game {
             let tree_number: u8 = StdRng::from_entropy().gen_range(1..=3);
             let mut trees: Vec<Tree> = Vec::with_capacity(tree_number as usize);
             for _id in 0..tree_number {
-                let position: usize = StdRng::from_entropy().gen_range(1..tree_number as usize);
+                let position: usize = StdRng::from_entropy().gen_range(1..length);
                 trees.push(Tree { position })
             }
 
@@ -146,6 +147,7 @@ pub mod game {
         }
     }
 
+    #[derive(Debug)]
     pub enum Winner {
         A,
         B,
