@@ -47,6 +47,7 @@ pub mod game {
     }
 
     #[non_exhaustive]
+    #[derive(PartialEq)]
     pub enum CarEvent {
         /// Efectivamente se mueve
         Advances,
@@ -130,9 +131,16 @@ pub mod game {
         }
     }
 
+    pub enum Winner {
+        A,
+        B,
+        Both,
+    }
+
     pub struct Race {
         track_a: Track,
         track_b: Track,
+        winner: Option<Winner>,
     }
 
     impl Default for Race {
@@ -143,13 +151,42 @@ pub mod game {
             Self {
                 track_a: Track::new(Car::default(), length),
                 track_b: Track::new(Car::default(), length),
+                winner: None,
             }
         }
     }
 
     impl Race {
-        pub fn tick(&mut self) -> (CarEvent, CarEvent) {
-            (self.track_a.tick(), self.track_b.tick())
+        /// realiza la lógica de cada paso de tiempo. Sí hay un ganador, retorna None,
+        /// de lo contrario, retorna que eventos ocurrieron
+        pub fn tick(&mut self) -> Option<(CarEvent, CarEvent)> {
+            // No realiza nada sí ya hay ganador
+            if self.winner.is_some() {
+                return None;
+            }
+            // Ejecuta el paso del tiempo
+            let event_track_a = self.track_a.tick();
+            let event_track_b = self.track_b.tick();
+
+            // Evalúa consecuencias
+            let a_wins = event_track_a == CarEvent::FinishLine;
+            let b_wins = event_track_b == CarEvent::FinishLine;
+
+            if !a_wins && !b_wins {
+                return Some((event_track_a, event_track_b));
+            }
+
+            if a_wins && b_wins {
+                self.winner = Some(Winner::Both);
+            }
+
+            if a_wins {
+                self.winner = Some(Winner::A);
+            } else {
+                self.winner = Some(Winner::B);
+            }
+
+            None
         }
     }
 }
