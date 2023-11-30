@@ -140,6 +140,7 @@ pub mod game {
             let next_car_position = self.car.try_to_advance() + self.car.position;
             // Verifica el carro no haya pasado la meta
             if next_car_position >= self.length {
+                self.car.position = self.length;
                 return CarEvent::FinishLine;
             }
             // Como no ha cruzado la meta, actualiza su estado y evalúa las consecuencias
@@ -222,12 +223,10 @@ pub mod game {
 
             if a_wins && b_wins {
                 self.winner = Some(Winner::Both);
-            }
-
-            if a_wins {
-                self.winner = Some(Winner::A);
+            } else if a_wins {
+                self.winner = Some(Winner::A)
             } else {
-                self.winner = Some(Winner::B);
+                self.winner = Some(Winner::B)
             }
 
             None
