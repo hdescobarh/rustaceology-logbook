@@ -215,3 +215,39 @@ pub mod game {
         }
     }
 }
+
+pub mod rendering {
+
+    use std::fmt::Display;
+
+    use crate::game::*;
+
+    const C_FLAG: &str = "🏁";
+    const C_CAR_A: &str = "🚙";
+    const C_CAR_B: &str = "🚗";
+    const C_CAR: &str = "⛍";
+    const C_CRASH: &str = "💥";
+    const C_TREE: &str = "🌲";
+    const C_TRACK: &str = "_";
+
+    impl Display for Track {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let mut line = vec![C_TRACK; *self.get_length() + 1];
+            for tree_loc in self.get_tree_positions() {
+                line[*tree_loc] = C_TREE;
+            }
+            if let Some(last) = line.last_mut() {
+                *last = C_FLAG;
+            }
+
+            let (car_loc, car_status) = self.get_car_info();
+
+            let car_char = match car_status {
+                CarStatus::OK => C_CAR,
+                CarStatus::Crashed(_) => C_CRASH,
+            };
+            line[*car_loc] = car_char;
+            write!(f, "{}", line.join(""))
+        }
+    }
+}
