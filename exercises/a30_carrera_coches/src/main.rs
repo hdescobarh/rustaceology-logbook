@@ -1,4 +1,8 @@
 //! author: Hans D. Escobar H. (hdescobarh)
+//! La Solución se compone de dos módulos:
+//! * `game` - Implementa la lógica del juego.
+//! * `rendering` - Encargado de la presentación en consola de los elementos del juego.
+
 /*
 Reto #46: La carrera de coches
 Crea un programa que simule la competición de dos coches en una pista.
@@ -19,6 +23,15 @@ uno de ellos (o los dos a la vez) llega a la meta.
   - Cada turno se imprimen las pistas y sus elementos.
   - Cuando la carrera finalice, se muestra el coche ganador o el empate.
  */
+
+/* Cargo manifest:
+[package]
+name = "carrera_de_coches"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+rand = "0.8.5"
+*/
 
 use std::process::exit;
 use std::thread;
