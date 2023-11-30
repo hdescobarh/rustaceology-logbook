@@ -23,6 +23,7 @@ fn main() {
     println!("Hello, world!");
 }
 
+/// Modulo encargado de la lógica interna del juego
 pub mod game {
 
     /// Número de ticks el carro no puede moverse después de estrellarse.
@@ -131,6 +132,18 @@ pub mod game {
                 .iter()
                 .any(|tree| tree.position == self.car.position)
         }
+
+        pub fn get_tree_positions(&self) -> Vec<&usize> {
+            self.trees.iter().map(|tree| &tree.position).collect()
+        }
+
+        pub fn get_length(&self) -> &usize {
+            &self.length
+        }
+
+        pub fn get_car_info(&self) -> (&usize, &CarStatus) {
+            (&self.car.position, &self.car.status)
+        }
     }
 
     pub enum Winner {
@@ -189,6 +202,16 @@ pub mod game {
             }
 
             None
+        }
+
+        pub fn get_track_a(&self) -> &Track {
+            &self.track_a
+        }
+        pub fn get_track_b(&self) -> &Track {
+            &self.track_b
+        }
+        pub fn winner(&self) -> &Option<Winner> {
+            &self.winner
         }
     }
 }
