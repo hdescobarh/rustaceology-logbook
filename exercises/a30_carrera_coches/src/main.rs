@@ -91,14 +91,16 @@ pub mod game {
             }
         }
         /// Indica el número de posiciones de movimiento hacia la meta
-        fn try_to_advance(&self) -> usize {
+        fn try_to_advance(&mut self) -> usize {
+            // el carro valida sí puede moverse en este turno
+            self.update_status();
             match self.status {
                 CarStatus::OK => StdRng::from_entropy().gen_range(1..=3),
                 CarStatus::Crashed(_) => 0,
             }
         }
 
-        fn check_status(&mut self) {
+        fn update_status(&mut self) {
             if let CarStatus::Crashed(t) = self.status {
                 if t >= CRASHED_TICKS {
                     self.status = CarStatus::OK
@@ -135,8 +137,6 @@ pub mod game {
         }
         /// Corre la lógica correspondiente para cada paso de tiempo
         fn tick(&mut self) -> CarEvent {
-            // el carro valida sí puede moverse en este turno
-            self.car.check_status();
             let next_car_position = self.car.try_to_advance() + self.car.position;
             // Verifica el carro no haya pasado la meta
             if next_car_position >= self.length {
@@ -146,7 +146,10 @@ pub mod game {
             self.car.position = next_car_position;
 
             if self.car_collision() {
-                self.car.status = CarStatus::Crashed(CRASHED_TICKS);
+                match self.car.status {
+                    CarStatus::OK => self.car.status = CarStatus::Crashed(0),
+                    CarStatus::Crashed(_) => (),
+                }
                 return CarEvent::Crash;
             }
             // No ha pasado la linea de meta ni chocado
