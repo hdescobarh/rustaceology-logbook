@@ -25,7 +25,7 @@ use std::thread;
 use std::time::Duration;
 
 /// Tiempo en ms entre ticks del juego
-const TICK_TIME: u64 = 1;
+const TICK_TIME: u64 = 1000;
 fn main() {
     let mut race = game::Race::default();
     loop {
