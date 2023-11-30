@@ -58,10 +58,8 @@ pub mod game {
 
     /// Representa el estado del carro. El valor numérico, cuando esta presente,
     /// indica el tiempo que lleva en ese estado
-    #[derive(Default)]
     #[non_exhaustive]
     pub enum CarStatus {
-        #[default]
         OK,
         Crashed(usize),
     }
@@ -77,13 +75,21 @@ pub mod game {
         FinishLine,
     }
 
-    #[derive(Default)]
     pub struct Car {
+        id: usize,
         position: usize,
         status: CarStatus,
     }
 
     impl Car {
+        /// Crea un nuevo vehículo con la id especificada
+        fn new(id: usize) -> Self {
+            Self {
+                id,
+                position: 0,
+                status: CarStatus::OK,
+            }
+        }
         /// Indica el número de posiciones de movimiento hacia la meta
         fn try_to_advance(&self) -> usize {
             match self.status {
@@ -161,8 +167,8 @@ pub mod game {
             &self.length
         }
 
-        pub fn get_car_info(&self) -> (&usize, &CarStatus) {
-            (&self.car.position, &self.car.status)
+        pub fn get_car_info(&self) -> (&usize, &usize, &CarStatus) {
+            (&self.car.id, &self.car.position, &self.car.status)
         }
     }
 
@@ -185,8 +191,8 @@ pub mod game {
             let length: usize =
                 StdRng::from_entropy().gen_range(TRACK_MIN_LENGTH..=TRACK_MAX_LENGTH);
             Self {
-                track_a: Track::new(Car::default(), length),
-                track_b: Track::new(Car::default(), length),
+                track_a: Track::new(Car::new(1), length),
+                track_b: Track::new(Car::new(2), length),
                 winner: None,
             }
         }
@@ -248,7 +254,8 @@ pub mod rendering {
     const C_CAR_B: &str = "🚗";
     const C_CRASH: &str = "💥";
     const C_TREE: &str = "🌲";
-    // Reemplace el underscore por Fullwidth Low Line (U+FF3F)
+    // Reemplacé el underscore por Full width Low Line (U+FF3F)
+    // Así visualmente las pistas no parecen de diferente longitud cuando tienen diferente numero de arboles.
     const C_TRACK: &str = "＿"; //"_";
 
     impl Display for Track {
@@ -261,10 +268,16 @@ pub mod rendering {
                 *last = C_FLAG;
             }
 
-            let (car_loc, car_status) = self.get_car_info();
+            let (car_id, car_loc, car_status) = self.get_car_info();
 
             let car_char = match car_status {
-                CarStatus::OK => C_CAR_B,
+                CarStatus::OK => {
+                    if *car_id == 1 {
+                        C_CAR_A
+                    } else {
+                        C_CAR_B
+                    }
+                }
                 CarStatus::Crashed(_) => C_CRASH,
             };
             line[*car_loc] = car_char;
