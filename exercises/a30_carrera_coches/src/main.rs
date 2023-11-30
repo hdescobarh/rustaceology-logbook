@@ -22,3 +22,134 @@ uno de ellos (o los dos a la vez) llega a la meta.
 fn main() {
     println!("Hello, world!");
 }
+
+pub mod game {
+
+    /// Número de ticks el carro no puede moverse después de estrellarse.
+    const CRASHED_TICKS: usize = 1;
+    /// Tamaño mínimo permitido para el circuito
+    const TRACK_MIN_LENGTH: usize = 10;
+    /// Tamaño máximo permitido para el circuito
+    const TRACK_MAX_LENGTH: usize = 30;
+
+    // Biblioteca para la generación de valores aleatorios
+    use rand::rngs::StdRng;
+    use rand::{Rng, SeedableRng};
+
+    /// Representa el estado del carro. El valor numérico, cuando esta presente,
+    /// indica el tiempo que lleva en ese estado
+    #[derive(Default)]
+    #[non_exhaustive]
+    pub enum CarStatus {
+        #[default]
+        OK,
+        Crashed(usize),
+    }
+
+    #[non_exhaustive]
+    pub enum CarEvent {
+        /// Efectivamente se mueve
+        Advances,
+        /// Se choca
+        Crash,
+        /// A cruzado la linea de meta
+        FinishLine,
+    }
+
+    #[derive(Default)]
+    pub struct Car {
+        position: usize,
+        status: CarStatus,
+    }
+
+    impl Car {
+        /// Indica el número de posiciones de movimiento hacia la meta
+        fn try_to_advance(&self) -> usize {
+            match self.status {
+                CarStatus::OK => StdRng::from_entropy().gen_range(1..=3),
+                CarStatus::Crashed(_) => 0,
+            }
+        }
+
+        fn check_status(&mut self) {
+            if let CarStatus::Crashed(t) = self.status {
+                if t >= CRASHED_TICKS {
+                    self.status = CarStatus::OK
+                }
+                self.status = CarStatus::Crashed(t - 1)
+            }
+        }
+    }
+
+    /// Representación de un arbol
+    pub struct Tree {
+        position: usize,
+    }
+
+    pub struct Track {
+        length: usize,
+        car: Car,
+        trees: Vec<Tree>,
+    }
+
+    impl Track {
+        fn new(car: Car, length: usize) -> Self {
+            // escoge aleatoriamente el número de árboles y sus posiciones
+            // Los arboles NO pueden estar ni la meta ni el punto de salida.
+            let tree_number: u8 = StdRng::from_entropy().gen_range(1..=3);
+            let mut trees: Vec<Tree> = Vec::with_capacity(tree_number as usize);
+            for _id in 0..tree_number {
+                let position: usize = StdRng::from_entropy().gen_range(1..tree_number as usize);
+                trees.push(Tree { position })
+            }
+
+            Self { length, trees, car }
+        }
+        /// Corre la lógica correspondiente para cada paso de tiempo
+        fn tick(&mut self) -> CarEvent {
+            let next_car_position = self.car.try_to_advance() + self.car.position;
+            // Verifica el carro no haya pasado la meta
+            if next_car_position >= self.length {
+                return CarEvent::FinishLine;
+            }
+            // Como no ha cruzado la meta, actualiza su estado y evalúa las consecuencias
+            self.car.position = next_car_position;
+
+            if self.car_collision() {
+                self.car.status = CarStatus::Crashed(CRASHED_TICKS);
+                return CarEvent::Crash;
+            }
+            // No ha pasado la linea de meta ni chocado
+            CarEvent::Advances
+        }
+
+        fn car_collision(&self) -> bool {
+            self.trees
+                .iter()
+                .any(|tree| tree.position == self.car.position)
+        }
+    }
+
+    pub struct Race {
+        track_a: Track,
+        track_b: Track,
+    }
+
+    impl Default for Race {
+        fn default() -> Self {
+            //randomly chooses track length
+            let length: usize =
+                StdRng::from_entropy().gen_range(TRACK_MIN_LENGTH..=TRACK_MAX_LENGTH);
+            Self {
+                track_a: Track::new(Car::default(), length),
+                track_b: Track::new(Car::default(), length),
+            }
+        }
+    }
+
+    impl Race {
+        pub fn tick(&mut self) -> (CarEvent, CarEvent) {
+            (self.track_a.tick(), self.track_b.tick())
+        }
+    }
+}
