@@ -16,26 +16,32 @@
 			"name": "Bibliography",
 			"path": "bibliography"
 		},
+		{
+			"name": "Exercism",
+			"path": "exercises/_exercism"
+		}
 	],
 	"settings": {
 		"files.eol": "auto",
 		"files.encoding": "utf8",
 		"editor.formatOnSave": true,
-		"editor.fontLigatures": "'calt', 'liga', 'dlig', 'ss01', 'ss02', 'ss06', 'ss07'",
-		"editor.fontFamily": "'Monaspace Neon Var', 'Intel One Mono', Consolas",
+		"editor.fontFamily": "'Cascadia Code', 'Cascada Mono', Consolas, 'Courier New', 'Noto Sans Math', monospace",
 		"editor.fontWeight": "300",
-		"editor.fontSize": 14,
-		"rust-analyzer.check.command": "clippy",
-		"rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
-		"rust-analyzer.restartServerOnConfigChange": true,
+		"editor.fontSize": 17,
 		"editor.defaultFormatter": null,
 		"[rust]": {
 			"editor.defaultFormatter": "rust-lang.rust-analyzer"
 		},
+		"rust-analyzer.check.command": "clippy",
+		"rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
+		"rust-analyzer.restartServerOnConfigChange": true,
+		"files.readonlyInclude": {
+			"**/.cargo/registry/src/**/*.rs": true,
+			"**/lib/rustlib/src/rust/library/**/*.rs": true,
+		},
 		"rust-analyzer.linkedProjects": [
-			"exercises\\a28_adivinanzas_matematicas\\Cargo.toml",
+			"exercises/_exercism",
 		],
-		"rust-analyzer.cargo.buildScripts.invocationLocation": "root",
 	},
 	"extensions": {
 		"recommendations": [
@@ -44,22 +50,4 @@
 			"streetsidesoftware.code-spell-checker"
 		]
 	},
-	"launch": {
-		"version": "0.2.0",
-		"configurations": [
-			{
-				"type": "lldb",
-				"request": "launch",
-				"name": "Cargo test",
-				"cargo": {
-					"args": [
-						"test",
-						"--no-run",
-						"--lib"
-					]
-				},
-				"args": []
-			}
-		]
-	}
 }
