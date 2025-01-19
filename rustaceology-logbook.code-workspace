@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism",
+			"exercises/_exercism/5_space-age/Cargo.toml",
 		],
 	},
 	"extensions": {
