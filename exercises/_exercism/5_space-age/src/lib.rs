@@ -1,18 +1,18 @@
-// The code below is a stub. Just enough to satisfy the compiler.
-// In order to pass the tests you can add-to or change any of this code.
-
 #[derive(Debug)]
-pub struct Duration;
+pub struct Duration {
+    seconds: f64,
+}
 
 impl From<u64> for Duration {
     fn from(s: u64) -> Self {
-        todo!("s, measured in seconds: {s}")
+        Self { seconds: s as f64 }
     }
 }
 
 pub trait Planet {
+    fn get_orbital_period() -> Duration;
     fn years_during(d: &Duration) -> f64 {
-        todo!("convert a duration ({d:?}) to the number of years on this planet for that duration");
+        d.seconds / Self::get_orbital_period().seconds
     }
 }
 
@@ -25,11 +25,59 @@ pub struct Saturn;
 pub struct Uranus;
 pub struct Neptune;
 
-impl Planet for Mercury {}
-impl Planet for Venus {}
-impl Planet for Earth {}
-impl Planet for Mars {}
-impl Planet for Jupiter {}
-impl Planet for Saturn {}
-impl Planet for Uranus {}
-impl Planet for Neptune {}
+impl Planet for Mercury {
+    fn get_orbital_period() -> Duration {
+        Duration {
+            seconds: 7600543.81992,
+        }
+    }
+}
+impl Planet for Venus {
+    fn get_orbital_period() -> Duration {
+        Duration {
+            seconds: 19414149.052176,
+        }
+    }
+}
+impl Planet for Earth {
+    fn get_orbital_period() -> Duration {
+        Duration {
+            seconds: 31557600.0,
+        }
+    }
+}
+impl Planet for Mars {
+    fn get_orbital_period() -> Duration {
+        Duration {
+            seconds: 59354032.690079994,
+        }
+    }
+}
+impl Planet for Jupiter {
+    fn get_orbital_period() -> Duration {
+        Duration {
+            seconds: 374355659.124,
+        }
+    }
+}
+impl Planet for Saturn {
+    fn get_orbital_period() -> Duration {
+        Duration {
+            seconds: 929292362.8848,
+        }
+    }
+}
+impl Planet for Uranus {
+    fn get_orbital_period() -> Duration {
+        Duration {
+            seconds: 2651370019.3296,
+        }
+    }
+}
+impl Planet for Neptune {
+    fn get_orbital_period() -> Duration {
+        Duration {
+            seconds: 5200418560.032001,
+        }
+    }
+}
