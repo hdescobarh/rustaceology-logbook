@@ -19,32 +19,15 @@ pub fn sublist<T: PartialEq>(first_list: &[T], second_list: &[T]) -> Comparison 
 }
 
 fn is_sublist<T: PartialEq>(first_list: &[T], second_list: &[T]) -> bool {
-    // Check necessary condition
-    if first_list.len() >= second_list.len() {
-        return false;
-    }
-
-    if first_list.is_empty() && !second_list.is_empty() {
-        true
-    } else {
-        second_list
+    first_list.is_empty() && !second_list.is_empty()
+        || second_list
             .windows(first_list.len())
             .any(|window| window == first_list)
-    }
 }
 
 fn is_superlist<T: PartialEq>(first_list: &[T], second_list: &[T]) -> bool {
-    // Check necessary condition
-    if first_list.len() <= second_list.len() {
-        return false;
-    }
-
-    // Empty list case
-    if !first_list.is_empty() && second_list.is_empty() {
-        true
-    } else {
-        first_list
+    !first_list.is_empty() && second_list.is_empty()
+        || first_list
             .windows(second_list.len())
             .any(|window| window == second_list)
-    }
 }
