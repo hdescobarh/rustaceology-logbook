@@ -9,6 +9,12 @@ impl From<u64> for Duration {
     }
 }
 
+impl From<f64> for Duration {
+    fn from(s: f64) -> Self {
+        Self { seconds: s }
+    }
+}
+
 pub trait Planet {
     fn get_orbital_period() -> Duration;
     fn years_during(d: &Duration) -> f64 {
@@ -27,57 +33,41 @@ pub struct Neptune;
 
 impl Planet for Mercury {
     fn get_orbital_period() -> Duration {
-        Duration {
-            seconds: 7600543.81992,
-        }
+        Duration::from(7600543.81992)
     }
 }
 impl Planet for Venus {
     fn get_orbital_period() -> Duration {
-        Duration {
-            seconds: 19414149.052176,
-        }
+        Duration::from(19414149.052176)
     }
 }
 impl Planet for Earth {
     fn get_orbital_period() -> Duration {
-        Duration {
-            seconds: 31557600.0,
-        }
+        Duration::from(31557600.0)
     }
 }
 impl Planet for Mars {
     fn get_orbital_period() -> Duration {
-        Duration {
-            seconds: 59354032.690079994,
-        }
+        Duration::from(59354032.690079994)
     }
 }
 impl Planet for Jupiter {
     fn get_orbital_period() -> Duration {
-        Duration {
-            seconds: 374355659.124,
-        }
+        Duration::from(374355659.124)
     }
 }
 impl Planet for Saturn {
     fn get_orbital_period() -> Duration {
-        Duration {
-            seconds: 929292362.8848,
-        }
+        Duration::from(929292362.8848)
     }
 }
 impl Planet for Uranus {
     fn get_orbital_period() -> Duration {
-        Duration {
-            seconds: 2651370019.3296,
-        }
+        Duration::from(2651370019.3296)
     }
 }
 impl Planet for Neptune {
     fn get_orbital_period() -> Duration {
-        Duration {
-            seconds: 5200418560.032001,
-        }
+        Duration::from(5200418560.032001)
     }
 }
