@@ -8,16 +8,16 @@ pub fn annotate(minefield: &[&str]) -> Vec<String> {
         .map(|row| row.as_bytes().to_owned())
         .collect();
 
-    let width = board.len();
-    let height = board.first().map(|row| row.len()).unwrap_or(0);
+    let height = board.len();
+    let width = board.first().map(|row| row.len()).unwrap_or(0);
 
-    for row in 0..width {
-        for col in 0..height {
+    for row in 0..height {
+        for col in 0..width {
             if board[row][col] != MINE_BYTE {
                 continue;
             }
 
-            for (i, j) in get_neighborhood(row, col, width, height) {
+            for (i, j) in get_neighborhood(row, col, height, width) {
                 if board[i][j] == MINE_BYTE {
                     continue;
                 } else if board[i][j] == EMPTY_BYTE {
@@ -39,8 +39,8 @@ pub fn annotate(minefield: &[&str]) -> Vec<String> {
 fn get_neighborhood(
     row: usize,
     col: usize,
-    width: usize,
     height: usize,
+    width: usize,
 ) -> impl Iterator<Item = (usize, usize)> {
     [
         (-1, -1),
@@ -56,9 +56,9 @@ fn get_neighborhood(
     .filter_map(move |(i, j)| {
         Some((
             row.checked_add_signed(*i)
-                .and_then(|i| if i < width { Some(i) } else { None })?,
+                .and_then(|i| if i < height { Some(i) } else { None })?,
             col.checked_add_signed(*j)
-                .and_then(|j| if j < height { Some(j) } else { None })?,
+                .and_then(|j| if j < width { Some(j) } else { None })?,
         ))
     })
 }
