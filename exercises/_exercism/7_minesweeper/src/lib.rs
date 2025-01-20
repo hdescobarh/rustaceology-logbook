@@ -52,7 +52,13 @@ fn get_neighborhood(
         (1, 0),
         (1, 1),
     ]
-    .iter()
-    .filter_map(move |(i, j)| Some((row.checked_add_signed(*i)?, col.checked_add_signed(*j)?)))
-    .filter(move |(i, j)| *i < field_rows && *j < field_cols)
+    .into_iter()
+    .filter_map(move |(i, j)| {
+        Some((
+            row.checked_add_signed(i)
+                .and_then(|i| if i < field_rows { Some(i) } else { None })?,
+            col.checked_add_signed(j)
+                .and_then(|j| if j < field_cols { Some(j) } else { None })?,
+        ))
+    })
 }
