@@ -1,6 +1,16 @@
 const MINE_BYTE: u8 = 42;
 const EMPTY_BYTE: u8 = 32;
 const DIGIT_ONE: u8 = 49;
+const NEIGHBORS: [(isize, isize); 8] = [
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, -1),
+    (0, 1),
+    (1, -1),
+    (1, 0),
+    (1, 1),
+];
 
 pub fn annotate(minefield: &[&str]) -> Vec<String> {
     let mut board: Vec<Vec<u8>> = minefield
@@ -17,15 +27,13 @@ pub fn annotate(minefield: &[&str]) -> Vec<String> {
                 continue;
             }
 
-            for (i, j) in get_neighborhood(row, col, height, width) {
-                if board[i][j] == MINE_BYTE {
-                    continue;
-                } else if board[i][j] == EMPTY_BYTE {
+            get_neighborhood(row, col, height, width).for_each(|(i, j)| {
+                if board[i][j] == EMPTY_BYTE {
                     board[i][j] = DIGIT_ONE
-                } else {
+                } else if board[i][j] != MINE_BYTE {
                     board[i][j] += 1
                 }
-            }
+            })
         }
     }
 
@@ -42,23 +50,8 @@ fn get_neighborhood(
     height: usize,
     width: usize,
 ) -> impl Iterator<Item = (usize, usize)> {
-    [
-        (-1, -1),
-        (-1, 0),
-        (-1, 1),
-        (0, -1),
-        (0, 1),
-        (1, -1),
-        (1, 0),
-        (1, 1),
-    ]
-    .iter()
-    .filter_map(move |(i, j)| {
-        Some((
-            row.checked_add_signed(*i)
-                .and_then(|i| if i < height { Some(i) } else { None })?,
-            col.checked_add_signed(*j)
-                .and_then(|j| if j < width { Some(j) } else { None })?,
-        ))
-    })
+    NEIGHBORS
+        .iter()
+        .filter_map(move |(i, j)| Some((row.checked_add_signed(*i)?, col.checked_add_signed(*j)?)))
+        .filter(move |(i, j)| *i < height && *j < width)
 }
