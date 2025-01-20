@@ -7,13 +7,12 @@ pub fn is_valid(code: &str) -> bool {
         if c.is_ascii_whitespace() {
             continue;
         }
-
         match c.to_digit(10) {
             Some(value) => {
                 if valid_digits.rem_euclid(2) == 0 {
                     sum += value;
                 } else {
-                    sum += double_and_lower_than_nine(value)
+                    sum += if value < 5 { value } else { value - 9 }
                 }
                 valid_digits += 1
             }
@@ -21,13 +20,5 @@ pub fn is_valid(code: &str) -> bool {
         }
     }
 
-    valid_digits > 1 && sum.rem_euclid(10) == 0
-}
-
-fn double_and_lower_than_nine(value: u32) -> u32 {
-    if value < 5 {
-        value * 2
-    } else {
-        value * 2 - 9
-    }
+    valid_digits > 1 && sum.checked_rem_euclid(10).is_some_and(|v| v == 0)
 }
