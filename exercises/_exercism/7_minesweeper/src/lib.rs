@@ -39,8 +39,8 @@ pub fn annotate(minefield: &[&str]) -> Vec<String> {
 fn get_neighborhood(
     row: usize,
     col: usize,
-    total_rows: usize,
-    total_cols: usize,
+    width: usize,
+    height: usize,
 ) -> impl Iterator<Item = (usize, usize)> {
     [
         (-1, -1),
@@ -52,13 +52,13 @@ fn get_neighborhood(
         (1, 0),
         (1, 1),
     ]
-    .into_iter()
+    .iter()
     .filter_map(move |(i, j)| {
         Some((
-            row.checked_add_signed(i)
-                .and_then(|i| if i < total_rows { Some(i) } else { None })?,
-            col.checked_add_signed(j)
-                .and_then(|j| if j < total_cols { Some(j) } else { None })?,
+            row.checked_add_signed(*i)
+                .and_then(|i| if i < width { Some(i) } else { None })?,
+            col.checked_add_signed(*j)
+                .and_then(|j| if j < height { Some(j) } else { None })?,
         ))
     })
 }
