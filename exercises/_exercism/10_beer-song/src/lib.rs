@@ -19,7 +19,6 @@ pub fn verse(n: u32) -> String {
 
 pub fn sing(start: u32, end: u32) -> String {
     let mut output = String::new();
-    let another = "";
     for i in (end..=start).rev() {
         let v = verse(i);
         write!(&mut output, "{}\n\n", v).unwrap_or_default();
