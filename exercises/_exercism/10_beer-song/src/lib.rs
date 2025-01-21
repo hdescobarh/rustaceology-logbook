@@ -28,27 +28,16 @@ pub fn sing(start: u32, end: u32) -> String {
 
 fn how_many(n: Option<u32>, capitalize: bool) -> String {
     match n {
-        Some(val) => {
-            if val > 0 {
-                val.to_string()
-            } else {
-                format!("{}o more", if capitalize { "N" } else { "n" })
-            }
-        }
+        Some(value) if value > 0 => value.to_string(),
+        Some(_) => format!("{}o more", if capitalize { "N" } else { "n" }),
         None => "99".to_string(),
     }
 }
 
 fn use_plural(n: Option<u32>) -> &'static str {
     match n {
-        Some(value) => {
-            if value == 1 {
-                ""
-            } else {
-                "s"
-            }
-        }
-        None => "s",
+        Some(1) => "",
+        _ => "s",
     }
 }
 
