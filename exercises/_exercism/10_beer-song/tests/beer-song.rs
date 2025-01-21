@@ -10,7 +10,6 @@ mod single_verse {
     }
 
     #[test]
-    #[ignore]
     fn last_generic_verse() {
         assert_eq!(
             verse(3).trim(),
@@ -19,7 +18,6 @@ mod single_verse {
     }
 
     #[test]
-    #[ignore]
     fn verse_with_2_bottles() {
         assert_eq!(
             verse(2).trim(),
@@ -28,7 +26,6 @@ mod single_verse {
     }
 
     #[test]
-    #[ignore]
     fn verse_with_1_bottle() {
         assert_eq!(
             verse(1).trim(),
@@ -37,7 +34,6 @@ mod single_verse {
     }
 
     #[test]
-    #[ignore]
     fn verse_with_0_bottles() {
         assert_eq!(
             verse(0).trim(),
