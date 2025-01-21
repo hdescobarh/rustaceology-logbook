@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 pub fn verse(n: u32) -> String {
     // [0-9]+ bottle[s]? of beer on the wall, [0-9]+ bottle[s]? of beer.\n
     // (Take (one|it) down and pass it around|Go to the store and buy some more),\s
@@ -16,7 +18,13 @@ pub fn verse(n: u32) -> String {
 }
 
 pub fn sing(start: u32, end: u32) -> String {
-    todo!("sing verses {start} to {end}, inclusive")
+    let mut output = String::new();
+    let another = "";
+    for i in (end..=start).rev() {
+        let v = verse(i);
+        write!(&mut output, "{}\n\n", v).unwrap_or_default();
+    }
+    output
 }
 
 fn how_many(n: Option<u32>, capitalize: bool) -> String {
