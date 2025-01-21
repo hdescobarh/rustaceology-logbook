@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/11_difference-of-squares/Cargo.toml",
+			"exercises/_exercism/13_leap/Cargo.toml",
 		],
 	},
 	"extensions": {
