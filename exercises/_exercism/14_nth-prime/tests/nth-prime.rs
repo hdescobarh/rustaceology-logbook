@@ -15,6 +15,13 @@ fn second_prime() {
 }
 
 #[test]
+fn third_prime() {
+    let output = nth(2);
+    let expected = 5;
+    assert_eq!(output, expected);
+}
+
+#[test]
 fn sixth_prime() {
     let output = nth(5);
     let expected = 13;
@@ -25,5 +32,12 @@ fn sixth_prime() {
 fn big_prime() {
     let output = nth(10_000);
     let expected = 104_743;
+    assert_eq!(output, expected);
+}
+
+#[test]
+fn very_big_prime() {
+    let output = nth(2032801);
+    let expected = 33019733;
     assert_eq!(output, expected);
 }
