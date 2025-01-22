@@ -1,14 +1,19 @@
 pub fn nth(n: u32) -> u32 {
-    // π(x) < 1.25506 x/log x for 1 < x (doi:10.1215/ijm/1255631807)
-    if n > 243023858 {
-        panic!("The {}nth prime is bigger than u32::MAX", n)
-    }
-    // For n <= 243023858 the cast to u32 will never overflows
-    let upper_bound = (1.25506 * n as f64 / (n as f64).ln()).ceil() as u32;
-
-    sieve_eratosthenes(upper_bound).unwrap()
+    let upper_bound = 150_000;
+    sieve_eratosthenes(upper_bound).nth(n as usize + 2).unwrap() as u32
 }
 
-fn sieve_eratosthenes(n: u32) -> Option<u32> {
-    todo!()
+fn sieve_eratosthenes(upper_bound: usize) -> impl Iterator<Item = usize> {
+    let mut check_list = vec![true; upper_bound + 3];
+    for i in 2..=upper_bound.isqrt() {
+        if check_list[i] {
+            for j in (i.pow(2)..=upper_bound).step_by(i) {
+                check_list[j] = false;
+            }
+        }
+    }
+    check_list
+        .into_iter()
+        .enumerate()
+        .filter_map(|(value, is_prime)| if is_prime { Some(value) } else { None })
 }
