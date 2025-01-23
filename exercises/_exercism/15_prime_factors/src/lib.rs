@@ -1,5 +1,15 @@
-pub fn factors(n: u64) -> Vec<u64> {
-    todo!("This should calculate the prime factors of {n}")
+pub fn factors(mut n: u64) -> Vec<u64> {
+    let mut output: Vec<u64> = Vec::new();
+    sieve_eratosthenes(n.isqrt() as usize).for_each(|prime| {
+        while n % prime == 0 {
+            output.push(prime);
+            n /= prime;
+        }
+    });
+    if n != 1 {
+        output.push(n)
+    }
+    output
 }
 
 fn sieve_eratosthenes(upper_bound: usize) -> impl Iterator<Item = u64> {
