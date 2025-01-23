@@ -2,7 +2,7 @@ pub fn factors(n: u64) -> Vec<u64> {
     todo!("This should calculate the prime factors of {n}")
 }
 
-fn sieve_eratosthenes(upper_bound: usize) -> impl Iterator<Item = usize> {
+fn sieve_eratosthenes(upper_bound: usize) -> impl Iterator<Item = u64> {
     let mut check_list = vec![true; upper_bound + 3];
     for i in 2..=upper_bound.isqrt() {
         if check_list[i] {
@@ -14,5 +14,6 @@ fn sieve_eratosthenes(upper_bound: usize) -> impl Iterator<Item = usize> {
     check_list
         .into_iter()
         .enumerate()
-        .filter_map(|(value, is_prime)| if is_prime { Some(value) } else { None })
+        .skip(2)
+        .filter_map(|(value, is_prime)| if is_prime { Some(value as u64) } else { None })
 }
