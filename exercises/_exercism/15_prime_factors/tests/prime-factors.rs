@@ -83,3 +83,10 @@ fn factors_include_a_large_prime() {
     let expected = [11, 9_539, 894_119];
     assert_eq!(factors, expected);
 }
+
+#[test]
+fn factors_include_a_huge_prime() {
+    let factors = factors(1_844_674_407_370);
+    let expected = [2, 5, 293, 629_581_709];
+    assert_eq!(factors, expected);
+}
