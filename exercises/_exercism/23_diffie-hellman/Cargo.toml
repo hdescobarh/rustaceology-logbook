@@ -4,6 +4,7 @@ name = "diffie-hellman"
 version = "0.1.0"
 
 [features]
+default = ["big-primes"]
 big-primes = []
 
 [dependencies]
