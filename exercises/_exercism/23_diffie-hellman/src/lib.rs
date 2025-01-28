@@ -1,5 +1,8 @@
+use rand::{thread_rng, Rng};
+
 pub fn private_key(p: u64) -> u64 {
-    todo!("Pick a private key greater than 1 and less than {p}")
+    let mut rng = thread_rng();
+    rng.gen_range(2_u64..p)
 }
 
 pub fn public_key(p: u64, g: u64, a: u64) -> u64 {
