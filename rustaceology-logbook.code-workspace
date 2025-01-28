@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/26_eliuds-eggs/Cargo.toml",
+			"exercises/_exercism/27_acronym/Cargo.toml",
 		],
 	},
 	"extensions": {
