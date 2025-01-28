@@ -1,8 +1,9 @@
+const VALID_SEPARATORS: [char; 2] = [' ', '-'];
 pub fn abbreviate(phrase: &str) -> String {
     phrase
-        .split(&['-', ' '])
+        .split(&VALID_SEPARATORS)
         .map(|word| {
-            if word.chars().any(|c| c.is_alphabetic() && c.is_lowercase()) {
+            if word.contains(char::is_lowercase) {
                 initial_from_mixed(word)
             } else {
                 intial_from_all_upper(word)
