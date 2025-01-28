@@ -1,16 +1,13 @@
+const STUDENTS: [&str; 12] = [
+    "Alice", "Bob", "Charlie", "David", "Eve", "Fred", "Ginny", "Harriet", "Ileana", "Joseph",
+    "Kincaid", "Larry",
+];
+
 pub fn plants(diagram: &str, student: &str) -> Vec<&'static str> {
-    let student_id = get_student_id(student).unwrap();
+    let student_id = STUDENTS.iter().position(|s| s == &student).unwrap();
     diagram
         .split_ascii_whitespace()
-        .take(2)
-        .flat_map(|r| {
-            r.chars()
-                .collect::<Vec<char>>()
-                .chunks(2)
-                .map(|a| [a[0], a[1]])
-                .nth(student_id)
-                .unwrap()
-        })
+        .flat_map(|r| r.chars().skip(student_id * 2).take(2))
         .map(|plant_code| translate_from_code(plant_code).unwrap())
         .collect()
 }
@@ -23,13 +20,4 @@ fn translate_from_code(code: char) -> Option<&'static str> {
         'V' => Some("violets"),
         _ => None,
     }
-}
-
-fn get_student_id(student: &str) -> Option<usize> {
-    [
-        "Alice", "Bob", "Charlie", "David", "Eve", "Fred", "Ginny", "Harriet", "Ileana", "Joseph",
-        "Kincaid", "Larry",
-    ]
-    .iter()
-    .position(|s| s == &student)
 }
