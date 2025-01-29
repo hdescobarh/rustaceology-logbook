@@ -73,6 +73,14 @@ fn underscore_emphasis() {
 }
 
 #[test]
+fn asterisks_emphasis() {
+    let input = "The Road **Not** Taken";
+    let output = abbreviate(input);
+    let expected = "TRNT";
+    assert_eq!(output, expected);
+}
+
+#[test]
 fn camelcase() {
     let input = "HyperText Markup Language";
     let output = abbreviate(input);
