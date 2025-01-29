@@ -29,7 +29,29 @@ impl Allergies {
     }
 
     fn decompose_score(score: u32) -> Vec<u32> {
-        todo!()
+        let mut result = Vec::new();
+        let mut remaining_score = if score % 2 != 0 {
+            result.push(0);
+            score - 1
+        } else {
+            score
+        };
+
+        let mut two_as_factor = 0;
+        while remaining_score > 0 {
+            if remaining_score % 2 == 0 {
+                two_as_factor += 1;
+                remaining_score /= 2;
+            } else if remaining_score == 1 {
+                result.push(two_as_factor);
+                remaining_score = 0;
+            } else {
+                result.push(two_as_factor);
+                remaining_score -= 1;
+            }
+        }
+
+        result
     }
 }
 
