@@ -3,7 +3,7 @@ pub struct Allergies {
     allergens: Vec<Allergen>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Allergen {
     Eggs,
     Peanuts,
@@ -45,11 +45,11 @@ impl Allergies {
     }
 
     pub fn is_allergic_to(&self, allergen: &Allergen) -> bool {
-        todo!("Determine if the patient is allergic to the '{allergen:?}' allergen.");
+        self.allergens.contains(allergen)
     }
 
     pub fn allergies(&self) -> Vec<Allergen> {
-        todo!("Return the list of allergens contained within the score with which the Allergies struct was made.");
+        self.allergens.clone()
     }
 
     fn decompose_score(score: u32) -> Vec<u32> {
