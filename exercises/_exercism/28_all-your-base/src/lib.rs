@@ -3,6 +3,7 @@ pub enum Error {
     InvalidInputBase,
     InvalidOutputBase,
     InvalidDigit(u32),
+    Overflow,
 }
 
 pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>, Error> {
@@ -11,11 +12,7 @@ pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>,
     } else if to_base <= 1 {
         return Err(Error::InvalidOutputBase);
     }
-
-    Ok(base_from_integer_value(
-        get_integer_value(number, from_base)?,
-        to_base,
-    ))
+    base_from_integer_value(get_integer_value(number, from_base)?, to_base)
 }
 
 fn get_integer_value(number: &[u32], from_base: u32) -> Result<u128, Error> {
@@ -29,16 +26,19 @@ fn get_integer_value(number: &[u32], from_base: u32) -> Result<u128, Error> {
     Ok(result)
 }
 
-fn base_from_integer_value(mut value: u128, to_base: u32) -> Vec<u32> {
+fn base_from_integer_value(mut value: u128, to_base: u32) -> Result<Vec<u32>, Error> {
     let mut result = Vec::new();
     while value > 0 {
-        result.push((value % to_base as u128) as u32);
+        match u32::try_from(value % to_base as u128) {
+            Ok(value) => result.push(value),
+            Err(_) => return Err(Error::Overflow),
+        };
         value /= to_base as u128
     }
     result.reverse();
     if result.is_empty() {
-        vec![0]
+        Ok(vec![0])
     } else {
-        result
+        Ok(result)
     }
 }
