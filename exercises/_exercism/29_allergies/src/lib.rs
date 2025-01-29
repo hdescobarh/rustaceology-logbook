@@ -37,7 +37,11 @@ impl TryFrom<u32> for Allergen {
 
 impl Allergies {
     pub fn new(score: u32) -> Self {
-        todo!("Given the '{score}' score, construct a new Allergies struct.");
+        let allergens = Self::decompose_score(score)
+            .iter()
+            .filter_map(|&value| Allergen::try_from(value).ok())
+            .collect();
+        Self { score, allergens }
     }
 
     pub fn is_allergic_to(&self, allergen: &Allergen) -> bool {
