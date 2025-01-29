@@ -15,6 +15,26 @@ pub enum Allergen {
     Cats,
 }
 
+impl TryFrom<u32> for Allergen {
+    type Error = &'static str;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        let result = match value {
+            0 => Self::Eggs,
+            1 => Self::Peanuts,
+            2 => Self::Shellfish,
+            3 => Self::Strawberries,
+            4 => Self::Tomatoes,
+            5 => Self::Chocolate,
+            6 => Self::Pollen,
+            7 => Self::Cats,
+            _ => return Err("Non valid code"),
+        };
+
+        Ok(result)
+    }
+}
+
 impl Allergies {
     pub fn new(score: u32) -> Self {
         todo!("Given the '{score}' score, construct a new Allergies struct.");
