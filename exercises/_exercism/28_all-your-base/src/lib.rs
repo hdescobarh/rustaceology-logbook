@@ -36,5 +36,21 @@ pub enum Error {
 ///    However, your function must be able to process input with leading 0 digits.
 ///
 pub fn convert(number: &[u32], from_base: u32, to_base: u32) -> Result<Vec<u32>, Error> {
+    if let Some(&d) = number.iter().find(|d| **d >= from_base) {
+        return Err(Error::InvalidDigit(d));
+    }
+
+    if [0, 1].contains(&from_base) {
+        return Err(Error::InvalidInputBase);
+    }
+
+    if [0, 1].contains(&to_base) {
+        return Err(Error::InvalidOutputBase);
+    }
+
+    if number.is_empty() {
+        return Ok(vec![0]);
+    }
+
     todo!("Convert {number:?} from base {from_base} to base {to_base}")
 }
