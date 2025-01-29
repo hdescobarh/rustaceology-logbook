@@ -1,6 +1,7 @@
 use allyourbase as ayb;
 
 #[test]
+#[ignore]
 fn single_bit_one_to_decimal() {
     let input_base = 2;
     let input_digits = &[1];
@@ -156,7 +157,6 @@ fn leading_zeros() {
 }
 
 #[test]
-#[ignore]
 fn input_base_is_one() {
     let input_base = 1;
     let input_digits = &[0];
@@ -168,7 +168,6 @@ fn input_base_is_one() {
 }
 
 #[test]
-#[ignore]
 fn input_base_is_zero() {
     let input_base = 0;
     let input_digits = &[];
@@ -180,7 +179,6 @@ fn input_base_is_zero() {
 }
 
 #[test]
-#[ignore]
 fn invalid_positive_digit() {
     let input_base = 2;
     let input_digits = &[1, 2, 1, 0, 1, 0];
@@ -192,7 +190,6 @@ fn invalid_positive_digit() {
 }
 
 #[test]
-#[ignore]
 fn output_base_is_one() {
     let input_base = 2;
     let input_digits = &[1, 0, 1, 0, 1, 0];
@@ -204,7 +201,6 @@ fn output_base_is_one() {
 }
 
 #[test]
-#[ignore]
 fn output_base_is_zero() {
     let input_base = 10;
     let input_digits = &[7];
