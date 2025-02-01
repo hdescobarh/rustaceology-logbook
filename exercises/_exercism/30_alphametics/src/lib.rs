@@ -7,8 +7,6 @@ type Guess = HashMap<char, u8>;
 
 #[cfg_attr(test, derive(Debug, PartialEq))]
 struct WordAddition {
-    addends: Vec<Word>,
-    total: Word,
     alphabet: Word,
     non_zeros: usize,
     powers: Vec<i128>,
@@ -41,7 +39,7 @@ impl WordAddition {
             };
             for (exponent, &letter) in word.iter().rev().enumerate() {
                 let value = operation * 10_i128.pow(u32::try_from(exponent).ok()?);
-                let current = powers_sum
+                powers_sum
                     .entry(letter)
                     .and_modify(|v| *v += value)
                     .or_insert(value);
@@ -67,8 +65,6 @@ impl WordAddition {
         };
 
         Some(Self {
-            addends: parts,
-            total,
             alphabet,
             non_zeros,
             powers,
@@ -117,8 +113,6 @@ mod test {
             (
                 "I + BB == ILL",
                 WordAddition {
-                    addends: vec![vec!['I'], vec!['B', 'B']],
-                    total: vec!['I', 'L', 'L'],
                     alphabet: vec!['I', 'B', 'L'],
                     non_zeros: 2,
                     powers: vec![-99, 11, -11],
@@ -127,8 +121,6 @@ mod test {
             (
                 "A == B",
                 WordAddition {
-                    addends: vec![vec!['A']],
-                    total: vec!['B'],
                     alphabet: vec!['A', 'B'],
                     non_zeros: 2,
                     powers: vec![1, -1],
@@ -137,8 +129,6 @@ mod test {
             (
                 "NO + NO + TOO == LATE",
                 WordAddition {
-                    addends: vec![vec!['N', 'O'], vec!['N', 'O'], vec!['T', 'O', 'O']],
-                    total: vec!['L', 'A', 'T', 'E'],
                     alphabet: vec!['N', 'T', 'L', 'O', 'A', 'E'],
                     non_zeros: 3,
                     powers: vec![20, 90, -1000, 13, -100, -1],
