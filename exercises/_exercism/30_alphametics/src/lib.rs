@@ -75,48 +75,7 @@ impl WordAddition {
         })
     }
 
-    fn get_integer_value(word: &Word, guess: &Guess) -> Option<u128> {
-        let mut total = 0_u128;
-        for c in word {
-            total = 10 * total + *guess.get(c)? as u128;
-        }
-        Some(total)
-    }
-
-    fn check_guess(&self, guess: &Guess) -> Option<bool> {
-        let guessed_total = Self::get_integer_value(&self.total, guess)?;
-        let mut guessed_sum = 0_u128;
-        for word in &self.addends {
-            guessed_sum += Self::get_integer_value(word, guess)?
-        }
-        if guessed_total == guessed_sum {
-            Some(true)
-        } else {
-            Some(false)
-        }
-    }
-
     pub fn brute_force_solve(&self) -> Option<Guess> {
-        for perm in (0_u8..=9).permutations(self.alphabet.len()) {
-            if perm.get(0..self.non_zeros)?.contains(&0) {
-                continue;
-            }
-            let guess = self
-                .alphabet
-                .iter()
-                .cloned()
-                .zip(perm)
-                .collect::<HashMap<char, u8>>();
-
-            if let Some(true) = self.check_guess(&guess) {
-                return Some(guess);
-            }
-        }
-
-        None
-    }
-
-    pub fn brute_force_solve2(&self) -> Option<Guess> {
         for perm in (0_u8..=9).permutations(self.alphabet.len()) {
             if perm.get(0..self.non_zeros)?.contains(&0) {
                 continue;
