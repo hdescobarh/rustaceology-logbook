@@ -10,7 +10,7 @@ struct WordAddition {
     addends: Vec<Word>,
     total: Word,
     alphabet: Word,
-    non_zeros: u8,
+    non_zeros: usize,
 }
 
 impl WordAddition {
@@ -41,7 +41,7 @@ impl WordAddition {
         let non_zeros = if non_zero_letters.len() < 2 || non_zero_letters.len() > 9 {
             return None;
         } else {
-            non_zero_letters.len() as u8
+            non_zero_letters.len()
         };
 
         Some(Self {
@@ -72,10 +72,30 @@ impl WordAddition {
             Some(false)
         }
     }
+
+    pub fn brute_force_solve(&self) -> Option<Guess> {
+        for perm in (0_u8..=9).permutations(self.alphabet.len()) {
+            if perm.get(0..self.non_zeros)?.contains(&0) {
+                continue;
+            }
+            let guess = self
+                .alphabet
+                .iter()
+                .cloned()
+                .zip(perm)
+                .collect::<HashMap<char, u8>>();
+
+            if let Some(true) = self.check_guess(&guess) {
+                return Some(guess);
+            }
+        }
+
+        None
+    }
 }
 
-pub fn solve(input: &str) -> Option<HashMap<char, u8>> {
-    todo!("Solve the alphametic {input:?}")
+pub fn solve(input: &str) -> Option<Guess> {
+    WordAddition::new(input)?.brute_force_solve()
 }
 
 #[cfg(test)]
