@@ -7,9 +7,9 @@ type Guess = HashMap<char, u8>;
 
 #[cfg_attr(test, derive(Debug, PartialEq))]
 struct WordAddition {
-    alphabet: Word,          // list of unique letters
+    alphabet: Word,          // list of unique letters L_i
     non_zeros: usize,        // letters[0..non_zeros] cannot be zero
-    coefficients: Vec<i128>, // coefficients of factorized addition
+    coefficients: Vec<i128>, // factorized addition coefficients C_i. C_i is coefficient of L_i
 }
 
 impl WordAddition {
