@@ -115,6 +115,33 @@ impl WordAddition {
 
         None
     }
+
+    pub fn brute_force_solve2(&self) -> Option<Guess> {
+        for perm in (0_u8..=9).permutations(self.alphabet.len()) {
+            if perm.get(0..self.non_zeros)?.contains(&0) {
+                continue;
+            }
+            if self
+                .powers
+                .iter()
+                .zip(perm.iter())
+                .fold(0, |total, (coefficient, digit)| {
+                    total + coefficient * *digit as i128
+                })
+                == 0
+            {
+                return Some(
+                    self.alphabet
+                        .iter()
+                        .cloned()
+                        .zip(perm)
+                        .collect::<HashMap<char, u8>>(),
+                );
+            }
+        }
+
+        None
+    }
 }
 
 pub fn solve(input: &str) -> Option<Guess> {
