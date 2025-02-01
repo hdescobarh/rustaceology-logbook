@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use itertools::Itertools;
+
 type Word = Vec<char>;
 type Guess = HashMap<char, u8>;
 
@@ -13,7 +15,41 @@ struct WordAddition {
 
 impl WordAddition {
     pub fn new(input: &str) -> Option<Self> {
-        todo!()
+        let mut parts: Vec<Word> = input
+            .split(|c: char| !c.is_ascii_alphabetic())
+            .filter(|w| !w.is_empty())
+            .map(|w| w.chars().collect())
+            .collect();
+        let non_zero_letters: Word = parts
+            .iter()
+            .filter_map(|w| w.first().cloned())
+            .unique()
+            .collect();
+        let alphabet: Word = non_zero_letters
+            .iter()
+            .chain(parts.iter().flatten())
+            .unique()
+            .cloned()
+            .collect();
+
+        let total = parts.pop()?;
+
+        if parts.is_empty() || alphabet.is_empty() {
+            return None;
+        }
+
+        let non_zeros = if non_zero_letters.len() < 2 || non_zero_letters.len() > 9 {
+            return None;
+        } else {
+            non_zero_letters.len() as u8
+        };
+
+        Some(Self {
+            addends: parts,
+            total,
+            alphabet,
+            non_zeros,
+        })
     }
 }
 
