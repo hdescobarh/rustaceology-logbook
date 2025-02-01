@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use itertools::Itertools;
+use itertools::{Itertools, Position};
 
 type Word = Vec<char>;
 type Guess = HashMap<char, u8>;
@@ -11,6 +11,7 @@ struct WordAddition {
     total: Word,
     alphabet: Word,
     non_zeros: usize,
+    powers: Vec<i128>,
 }
 
 impl WordAddition {
@@ -32,6 +33,27 @@ impl WordAddition {
             .cloned()
             .collect();
 
+        let mut powers_sum: HashMap<char, i128> = HashMap::new();
+        for (position, word) in parts.iter().with_position() {
+            let operation = match position {
+                Position::Last => -1,
+                _ => 1,
+            };
+            for (exponent, &letter) in word.iter().rev().enumerate() {
+                let value = operation * 10_i128.pow(u32::try_from(exponent).ok()?);
+                let current = powers_sum
+                    .entry(letter)
+                    .and_modify(|v| *v += value)
+                    .or_insert(value);
+            }
+        }
+
+        let powers = alphabet
+            .iter()
+            .filter_map(|c| powers_sum.get(c))
+            .cloned()
+            .collect();
+
         let total = parts.pop()?;
 
         if parts.is_empty() || alphabet.is_empty() {
@@ -49,6 +71,7 @@ impl WordAddition {
             total,
             alphabet,
             non_zeros,
+            powers,
         })
     }
 
@@ -112,6 +135,7 @@ mod test {
                     total: vec!['I', 'L', 'L'],
                     alphabet: vec!['I', 'B', 'L'],
                     non_zeros: 2,
+                    powers: vec![-99, 11, -11],
                 },
             ),
             (
@@ -121,6 +145,7 @@ mod test {
                     total: vec!['B'],
                     alphabet: vec!['A', 'B'],
                     non_zeros: 2,
+                    powers: vec![1, -1],
                 },
             ),
             (
@@ -130,6 +155,7 @@ mod test {
                     total: vec!['L', 'A', 'T', 'E'],
                     alphabet: vec!['N', 'T', 'L', 'O', 'A', 'E'],
                     non_zeros: 3,
+                    powers: vec![20, 90, -1000, 13, -100, -1],
                 },
             ),
         ];
