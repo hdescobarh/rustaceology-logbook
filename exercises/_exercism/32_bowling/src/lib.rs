@@ -8,7 +8,37 @@ pub enum FrameStatus {
 
 struct Frame {
     status: FrameStatus,
-    fill_balls: Option<Vec<FrameStatus>>,
+    fill_balls: Option<Vec<u16>>,
+}
+
+impl Frame {
+    pub fn roll(&mut self, pins: u16) -> Result<(), Error> {
+        if pins > 10 {
+            return Err(Error::NotEnoughPinsLeft);
+        }
+        match self.status {
+            FrameStatus::Unbegun => self.status = FrameStatus::Unfinished(pins),
+            FrameStatus::Unfinished(knocked) => {
+                self.status = match knocked.checked_add(pins) {
+                    Some(new_knocked) if new_knocked < 10 => FrameStatus::Open(new_knocked),
+                    Some(10) => FrameStatus::Spare(pins),
+                    _ => return Err(Error::NotEnoughPinsLeft),
+                }
+            }
+            FrameStatus::Spare(_) if self.fill_balls.as_ref().is_some_and(|v| v.is_empty()) => {
+                if let Some(v) = self.fill_balls.as_mut() {
+                    v.push(pins);
+                };
+            }
+            FrameStatus::Strike if self.fill_balls.as_ref().is_some_and(|v| v.len() < 2) => {
+                if let Some(v) = self.fill_balls.as_mut() {
+                    v.push(pins);
+                }
+            }
+            _ => return Err(Error::NotEnoughPinsLeft),
+        };
+        Ok(())
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
