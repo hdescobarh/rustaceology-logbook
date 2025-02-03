@@ -1,5 +1,5 @@
 // Returns the first occurrence of key in array
-fn binary_search_recursive<A: AsRef<[T]>, T: PartialOrd + Sized>(
+fn binary_search_recursive<A: AsRef<[T]>, T: PartialOrd>(
     array: &A,
     key: &T,
     start: usize,
