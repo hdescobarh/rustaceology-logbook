@@ -1,10 +1,6 @@
-pub fn find<T: PartialOrd>(array: &[T], key: T) -> Option<usize> {
-    binary_search_recursive::<T>(array, &key, 0, array.len(), None)
-}
-
 // Returns the first occurrence of key in array
-fn binary_search_recursive<T: PartialOrd>(
-    array: &[T],
+fn binary_search_recursive<A: AsRef<[T]>, T: PartialOrd + Sized>(
+    array: &A,
     key: &T,
     start: usize,
     end: usize,
@@ -15,9 +11,9 @@ fn binary_search_recursive<T: PartialOrd>(
     }
     let mid_point = end.checked_add(start)?.checked_div(2)?;
 
-    if array.get(mid_point)? < key {
+    if array.as_ref()[mid_point] < *key {
         binary_search_recursive(array, key, mid_point.checked_add(1)?, end, current_position)
-    } else if array.get(mid_point)? > key {
+    } else if array.as_ref()[mid_point] > *key {
         match mid_point.checked_sub(1) {
             Some(end) => binary_search_recursive(array, key, start, end, current_position),
             None => current_position,
@@ -28,4 +24,8 @@ fn binary_search_recursive<T: PartialOrd>(
             None => Some(mid_point),
         }
     }
+}
+
+pub fn find<A: AsRef<[T]>, T: PartialOrd>(array: A, key: T) -> Option<usize> {
+    binary_search_recursive(&array, &key, 0, array.as_ref().len().checked_sub(1)?, None)
 }
