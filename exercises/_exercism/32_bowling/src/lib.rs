@@ -1,10 +1,25 @@
+pub enum FrameStatus {
+    Unbegun,
+    Unfinished(u16),
+    Open(u16),
+    Spare(u16),
+    Strike,
+}
+
+struct Frame {
+    status: FrameStatus,
+    fill_balls: Option<Vec<FrameStatus>>,
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     NotEnoughPinsLeft,
     GameComplete,
 }
-
-pub struct BowlingGame {}
+pub struct BowlingGame {
+    current: u8,
+    frames: Vec<Frame>,
+}
 
 impl BowlingGame {
     pub fn new() -> Self {
