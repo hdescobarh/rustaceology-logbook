@@ -81,3 +81,19 @@ fn works_for_str_elements() {
     assert_eq!(find(["a"], "a"), Some(0));
     assert_eq!(find(["a", "b"], "b"), Some(1));
 }
+
+#[test]
+fn manages_correctly_array_with_duplicates() {
+    let array = [2, 4, 4, 4, 7, 7, 9];
+    let cases = [
+        (9, Some(6)),
+        (4, Some(1)),
+        (5, None),
+        (2, Some(0)),
+        (1, None),
+        (42, None),
+    ];
+    for (input, expected) in cases {
+        assert_eq!(find(array, input), expected);
+    }
+}
