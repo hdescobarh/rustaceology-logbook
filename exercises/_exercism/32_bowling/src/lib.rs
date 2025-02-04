@@ -97,7 +97,13 @@ impl BowlingGame {
     }
 
     pub fn roll(&mut self, pins: u16) -> Result<(), Error> {
-        todo!("Record that {pins} pins have been scored");
+        self.frames[self.current].roll(pins)?;
+        if let Status::Open | Status::Spare | Status::Strike = self.frames[self.current].status {
+            if self.current < 9 {
+                self.current += 1;
+            }
+        }
+        Ok(())
     }
 
     pub fn score(&self) -> Option<u16> {
