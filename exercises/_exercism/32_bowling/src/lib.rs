@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub enum Status {
     Unbegun,
     Unfinished,
@@ -94,5 +95,115 @@ impl BowlingGame {
 
     pub fn score(&self) -> Option<u16> {
         todo!("Return the score if the game is complete, or None if not.");
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::Error::*;
+    use crate::{Frame, Status};
+
+    #[test]
+    fn frame_unbegun_to_unfinished() {
+        let mut frame = Frame::new(false);
+        assert_eq!(frame.throws.first(), None);
+        assert_eq!(frame.roll(5), Ok(()));
+        assert_eq!(frame.status, Status::Unfinished);
+        assert_eq!(frame.throws[0], 5);
+        assert_eq!(frame.throws.get(1), None);
+        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+        assert_eq!(frame.roll(5), Ok(()));
+    }
+
+    #[test]
+    fn frame_unbegun_to_strike() {
+        let mut frame = Frame::new(false);
+        assert_eq!(frame.throws.first(), None);
+        assert_eq!(frame.roll(10), Ok(()));
+        assert_eq!(frame.status, Status::Strike);
+        assert_eq!(frame.throws[0], 10);
+        assert_eq!(frame.throws.get(1), None);
+        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+    }
+
+    #[test]
+    fn frame_unfinished_to_spare() {
+        let mut frame = Frame::new(false);
+        let _ = frame.roll(4);
+        let _ = frame.roll(6);
+        assert_eq!(frame.status, Status::Spare);
+        assert_eq!(frame.throws[0], 4);
+        assert_eq!(frame.throws[1], 6);
+        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+    }
+
+    #[test]
+    fn frame_unfinished_to_open() {
+        let mut frame = Frame::new(false);
+        let _ = frame.roll(7);
+        let _ = frame.roll(1);
+        assert_eq!(frame.status, Status::Open);
+        assert_eq!(frame.throws[0], 7);
+        assert_eq!(frame.throws[1], 1);
+        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+    }
+
+    #[test]
+    fn fillballs_spare_open() {
+        let mut frame = Frame::new(true);
+        let _ = frame.roll(3);
+        let _ = frame.roll(7);
+        assert_eq!(frame.status, Status::Spare);
+        assert_eq!(frame.throws[0], 3);
+        assert_eq!(frame.throws[1], 7);
+        let _ = frame.roll(2);
+        assert_eq!(frame.fillballs.as_ref().unwrap()[0], 2);
+        assert_eq!(frame.fillballs.as_ref().unwrap().get(1), None);
+        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+    }
+    #[test]
+    fn fillballs_spare_strike() {
+        let mut frame = Frame::new(true);
+        let _ = frame.roll(1);
+        let _ = frame.roll(9);
+        assert_eq!(frame.status, Status::Spare);
+        assert_eq!(frame.throws[0], 1);
+        assert_eq!(frame.throws[1], 9);
+        let _ = frame.roll(10);
+        assert_eq!(frame.fillballs.as_ref().unwrap()[0], 10);
+        assert_eq!(frame.fillballs.as_ref().unwrap().get(1), None);
+        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+    }
+    #[test]
+    fn fillballs_strike_spare() {
+        let mut frame = Frame::new(true);
+        let _ = frame.roll(10);
+    }
+    #[test]
+    fn fillballs_strike_open() {
+        let mut frame = Frame::new(true);
+        let _ = frame.roll(10);
+    }
+    #[test]
+    fn fillballs_triple_strike() {
+        let mut frame = Frame::new(true);
+        assert_eq!(frame.roll(10), Ok(()));
+        assert_eq!(frame.status, Status::Strike);
+        assert_eq!(frame.roll(10), Ok(()));
+        assert_eq!(frame.roll(10), Ok(()));
+        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+        assert_eq!(*frame.fillballs.as_ref().unwrap(), vec![10, 10]);
+        assert_eq!(frame.throws, vec![10])
+    }
+    #[test]
+    fn fillballs_strike_strike_open() {
+        let mut frame = Frame::new(true);
+        assert_eq!(frame.roll(10), Ok(()));
+        assert_eq!(frame.status, Status::Strike);
+        assert_eq!(frame.roll(10), Ok(()));
+        assert_eq!(frame.roll(8), Ok(()));
+        assert_eq!(frame.roll(2), Err(NotEnoughPinsLeft));
+        assert_eq!(*frame.fillballs.as_ref().unwrap(), vec![10, 8]);
+        assert_eq!(frame.throws, vec![10])
     }
 }
