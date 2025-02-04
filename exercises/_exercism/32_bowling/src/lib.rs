@@ -27,8 +27,8 @@ impl Frame {
         if pins > 10 {
             return Err(Error::NotEnoughPinsLeft);
         }
-        match self.status {
-            Status::Unbegun => {
+        match (&self.status, &self.fillballs) {
+            (Status::Unbegun, _) => {
                 self.status = if pins < 10 {
                     Status::Unfinished
                 } else {
@@ -36,7 +36,7 @@ impl Frame {
                 };
                 self.throws.push(pins)
             }
-            Status::Unfinished => {
+            (Status::Unfinished, _) => {
                 match (self.throws[0] + pins).cmp(&10) {
                     Ordering::Less => self.status = Status::Open,
                     Ordering::Equal => self.status = Status::Spare,
@@ -44,35 +44,24 @@ impl Frame {
                 }
                 self.throws.push(pins)
             }
-            Status::Open if self.fillballs.as_ref().is_some() => return Err(Error::GameComplete),
-            Status::Spare if self.fillballs.as_ref().is_some_and(|v| v.is_empty()) => {
-                self.fillballs.as_mut().unwrap().push(pins);
+            (Status::Open, Some(_)) => return Err(Error::GameComplete),
+            (Status::Spare, Some(v)) if v.is_empty() => self.fillballs.as_mut().unwrap().push(pins),
+            (Status::Spare, Some(_)) => return Err(Error::GameComplete),
+            (Status::Strike, Some(v)) if v.is_empty() => {
+                self.fillballs.as_mut().unwrap().push(pins)
             }
-            Status::Spare if self.fillballs.as_ref().is_some_and(|v| v.len() == 1) => {
-                return Err(Error::GameComplete);
-            }
-            Status::Strike if self.fillballs.as_ref().is_some_and(|v| v.is_empty()) => {
-                self.fillballs.as_mut().unwrap().push(pins);
-            }
-            Status::Strike
-                if self
-                    .fillballs
-                    .as_ref()
-                    .is_some_and(|v| v.len() == 1 && v[0] < 10) =>
-            {
+            (Status::Strike, Some(v)) if v.len() == 1 && v[0] < 10 => {
                 match (self.fillballs.as_ref().unwrap()[0] + pins).cmp(&10) {
                     Ordering::Greater => return Err(Error::NotEnoughPinsLeft),
                     _ => self.fillballs.as_mut().unwrap().push(pins),
                 };
             }
-            Status::Strike if self.fillballs.as_ref().is_some_and(|v| v.len() == 1) => {
+            (Status::Strike, Some(v)) if v.len() == 1 => {
                 self.fillballs.as_mut().unwrap().push(pins)
             }
-            Status::Strike if self.fillballs.as_ref().is_some_and(|v| v.len() == 2) => {
-                return Err(Error::GameComplete)
-            }
+            (Status::Strike, Some(v)) if v.len() == 2 => return Err(Error::GameComplete),
             _ => return Err(Error::NotEnoughPinsLeft),
-        }
+        };
         Ok(())
     }
 }
