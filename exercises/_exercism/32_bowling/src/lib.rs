@@ -44,8 +44,12 @@ impl Frame {
                 }
                 self.throws.push(pins)
             }
+            Status::Open if self.fillballs.as_ref().is_some() => return Err(Error::GameComplete),
             Status::Spare if self.fillballs.as_ref().is_some_and(|v| v.is_empty()) => {
                 self.fillballs.as_mut().unwrap().push(pins);
+            }
+            Status::Spare if self.fillballs.as_ref().is_some_and(|v| v.len() == 1) => {
+                return Err(Error::GameComplete);
             }
             Status::Strike if self.fillballs.as_ref().is_some_and(|v| v.is_empty()) => {
                 self.fillballs.as_mut().unwrap().push(pins);
@@ -63,6 +67,9 @@ impl Frame {
             }
             Status::Strike if self.fillballs.as_ref().is_some_and(|v| v.len() == 1) => {
                 self.fillballs.as_mut().unwrap().push(pins)
+            }
+            Status::Strike if self.fillballs.as_ref().is_some_and(|v| v.len() == 2) => {
+                return Err(Error::GameComplete)
             }
             _ => return Err(Error::NotEnoughPinsLeft),
         }
@@ -159,7 +166,7 @@ mod test {
         let _ = frame.roll(2);
         assert_eq!(frame.fillballs.as_ref().unwrap()[0], 2);
         assert_eq!(frame.fillballs.as_ref().unwrap().get(1), None);
-        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+        assert_eq!(frame.roll(10), Err(GameComplete));
     }
     #[test]
     fn fillballs_spare_strike() {
@@ -172,7 +179,7 @@ mod test {
         let _ = frame.roll(10);
         assert_eq!(frame.fillballs.as_ref().unwrap()[0], 10);
         assert_eq!(frame.fillballs.as_ref().unwrap().get(1), None);
-        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+        assert_eq!(frame.roll(10), Err(GameComplete));
     }
     #[test]
     fn fillballs_strike_spare() {
@@ -191,7 +198,7 @@ mod test {
         assert_eq!(frame.status, Status::Strike);
         assert_eq!(frame.roll(10), Ok(()));
         assert_eq!(frame.roll(10), Ok(()));
-        assert_eq!(frame.roll(10), Err(NotEnoughPinsLeft));
+        assert_eq!(frame.roll(10), Err(GameComplete));
         assert_eq!(*frame.fillballs.as_ref().unwrap(), vec![10, 10]);
         assert_eq!(frame.throws, vec![10])
     }
@@ -202,7 +209,7 @@ mod test {
         assert_eq!(frame.status, Status::Strike);
         assert_eq!(frame.roll(10), Ok(()));
         assert_eq!(frame.roll(8), Ok(()));
-        assert_eq!(frame.roll(2), Err(NotEnoughPinsLeft));
+        assert_eq!(frame.roll(2), Err(GameComplete));
         assert_eq!(*frame.fillballs.as_ref().unwrap(), vec![10, 8]);
         assert_eq!(frame.throws, vec![10])
     }
