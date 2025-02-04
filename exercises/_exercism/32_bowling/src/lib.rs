@@ -107,7 +107,40 @@ impl BowlingGame {
     }
 
     pub fn score(&self) -> Option<u16> {
-        todo!("Return the score if the game is complete, or None if not.");
+        match (&self.frames[9].status, &self.frames[9].fillballs) {
+            (Status::Open, _) => (),
+            (Status::Spare, Some(v)) if v.len() == 1 => (),
+            (Status::Strike, Some(v)) if v.len() == 2 => (),
+            _ => return None,
+        };
+        let mut total: u16 = self.frames[9].throws.iter().sum::<u16>()
+            + self.frames[9]
+                .fillballs
+                .as_ref()
+                .map(|v| v.iter().sum::<u16>())
+                .unwrap_or(0);
+        for (i, frame) in self.frames[..9].iter().enumerate() {
+            total += match (i, &frame.status) {
+                (_, Status::Open) => frame.throws.iter().sum(),
+                (_, Status::Spare) => 10 + self.frames[i + 1].throws[0],
+                (8, Status::Strike) => {
+                    10 + if self.frames[9].throws.len() == 2 {
+                        self.frames[9].throws.iter().sum::<u16>()
+                    } else {
+                        self.frames[9].throws[0] + self.frames[9].fillballs.as_ref().unwrap()[0]
+                    }
+                }
+                (_, Status::Strike) => {
+                    10 + if self.frames[i + 1].throws.len() == 2 {
+                        self.frames[i + 1].throws.iter().sum::<u16>()
+                    } else {
+                        self.frames[i + 1].throws[0] + self.frames[i + 2].throws[0]
+                    }
+                }
+                _ => return None,
+            };
+        }
+        Some(total)
     }
 }
 
