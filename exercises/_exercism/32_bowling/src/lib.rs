@@ -17,7 +17,13 @@ impl Frame {
             return Err(Error::NotEnoughPinsLeft);
         }
         match self.status {
-            FrameStatus::Unbegun => self.status = FrameStatus::Unfinished(pins),
+            FrameStatus::Unbegun => {
+                self.status = if pins == 10 {
+                    FrameStatus::Strike
+                } else {
+                    FrameStatus::Unfinished(pins)
+                }
+            }
             FrameStatus::Unfinished(knocked) => {
                 self.status = match knocked.checked_add(pins) {
                     Some(new_knocked) if new_knocked < 10 => FrameStatus::Open(new_knocked),
