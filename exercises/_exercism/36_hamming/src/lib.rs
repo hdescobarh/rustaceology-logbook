@@ -1,5 +1,11 @@
-/// Return the Hamming distance between the strings,
-/// or None if the lengths are mismatched.
 pub fn hamming_distance(s1: &str, s2: &str) -> Option<usize> {
-    todo!("What is the Hamming Distance between {s1} and {s2}");
+    if s1.len() != s2.len() {
+        // we expect only ASCII, so its is ok to compare the length in bytes
+        return None;
+    }
+    Some(
+        s1.chars()
+            .zip(s2.chars())
+            .fold(0_usize, |acc, (c1, c2)| acc + if c1 != c2 { 1 } else { 0 }),
+    )
 }
