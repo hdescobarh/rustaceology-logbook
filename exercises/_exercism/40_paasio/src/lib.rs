@@ -33,10 +33,10 @@ impl<R: Read> ReadStats<R> {
 
 impl<R: Read> Read for ReadStats<R> {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
-        let readed_bytes = self.wrapped.read(buf)?;
-        self.bytes += readed_bytes;
+        let read_bytes = self.wrapped.read(buf)?;
+        self.bytes += read_bytes;
         self.operations += 1;
-        Ok(readed_bytes)
+        Ok(read_bytes)
     }
 }
 
