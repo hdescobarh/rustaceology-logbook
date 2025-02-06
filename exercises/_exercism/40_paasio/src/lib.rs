@@ -40,35 +40,43 @@ impl<R: Read> Read for ReadStats<R> {
     }
 }
 
-pub struct WriteStats<W>(::std::marker::PhantomData<W>);
+pub struct WriteStats<W: Write> {
+    operations: usize,
+    bytes: usize,
+    wrapped: W,
+}
 
 impl<W: Write> WriteStats<W> {
-    // _wrapped is ignored because W is not bounded on Debug or Display and therefore
-    // can't be passed through format!(). For actual implementation you will likely
-    // wish to remove the leading underscore so the variable is not ignored.
-    pub fn new(_wrapped: W) -> WriteStats<W> {
-        todo!()
+    pub fn new(wrapped: W) -> WriteStats<W> {
+        Self {
+            operations: 0,
+            bytes: 0,
+            wrapped,
+        }
     }
 
     pub fn get_ref(&self) -> &W {
-        todo!()
+        &self.wrapped
     }
 
     pub fn bytes_through(&self) -> usize {
-        todo!()
+        self.bytes
     }
 
     pub fn writes(&self) -> usize {
-        todo!()
+        self.operations
     }
 }
 
 impl<W: Write> Write for WriteStats<W> {
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
-        todo!("Collect statistics about this call writing {buf:?}")
+        let written_bytes = self.wrapped.write(buf)?;
+        self.bytes += written_bytes;
+        self.operations += 1;
+        Ok(written_bytes)
     }
 
     fn flush(&mut self) -> Result<()> {
-        todo!()
+        self.wrapped.flush()
     }
 }
