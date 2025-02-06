@@ -25,10 +25,10 @@
         },
         {
             "languageId": "rust",
-            "includeRegExpList": [
-                "[/]{2,3}.*",
-                "[/][*]+\n?([\\S\\s]*?)[*][/]"
-            ],
+            // "includeRegExpList": [
+            //     "[/]{2,3}.*",
+            //     "[/][*]+\n?([\\S\\s]*?)[*][/]"
+            // ],
             "dictionaries": [
                 "rustDictionary"
             ]
