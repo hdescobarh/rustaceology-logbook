@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 #[derive(Clone)]
 struct StudentsList {
     grade: u32,
-    students: Vec<String>, // always sorted
+    students: Vec<String>, // since this is always sorted, it is best to use binary search (O(log n)) than liner search (vec contains method)
 }
 
 impl StudentsList {
@@ -23,23 +23,18 @@ impl StudentsList {
 
     pub fn add(&mut self, student: &str) -> Result<(), String> {
         let student = student.to_string();
-        if self.students.is_empty() {
-            self.students.push(student);
-            return Ok(());
+        if let Err(index) = self.students.binary_search(&student) {
+            self.students.insert(index, student);
+            Ok(())
+        } else {
+            Err(format!(
+                "Student {student} already is in grade {grade}",
+                grade = self.grade
+            ))
         }
-        match self.students.binary_search(&student) {
-            Ok(_) => {
-                return Err(format!(
-                    "Student {student} already is in grade {grade}",
-                    grade = self.grade
-                ))
-            }
-            Err(index) => self.students.insert(index, student),
-        };
-        Ok(())
     }
 
-    pub fn contains(&self, student: &str) -> bool {
+    pub fn includes(&self, student: &str) -> bool {
         self.students.binary_search(&student.to_string()).is_ok()
     }
 }
@@ -63,7 +58,7 @@ impl School {
 
     pub fn add(&mut self, grade: u32, student: &str) -> Result<(), String> {
         for (grade, list) in self.roster.iter() {
-            if list.contains(student) {
+            if list.includes(student) {
                 return Err(format!("Student {student} already is in grade {grade}"));
             }
         }
