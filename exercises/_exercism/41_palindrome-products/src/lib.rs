@@ -34,3 +34,27 @@ pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome
         "returns the minimum and maximum number of palindromes of the products of two factors in the range {min} to {max}"
     );
 }
+
+#[cfg(test)]
+mod test {
+    use crate::Palindrome;
+
+    #[test]
+    fn check_is_palindrome() {
+        let cases = [
+            (0, true),
+            (9, true),
+            (18, false),
+            (121, true),
+            (9009, true),
+            (123321, true),
+            (1234321, true),
+            (321321, false),
+            (3214321, false),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(Palindrome::is_palindrome(input), expected)
+        }
+    }
+}
