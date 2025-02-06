@@ -1,6 +1,7 @@
 use std::io::{Error, ErrorKind, Read, Result, Write};
 
 #[test]
+#[ignore]
 fn create_stats() {
     let mut data: Vec<u8> = Vec::new();
     let _ = paasio::ReadStats::new(data.as_slice());
@@ -16,7 +17,6 @@ mod read_string {
     static INPUT: &[u8] = b"Twas brillig, and the slithy toves/Did gyre and gimble in the wabe:/All mimsy were the borogoves,/And the mome raths outgrabe.";
 
     #[test]
-    #[ignore]
     fn read_passthrough() {
         let data = INPUT;
         let size = data.len();
@@ -36,7 +36,6 @@ mod read_string {
     }
 
     #[test]
-    #[ignore]
     fn read_chunks() {
         let data = INPUT;
         let size = data.len();
@@ -56,7 +55,6 @@ mod read_string {
     }
 
     #[test]
-    #[ignore]
     fn read_buffered_chunks() {
         let data = INPUT;
         let size = data.len();
