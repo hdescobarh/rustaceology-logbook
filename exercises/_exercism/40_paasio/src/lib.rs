@@ -3,32 +3,40 @@ use std::io::{Read, Result, Write};
 // the PhantomData instances in this file are just to stop compiler complaints
 // about missing generics; feel free to remove them
 
-pub struct ReadStats<R>(::std::marker::PhantomData<R>);
+pub struct ReadStats<R: Read> {
+    operations: usize,
+    bytes: usize,
+    wrapped: R,
+}
 
 impl<R: Read> ReadStats<R> {
-    // _wrapped is ignored because R is not bounded on Debug or Display and therefore
-    // can't be passed through format!(). For actual implementation you will likely
-    // wish to remove the leading underscore so the variable is not ignored.
-    pub fn new(_wrapped: R) -> ReadStats<R> {
-        todo!()
+    pub fn new(wrapped: R) -> ReadStats<R> {
+        Self {
+            operations: 0,
+            bytes: 0,
+            wrapped,
+        }
     }
 
     pub fn get_ref(&self) -> &R {
-        todo!()
+        &self.wrapped
     }
 
     pub fn bytes_through(&self) -> usize {
-        todo!()
+        self.bytes
     }
 
     pub fn reads(&self) -> usize {
-        todo!()
+        self.operations
     }
 }
 
 impl<R: Read> Read for ReadStats<R> {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
-        todo!("Collect statistics about this call reading {buf:?}")
+        let readed_bytes = self.wrapped.read(buf)?;
+        self.bytes += readed_bytes;
+        self.operations += 1;
+        Ok(readed_bytes)
     }
 }
 
