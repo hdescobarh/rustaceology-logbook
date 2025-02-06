@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/36_hamming/Cargo.toml",
+			"exercises/_exercism/37_isbn-verifier/Cargo.toml",
 		],
 	},
 	"extensions": {
