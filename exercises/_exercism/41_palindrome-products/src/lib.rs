@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -7,6 +8,12 @@ pub struct Palindrome {
 }
 
 impl Palindrome {
+    pub fn new(candidate: (u64, Vec<(u64, u64)>)) -> Self {
+        Self {
+            value: candidate.0,
+            factors: HashSet::from_iter(candidate.1),
+        }
+    }
     pub fn value(&self) -> u64 {
         self.value
     }
@@ -30,9 +37,24 @@ impl Palindrome {
 }
 
 pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
-    todo!(
-        "returns the minimum and maximum number of palindromes of the products of two factors in the range {min} to {max}"
-    );
+    let mut candidates: BTreeMap<u64, Vec<(u64, u64)>> = BTreeMap::new();
+    (min..=max)
+        .flat_map(|j| (min..=j).map(move |i| (i * j, (i, j))))
+        .filter(|(product, _)| Palindrome::is_palindrome(*product))
+        .for_each(|(product, factors)| {
+            candidates
+                .entry(product)
+                .and_modify(|f| f.push(factors))
+                .or_insert(vec![factors]);
+        });
+
+    let min_palindrome = Palindrome::new(candidates.pop_first()?);
+    let max_palindrome = candidates
+        .pop_last()
+        .map(Palindrome::new)
+        .unwrap_or(min_palindrome.clone());
+
+    Some((min_palindrome, max_palindrome))
 }
 
 #[cfg(test)]
