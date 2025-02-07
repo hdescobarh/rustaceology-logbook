@@ -54,8 +54,46 @@ pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome
     Some((min_palindrome, max_palindrome))
 }
 
+fn count_digits(mut number: u64) -> u64 {
+    if number < 10 {
+        return 1;
+    }
+    let mut count = 0;
+    while number > 0 {
+        count += 1;
+        number /= 10
+    }
+    count
+}
+
+fn append_reverse(prefix: u64, mut forward_suffix: u64) -> u64 {
+    let mut result = prefix;
+    while forward_suffix > 0 {
+        let a = forward_suffix % 10;
+        result = result * 10 + a;
+        forward_suffix /= 10;
+    }
+    result
+}
+
 fn next_palindrome(number: u64) -> u64 {
-    todo!()
+    let digits = count_digits(number);
+    let half_digits = (digits / 2) as u32;
+    if digits % 2 == 0 {
+        let prefix = 1 + number / 10_u64.pow(half_digits);
+        if count_digits(prefix) > half_digits as u64 {
+            append_reverse(prefix, prefix / 10)
+        } else {
+            append_reverse(prefix, prefix)
+        }
+    } else {
+        let prefix = 1 + number / 10_u64.pow(half_digits);
+        if count_digits(prefix) > (half_digits + 1) as u64 {
+            append_reverse(prefix / 10, prefix / 10)
+        } else {
+            append_reverse(prefix, prefix / 10)
+        }
+    }
 }
 
 #[cfg(test)]
