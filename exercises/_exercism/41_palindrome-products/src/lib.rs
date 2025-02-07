@@ -54,9 +54,13 @@ pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome
     Some((min_palindrome, max_palindrome))
 }
 
+fn next_palindrome(number: u64) -> u64 {
+    todo!()
+}
+
 #[cfg(test)]
 mod test {
-    use crate::Palindrome;
+    use crate::{next_palindrome, Palindrome};
 
     #[test]
     fn check_is_palindrome() {
@@ -74,6 +78,60 @@ mod test {
 
         for (input, expected) in cases {
             assert_eq!(Palindrome::is_palindrome(input), expected)
+        }
+    }
+
+    #[test]
+    fn next_palindrome_from_odd_to_same_length() {
+        let cases = [
+            (0, 1),
+            (1, 2),
+            (101, 111),
+            (5_000_005, 5_001_005),
+            (5_981_895, 5_982_895),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(next_palindrome(input), expected)
+        }
+    }
+
+    #[test]
+    fn next_palindrome_from_odd_to_higher_length() {
+        let cases = [
+            (9, 11),
+            (999, 1001),
+            (99_999, 100_001),
+            (99_999_999_999, 100_000_000_001),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(next_palindrome(input), expected)
+        }
+    }
+
+    #[test]
+    fn next_palindrome_from_even_to_same_length() {
+        let cases = [
+            (11, 22),
+            (99, 101),
+            (100_001, 101_101),
+            (101_101, 102_201),
+            (109_901, 110_011),
+            (76_543_211_234_567, 76_543_222_234_567),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(next_palindrome(input), expected)
+        }
+    }
+
+    #[test]
+    fn next_palindrome_from_even_to_higher_length() {
+        let cases = [
+            (9999, 10_001),
+            (999_999, 1_000_001),
+            (999_999_999_999, 1_000_000_000_001),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(next_palindrome(input), expected)
         }
     }
 }
