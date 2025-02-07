@@ -23,16 +23,13 @@ impl Palindrome {
     }
 
     fn is_palindrome(value: u64) -> bool {
-        if value < 10 {
-            return true;
+        let mut reverse = value;
+        let mut result = 0;
+        while reverse > 0 {
+            result = result * 10 + reverse % 10;
+            reverse /= 10;
         }
-        let digits: Vec<char> = format!("{}", value).chars().collect();
-        for index in 0..digits.len() / 2 {
-            if digits[index] != digits[digits.len() - index - 1] {
-                return false;
-            }
-        }
-        true
+        result == value
     }
 }
 
