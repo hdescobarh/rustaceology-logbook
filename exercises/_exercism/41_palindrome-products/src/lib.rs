@@ -33,7 +33,7 @@ impl Palindrome {
     }
 }
 
-pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
+pub fn _palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
     let mut candidates: BTreeMap<u64, Vec<(u64, u64)>> = BTreeMap::new();
     (min..=max)
         .flat_map(|j| (min..=j).map(move |i| (i * j, (i, j))))
@@ -52,6 +52,70 @@ pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome
         .unwrap_or(min_palindrome.clone());
 
     Some((min_palindrome, max_palindrome))
+}
+
+pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
+    let mut candidate_pal = PalindromeOperator::create(min.pow(2));
+    let mut min_factors = HashSet::new();
+
+    // find smaller palindrome
+    loop {
+        if candidate_pal > max.pow(2) {
+            break;
+        }
+        for a in min..=candidate_pal.isqrt() {
+            if candidate_pal % a == 0 {
+                min_factors.insert((a, candidate_pal / a));
+            }
+        }
+
+        if !min_factors.is_empty() {
+            break;
+        }
+        candidate_pal = PalindromeOperator::next(candidate_pal);
+    }
+    if min_factors.is_empty() {
+        return None;
+    }
+    let mut pal = candidate_pal;
+    let mut factors = min_factors.clone();
+    let smallest = Palindrome {
+        value: candidate_pal,
+        factors: min_factors,
+    };
+
+    let mut candidate_factors = HashSet::new();
+    candidate_pal = PalindromeOperator::next(candidate_pal);
+    // find higher palindrome
+    loop {
+        if candidate_pal > max.pow(2) {
+            break;
+        }
+
+        for a in candidate_pal.isqrt()..=max {
+            if candidate_pal % a == 0 {
+                candidate_factors.insert((candidate_pal / a, a));
+            }
+        }
+
+        if !candidate_factors.is_empty() {
+            factors = candidate_factors;
+            candidate_factors = HashSet::new();
+            pal = candidate_pal;
+        }
+        candidate_pal = PalindromeOperator::next(candidate_pal);
+    }
+
+    let highest = if factors.is_empty() {
+        smallest.clone()
+    } else {
+        Palindrome {
+            value: pal,
+            factors,
+        }
+    };
+
+    Some((smallest, highest))
 }
 
 struct PalindromeOperator {}
