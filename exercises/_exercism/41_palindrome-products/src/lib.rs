@@ -2,19 +2,16 @@ use std::collections::HashSet;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Palindrome {
-    value: u64,
+    number: u64,
     factors: HashSet<(u64, u64)>,
 }
 
 impl Palindrome {
-    pub fn new(candidate: (u64, Vec<(u64, u64)>)) -> Self {
-        Self {
-            value: candidate.0,
-            factors: HashSet::from_iter(candidate.1),
-        }
+    pub fn new(number: u64, factors: HashSet<(u64, u64)>) -> Self {
+        Self { number, factors }
     }
     pub fn value(&self) -> u64 {
-        self.value
+        self.number
     }
 
     pub fn into_factors(self) -> HashSet<(u64, u64)> {
@@ -23,72 +20,16 @@ impl Palindrome {
 }
 
 pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
-    let mut candidate_pal = PalindromeOperator::create(min.pow(2));
-    let mut min_factors = HashSet::new();
-
-    // find smaller palindrome
-    loop {
-        if candidate_pal > max.pow(2) {
-            break;
-        }
-        for a in min..=candidate_pal.isqrt() {
-            if candidate_pal % a == 0 {
-                min_factors.insert((a, candidate_pal / a));
-            }
-        }
-
-        if !min_factors.is_empty() {
-            break;
-        }
-        candidate_pal = PalindromeOperator::next(candidate_pal);
+    let smallest = PalinOps::find_smallest_pal(min, max)?;
+    match PalinOps::find_largest_pal(max, &smallest) {
+        Some(highest) => Some((smallest, highest)),
+        None => Some((smallest.clone(), smallest)),
     }
-    if min_factors.is_empty() {
-        return None;
-    }
-    let mut pal = candidate_pal;
-    let mut factors = min_factors.clone();
-    let smallest = Palindrome {
-        value: candidate_pal,
-        factors: min_factors,
-    };
-
-    let mut candidate_factors = HashSet::new();
-    candidate_pal = PalindromeOperator::next(candidate_pal);
-    // find higher palindrome
-    loop {
-        if candidate_pal > max.pow(2) {
-            break;
-        }
-
-        for a in candidate_pal.isqrt()..=max {
-            if candidate_pal % a == 0 {
-                candidate_factors.insert((candidate_pal / a, a));
-            }
-        }
-
-        if !candidate_factors.is_empty() {
-            factors = candidate_factors;
-            candidate_factors = HashSet::new();
-            pal = candidate_pal;
-        }
-        candidate_pal = PalindromeOperator::next(candidate_pal);
-    }
-
-    let highest = if factors.is_empty() {
-        smallest.clone()
-    } else {
-        Palindrome {
-            value: pal,
-            factors,
-        }
-    };
-
-    Some((smallest, highest))
 }
 
-struct PalindromeOperator {}
+struct PalinOps {}
 
-impl PalindromeOperator {
+impl PalinOps {
     pub fn create(from: u64) -> u64 {
         let mut new = Self::next_palindrome(from, false);
         while new < from {
@@ -139,11 +80,61 @@ impl PalindromeOperator {
             Self::append_reverse(prefix, prefix / 10)
         }
     }
+
+    pub fn find_smallest_pal(min: u64, max: u64) -> Option<Palindrome> {
+        let mut candidate = PalinOps::create(min.pow(2));
+        let mut factors = HashSet::new();
+        while candidate <= max.pow(2) {
+            for a in min..=candidate.isqrt() {
+                if candidate % a == 0 {
+                    factors.insert((a, candidate / a));
+                }
+            }
+            if !factors.is_empty() {
+                break;
+            }
+            candidate = PalinOps::next(candidate);
+        }
+        if factors.is_empty() {
+            None
+        } else {
+            Some(Palindrome::new(candidate, factors))
+        }
+    }
+
+    pub fn find_largest_pal(max: u64, smallest: &Palindrome) -> Option<Palindrome> {
+        let mut candidate_pal = smallest.number;
+        let (mut pal, mut factors) = (smallest.number, smallest.factors.clone());
+
+        let mut candidate_factors = HashSet::new();
+        candidate_pal = PalinOps::next(candidate_pal);
+        // find higher palindrome
+        while candidate_pal <= max.pow(2) {
+            for a in candidate_pal.isqrt()..=max {
+                if candidate_pal % a == 0 {
+                    candidate_factors.insert((candidate_pal / a, a));
+                }
+            }
+
+            if !candidate_factors.is_empty() {
+                factors = candidate_factors;
+                candidate_factors = HashSet::new();
+                pal = candidate_pal;
+            }
+            candidate_pal = PalinOps::next(candidate_pal);
+        }
+
+        if factors.is_empty() {
+            None
+        } else {
+            Some(Palindrome::new(pal, factors))
+        }
+    }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{Palindrome, PalindromeOperator};
+    use crate::{PalinOps, Palindrome};
 
     #[test]
     fn next_palindrome_from_odd_to_same_length() {
@@ -155,7 +146,7 @@ mod test {
             (5_981_895, 5_982_895),
         ];
         for (input, expected) in cases {
-            assert_eq!(PalindromeOperator::next_palindrome(input, true), expected)
+            assert_eq!(PalinOps::next_palindrome(input, true), expected)
         }
     }
 
@@ -168,7 +159,7 @@ mod test {
             (99_999_999_999, 100_000_000_001),
         ];
         for (input, expected) in cases {
-            assert_eq!(PalindromeOperator::next_palindrome(input, true), expected)
+            assert_eq!(PalinOps::next_palindrome(input, true), expected)
         }
     }
 
@@ -183,7 +174,7 @@ mod test {
             (76_543_211_234_567, 76_543_222_234_567),
         ];
         for (input, expected) in cases {
-            assert_eq!(PalindromeOperator::next_palindrome(input, true), expected)
+            assert_eq!(PalinOps::next_palindrome(input, true), expected)
         }
     }
 
@@ -195,7 +186,7 @@ mod test {
             (999_999_999_999, 1_000_000_000_001),
         ];
         for (input, expected) in cases {
-            assert_eq!(PalindromeOperator::next_palindrome(input, true), expected)
+            assert_eq!(PalinOps::next_palindrome(input, true), expected)
         }
     }
 }
