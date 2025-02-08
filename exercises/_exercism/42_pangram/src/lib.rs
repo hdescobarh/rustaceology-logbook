@@ -1,4 +1,8 @@
-/// Determine whether a sentence is a pangram.
+use std::collections::HashSet;
 pub fn is_pangram(sentence: &str) -> bool {
-    todo!("Is {sentence} a pangram?");
+    let mut letters: HashSet<char> = HashSet::from_iter('\u{0041}'..='\u{005A}');
+    sentence.chars().for_each(|c| {
+        letters.remove(&c.to_ascii_uppercase());
+    });
+    letters.is_empty()
 }
