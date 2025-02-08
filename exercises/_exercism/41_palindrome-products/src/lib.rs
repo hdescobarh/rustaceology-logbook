@@ -54,51 +54,64 @@ pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome
     Some((min_palindrome, max_palindrome))
 }
 
-fn count_digits(mut number: u64) -> u64 {
-    if number < 10 {
-        return 1;
-    }
-    let mut count = 0;
-    while number > 0 {
-        count += 1;
-        number /= 10
-    }
-    count
-}
+struct PalindromeOperator {}
 
-fn append_reverse(prefix: u64, mut forward_suffix: u64) -> u64 {
-    let mut result = prefix;
-    while forward_suffix > 0 {
-        let a = forward_suffix % 10;
-        result = result * 10 + a;
-        forward_suffix /= 10;
-    }
-    result
-}
-
-fn next_palindrome(number: u64) -> u64 {
-    let digits = count_digits(number);
-    let half_digits = (digits / 2) as u32;
-    if digits % 2 == 0 {
-        let prefix = 1 + number / 10_u64.pow(half_digits);
-        if count_digits(prefix) > half_digits as u64 {
-            append_reverse(prefix, prefix / 10)
-        } else {
-            append_reverse(prefix, prefix)
+impl PalindromeOperator {
+    pub fn create(from: u64) -> u64 {
+        let mut new = Self::next_palindrome(from, false);
+        while new < from {
+            new = Self::next_palindrome(new, true)
         }
-    } else {
-        let prefix = 1 + number / 10_u64.pow(half_digits);
-        if count_digits(prefix) > (half_digits + 1) as u64 {
-            append_reverse(prefix / 10, prefix / 10)
+        new
+    }
+
+    pub fn next(from: u64) -> u64 {
+        Self::next_palindrome(from, true)
+    }
+
+    fn count_digits(mut number: u64) -> u64 {
+        if number < 10 {
+            return 1;
+        }
+        let mut count = 0;
+        while number > 0 {
+            count += 1;
+            number /= 10
+        }
+        count
+    }
+
+    fn append_reverse(prefix: u64, mut forward_suffix: u64) -> u64 {
+        let mut result = prefix;
+        while forward_suffix > 0 {
+            let a = forward_suffix % 10;
+            result = result * 10 + a;
+            forward_suffix /= 10;
+        }
+        result
+    }
+
+    fn next_palindrome(number: u64, from_palindrome: bool) -> u64 {
+        let digits = Self::count_digits(number);
+        let half_digits = (digits / 2) as u32;
+        let prefix = number / 10_u64.pow(half_digits) + if from_palindrome { 1 } else { 0 };
+        if digits % 2 == 0 {
+            if Self::count_digits(prefix) > half_digits as u64 {
+                Self::append_reverse(prefix, prefix / 10)
+            } else {
+                Self::append_reverse(prefix, prefix)
+            }
+        } else if Self::count_digits(prefix) > (half_digits + 1) as u64 {
+            Self::append_reverse(prefix / 10, prefix / 10)
         } else {
-            append_reverse(prefix, prefix / 10)
+            Self::append_reverse(prefix, prefix / 10)
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{next_palindrome, Palindrome};
+    use crate::{Palindrome, PalindromeOperator};
 
     #[test]
     fn check_is_palindrome() {
@@ -129,7 +142,7 @@ mod test {
             (5_981_895, 5_982_895),
         ];
         for (input, expected) in cases {
-            assert_eq!(next_palindrome(input), expected)
+            assert_eq!(PalindromeOperator::next_palindrome(input, true), expected)
         }
     }
 
@@ -142,7 +155,7 @@ mod test {
             (99_999_999_999, 100_000_000_001),
         ];
         for (input, expected) in cases {
-            assert_eq!(next_palindrome(input), expected)
+            assert_eq!(PalindromeOperator::next_palindrome(input, true), expected)
         }
     }
 
@@ -157,7 +170,7 @@ mod test {
             (76_543_211_234_567, 76_543_222_234_567),
         ];
         for (input, expected) in cases {
-            assert_eq!(next_palindrome(input), expected)
+            assert_eq!(PalindromeOperator::next_palindrome(input, true), expected)
         }
     }
 
@@ -169,7 +182,7 @@ mod test {
             (999_999_999_999, 1_000_000_000_001),
         ];
         for (input, expected) in cases {
-            assert_eq!(next_palindrome(input), expected)
+            assert_eq!(PalindromeOperator::next_palindrome(input, true), expected)
         }
     }
 }
