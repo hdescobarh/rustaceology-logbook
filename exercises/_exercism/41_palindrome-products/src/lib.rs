@@ -21,10 +21,8 @@ impl Palindrome {
 
 pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
     let smallest = PalinOps::find_smallest_pal(min, max)?;
-    match PalinOps::find_largest_pal(max, &smallest) {
-        Some(highest) => Some((smallest, highest)),
-        None => Some((smallest.clone(), smallest)),
-    }
+    let highest = PalinOps::find_largest_pal(max, &smallest);
+    Some((smallest, highest))
 }
 
 struct PalinOps {}
@@ -53,7 +51,7 @@ impl PalinOps {
         }
         count
     }
-
+    // given prefix (dn..d0) and suffix: (am..a0), generates (dn..d0 a0..am)
     fn append_reverse(prefix: u64, mut forward_suffix: u64) -> u64 {
         let mut result = prefix;
         while forward_suffix > 0 {
@@ -102,39 +100,28 @@ impl PalinOps {
         }
     }
 
-    pub fn find_largest_pal(max: u64, smallest: &Palindrome) -> Option<Palindrome> {
-        let mut candidate_pal = smallest.number;
-        let (mut pal, mut factors) = (smallest.number, smallest.factors.clone());
-
-        let mut candidate_factors = HashSet::new();
-        candidate_pal = PalinOps::next(candidate_pal);
-        // find higher palindrome
-        while candidate_pal <= max.pow(2) {
-            for a in candidate_pal.isqrt()..=max {
-                if candidate_pal % a == 0 {
-                    candidate_factors.insert((candidate_pal / a, a));
+    pub fn find_largest_pal(max: u64, smallest: &Palindrome) -> Palindrome {
+        let (mut largest_pal, mut largest_factors) = (smallest.number, smallest.factors.clone());
+        let (mut pal, mut factors) = (PalinOps::next(largest_pal), HashSet::new());
+        while pal <= max.pow(2) {
+            for a in pal.isqrt()..=max {
+                if pal % a == 0 {
+                    factors.insert((pal / a, a));
                 }
             }
-
-            if !candidate_factors.is_empty() {
-                factors = candidate_factors;
-                candidate_factors = HashSet::new();
-                pal = candidate_pal;
+            if !factors.is_empty() {
+                (largest_pal, largest_factors, factors) = (pal, factors, HashSet::new());
             }
-            candidate_pal = PalinOps::next(candidate_pal);
+            pal = PalinOps::next(pal);
         }
 
-        if factors.is_empty() {
-            None
-        } else {
-            Some(Palindrome::new(pal, factors))
-        }
+        Palindrome::new(largest_pal, largest_factors)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{PalinOps, Palindrome};
+    use crate::PalinOps;
 
     #[test]
     fn next_palindrome_from_odd_to_same_length() {
