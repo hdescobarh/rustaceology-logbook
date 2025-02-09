@@ -37,5 +37,16 @@ pub fn encode(source: &str) -> String {
 }
 
 pub fn decode(source: &str) -> String {
-    todo!("Return the run-length decoding of {source}.");
+    source
+        .split_inclusive(|c: char| c.is_ascii_alphabetic() || c == ' ')
+        .map(|s| {
+            let (times, letter) = s.split_at(s.len() - 1);
+            let number_repeats = if times.is_empty() {
+                1
+            } else {
+                times.parse::<usize>().unwrap()
+            };
+            letter.repeat(number_repeats)
+        })
+        .collect()
 }
