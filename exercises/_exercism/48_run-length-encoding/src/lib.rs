@@ -1,39 +1,30 @@
-use std::iter::repeat;
-
 pub fn encode(source: &str) -> String {
-    // source contains only alphabetic ASCII
     let mut output = String::new();
-    let mut previous = None::<char>;
-    let mut count = 0;
-
+    let mut buffer: Option<(char, usize)> = None;
     for current in source.chars() {
-        match previous {
-            Some(v) if v == current => count += 1,
-            Some(v) => {
-                let encoded = if count > 1 {
-                    format!("{count}{v}")
-                } else {
-                    format!("{v}")
-                };
-                output.push_str(&encoded);
-                previous = Some(current);
-                count = 1;
+        match buffer {
+            Some((letter, times)) if current == letter => buffer = Some((letter, times + 1)),
+            Some((letter, times)) => {
+                encode_letter(letter, times, &mut output);
+                buffer = Some((current, 1))
             }
-            None => {
-                previous = Some(current);
-                count += 1;
-            }
-        };
+            None => buffer = Some((current, 1)),
+        }
     }
-    if let Some(v) = previous {
-        let encoded = if count > 1 {
-            format!("{count}{v}")
-        } else {
-            format!("{v}")
-        };
-        output.push_str(&encoded);
+
+    if let Some((letter, times)) = buffer {
+        encode_letter(letter, times, &mut output);
     }
     output
+}
+
+fn encode_letter(letter: char, times: usize, output: &mut String) {
+    let encoded_letter = if times > 1 {
+        format!("{times}{letter}")
+    } else {
+        format!("{letter}")
+    };
+    output.push_str(&encoded_letter);
 }
 
 pub fn decode(source: &str) -> String {
