@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/44_perfect-numbers/Cargo.toml",
+			"exercises/_exercism/45_pig-latin/Cargo.toml",
 		],
 	},
 	"extensions": {
