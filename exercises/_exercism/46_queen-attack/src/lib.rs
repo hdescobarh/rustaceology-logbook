@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub struct ChessPosition {
     file: i8,
-    ranK: i8,
+    rank: i8,
 }
 
 #[derive(Debug)]
@@ -16,7 +16,7 @@ impl ChessPosition {
         }
         Some(Self {
             file: file as i8,
-            ranK: rank as i8,
+            rank: rank as i8,
         })
     }
 }
@@ -29,7 +29,7 @@ impl Queen {
     pub fn can_attack(&self, other: &Queen) -> bool {
         match (
             self.position.file - other.position.file,
-            self.position.ranK - other.position.ranK,
+            self.position.rank - other.position.rank,
         ) {
             (0, _) => true,
             (_, 0) => true,
