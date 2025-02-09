@@ -94,3 +94,19 @@ fn zero_is_rejected_as_it_is_not_a_positive_integer() {
     let output = classify(input);
     assert!(output.is_none());
 }
+
+#[test]
+fn ten_digits_perfect_classified_correctly() {
+    let input = 8_589_869_056;
+    let output = classify(input);
+    let expected = Some(Classification::Perfect);
+    assert_eq!(output, expected);
+}
+
+#[test]
+fn fifteen_digits_deficient_classified_correctly() {
+    let input = 959_330_550_337;
+    let output = classify(input);
+    let expected = Some(Classification::Deficient);
+    assert_eq!(output, expected);
+}
