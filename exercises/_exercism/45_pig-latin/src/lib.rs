@@ -8,17 +8,15 @@ const RULES: [&str; 4] = [
 pub fn translate(input: &str) -> String {
     input
         .split_inclusive(|c: char| c.is_ascii_whitespace())
-        .map(translate_word)
+        .map(|w| translate_word(w).unwrap_or_default())
         .collect()
 }
 
-fn translate_word(word: &str) -> String {
-    for rule in &RULES[..RULES.len()] {
-        let re = Regex::new(rule).unwrap();
-        if let Some(caps) = re.captures(word) {
-            return [&caps["prefix"], &caps["suffix"], "ay", &caps["spaces"]].join("");
+fn translate_word(word: &str) -> Option<String> {
+    for rule in RULES {
+        if let Some(caps) = Regex::new(rule).ok()?.captures(word) {
+            return Some([&caps["prefix"], &caps["suffix"], "ay", &caps["spaces"]].join(""));
         };
     }
-    let re = Regex::new(RULES.last().unwrap()).unwrap();
-    re.replace_all(word, "$prefix${suffix}ay").to_string()
+    None
 }
