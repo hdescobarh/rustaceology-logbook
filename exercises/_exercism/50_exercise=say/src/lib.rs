@@ -12,6 +12,7 @@ pub fn encode(mut n: u64) -> String {
     }
     periods
         .into_iter()
+        .rev()
         .map(String::from)
         .collect::<Vec<String>>()
         .join(" ")
@@ -68,13 +69,11 @@ impl Period {
 
     fn places_to_word(&self) -> String {
         match (self.hundreds, self.tens, self.ones) {
-            (0, 0, _) => Self::digit_to_word(self.ones).to_string(),
+            (0, 0, ones) => Self::digit_to_word(ones).to_string(),
             (0, _, _) => self.tens_to_word().to_string(),
-            (_, _, _) => format!(
-                "{} hundred{}",
-                Self::digit_to_word(self.hundreds),
-                self.tens_to_word()
-            ),
+            (_, 0, 0) => self.hundreds_to_word(),
+            (_, 0, ones) => format!("{} {}", self.hundreds_to_word(), Self::digit_to_word(ones)),
+            (_, _, _) => format!("{} {}", self.hundreds_to_word(), self.tens_to_word()),
         }
     }
 
@@ -117,16 +116,20 @@ impl Period {
 
     fn tens_prefix_from_twenty(&self) -> &str {
         match self.tens {
-            2 => " twenty",
-            3 => " thirty",
-            4 => " forty",
-            5 => " fifty",
-            6 => " sixty",
-            7 => " seventy",
-            8 => " eighty",
-            9 => " ninety",
+            2 => "twenty",
+            3 => "thirty",
+            4 => "forty",
+            5 => "fifty",
+            6 => "sixty",
+            7 => "seventy",
+            8 => "eighty",
+            9 => "ninety",
             _ => "",
         }
+    }
+
+    fn hundreds_to_word(&self) -> String {
+        format!("{} hundred", Self::digit_to_word(self.hundreds))
     }
 }
 
