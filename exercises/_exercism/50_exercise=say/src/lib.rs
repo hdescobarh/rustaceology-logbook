@@ -2,20 +2,16 @@ pub fn encode(mut n: u64) -> String {
     if n == 0 {
         return Period::null().into();
     }
-    let (mut current, mut periods) = (0, Vec::new());
+    let (mut current, mut periods_str) = (0, Vec::<String>::new());
     while n > 0 {
         if let Some(p) = Period::new(n % 1000, current) {
-            periods.push(p);
+            periods_str.push(p.into());
         }
         n /= 1000;
         current += 1;
     }
-    periods
-        .into_iter()
-        .rev()
-        .map(String::from)
-        .collect::<Vec<String>>()
-        .join(" ")
+    periods_str.reverse();
+    periods_str.join(" ")
 }
 
 struct Period {
