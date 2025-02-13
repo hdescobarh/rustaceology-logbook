@@ -2,10 +2,11 @@ use sieve::*;
 
 #[test]
 fn no_primes_under_two() {
-    let input = 1;
-    let output = primes_up_to(input);
-    let expected = [];
-    assert_eq!(output, expected);
+    for input in 0..=1 {
+        let output = primes_up_to(input);
+        let expected = [];
+        assert_eq!(output, expected);
+    }
 }
 
 #[test]
