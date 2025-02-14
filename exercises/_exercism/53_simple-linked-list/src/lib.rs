@@ -12,17 +12,11 @@ impl<T> Node<T> {
     }
 
     fn next_as_ref(&self) -> Option<&Self> {
-        match &self.next {
-            Some(node) => Some(node),
-            None => None,
-        }
+        self.next.as_deref()
     }
 
     fn next_as_mut(&mut self) -> Option<&mut Self> {
-        match &mut self.next {
-            Some(node) => Some(node),
-            None => None,
-        }
+        self.next.as_deref_mut()
     }
 
     fn push(&mut self, element: T) {
