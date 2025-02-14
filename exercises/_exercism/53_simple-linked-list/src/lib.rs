@@ -1,14 +1,16 @@
+use std::ops::Deref;
+
 struct Node<T> {
     element: T,
     next: Option<Box<Node<T>>>,
 }
 
 impl<T> Node<T> {
-    fn new(element: T) -> Box<Self> {
-        Box::new(Self {
+    fn new(element: T) -> Self {
+        Self {
             element,
             next: None,
-        })
+        }
     }
 
     fn next_as_ref(&self) -> Option<&Self> {
@@ -29,52 +31,98 @@ impl<T> Node<T> {
         if self.next.is_some() {
             panic!("Current node already have a next");
         };
-        self.next = Some(Self::new(element));
+        self.next = Some(Box::new(Self::new(element)));
+    }
+
+    fn is_second_last(&self) -> bool {
+        match &self.next {
+            Some(node) => node.next.is_none(),
+            None => false,
+        }
+    }
+
+    fn unwrap(self) -> T {
+        if self.next.is_some() {
+            panic!("Cannot unwrap nodes with some next")
+        }
+        self.element
+    }
+
+    fn peek(&self) -> &T {
+        &self.element
     }
 
     fn take_next(&mut self) -> Option<T> {
-        match &self.next {
-            Some(node) if node.next.is_some() => panic!("Cannot take nodes with some next"),
-            _ => (),
-        };
+        if self.next.is_some() {
+            panic!("Cannot take nodes with some next")
+        }
         self.next.take().map(|node| node.element)
     }
 }
 
 pub struct SimpleLinkedList<T> {
-    // Delete this field
-    // dummy is needed to avoid unused parameter error during compilation
-    dummy: ::std::marker::PhantomData<T>,
+    head: Option<Node<T>>,
 }
 
 impl<T> SimpleLinkedList<T> {
     pub fn new() -> Self {
-        todo!()
+        Self { head: None }
     }
 
-    // You may be wondering why it's necessary to have is_empty()
-    // when it can easily be determined from len().
-    // It's good custom to have both because len() can be expensive for some types,
-    // whereas is_empty() is almost always cheap.
-    // (Also ask yourself whether len() is expensive for SimpleLinkedList)
     pub fn is_empty(&self) -> bool {
-        todo!()
+        self.head.is_none()
     }
 
     pub fn len(&self) -> usize {
-        todo!()
+        let (mut current, mut length) = match &self.head {
+            Some(node) => (node, 1),
+            None => return 0,
+        };
+        while let Some(node) = current.next_as_ref() {
+            current = node;
+            length += 1
+        }
+        length
     }
 
-    pub fn push(&mut self, _element: T) {
-        todo!()
+    pub fn push(&mut self, element: T) {
+        let mut current = match &mut self.head {
+            Some(node) => node,
+            None => {
+                self.head = Some(Node::new(element));
+                return;
+            }
+        };
+        while current.next_as_ref().is_some() {
+            current = current.next_as_mut().unwrap();
+        }
+        current.push(element);
     }
 
     pub fn pop(&mut self) -> Option<T> {
-        todo!()
+        let mut current = match self.head.as_ref() {
+            Some(node) if node.next_as_ref().is_none() => {
+                return Some(self.head.take().unwrap().unwrap());
+            }
+            None => return None,
+            _ => self.head.as_mut().unwrap(),
+        };
+
+        while !current.is_second_last() {
+            current = current.next_as_mut().unwrap();
+        }
+        current.take_next()
     }
 
     pub fn peek(&self) -> Option<&T> {
-        todo!()
+        let mut current = match &self.head {
+            Some(node) => node,
+            None => return None,
+        };
+        while current.next_as_ref().is_some() {
+            current = current.next_as_ref().unwrap();
+        }
+        Some(current.peek())
     }
 
     #[must_use]
