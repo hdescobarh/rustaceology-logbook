@@ -1,62 +1,65 @@
-struct Node<T> {
-    element: T,
-    next: Option<Box<Node<T>>>,
+mod list_node {
+    pub struct Node<T> {
+        element: T,
+        next: Option<Box<Node<T>>>,
+    }
+
+    impl<T> Node<T> {
+        pub fn new(element: T) -> Self {
+            Self {
+                element,
+                next: None,
+            }
+        }
+
+        pub fn next_as_ref(&self) -> Option<&Self> {
+            self.next.as_deref()
+        }
+
+        pub fn next_as_mut(&mut self) -> Option<&mut Self> {
+            self.next.as_deref_mut()
+        }
+
+        pub fn push(&mut self, element: T) {
+            if self.next.is_some() {
+                panic!("Current node already have a next");
+            };
+            self.next = Some(Box::new(Self::new(element)));
+        }
+
+        pub fn is_second_last(&self) -> bool {
+            match &self.next {
+                Some(node) => node.next.is_none(),
+                None => false,
+            }
+        }
+
+        pub fn unwrap(self) -> T {
+            if self.next.is_some() {
+                panic!("Cannot unwrap nodes with some next")
+            }
+            self.element
+        }
+
+        pub fn peek(&self) -> &T {
+            &self.element
+        }
+
+        pub fn take_next(&mut self) -> Option<T> {
+            if self
+                .next
+                .as_ref()
+                .map(|next_node| next_node.next.is_some())
+                .unwrap_or(false)
+            {
+                panic!("Cannot take nodes with some next")
+            }
+            self.next.take().map(|node| node.element)
+        }
+    }
 }
 
-impl<T> Node<T> {
-    fn new(element: T) -> Self {
-        Self {
-            element,
-            next: None,
-        }
-    }
-
-    fn next_as_ref(&self) -> Option<&Self> {
-        self.next.as_deref()
-    }
-
-    fn next_as_mut(&mut self) -> Option<&mut Self> {
-        self.next.as_deref_mut()
-    }
-
-    fn push(&mut self, element: T) {
-        if self.next.is_some() {
-            panic!("Current node already have a next");
-        };
-        self.next = Some(Box::new(Self::new(element)));
-    }
-
-    fn is_second_last(&self) -> bool {
-        match &self.next {
-            Some(node) => node.next.is_none(),
-            None => false,
-        }
-    }
-
-    fn unwrap(self) -> T {
-        if self.next.is_some() {
-            panic!("Cannot unwrap nodes with some next")
-        }
-        self.element
-    }
-
-    fn peek(&self) -> &T {
-        &self.element
-    }
-
-    fn take_next(&mut self) -> Option<T> {
-        if self
-            .next
-            .as_ref()
-            .map(|next_node| next_node.next.is_some())
-            .unwrap_or(false)
-        {
-            panic!("Cannot take nodes with some next")
-        }
-        self.next.take().map(|node| node.element)
-    }
-}
-
+use list_node::Node;
 pub struct SimpleLinkedList<T> {
     head: Option<Node<T>>,
 }
