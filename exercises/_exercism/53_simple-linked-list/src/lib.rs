@@ -1,3 +1,46 @@
+struct Node<T> {
+    element: T,
+    next: Option<Box<Node<T>>>,
+}
+
+impl<T> Node<T> {
+    fn new(element: T) -> Box<Self> {
+        Box::new(Self {
+            element,
+            next: None,
+        })
+    }
+
+    fn next_as_ref(&self) -> Option<&Self> {
+        match &self.next {
+            Some(node) => Some(node),
+            None => None,
+        }
+    }
+
+    fn next_as_mut(&mut self) -> Option<&mut Self> {
+        match &mut self.next {
+            Some(node) => Some(node),
+            None => None,
+        }
+    }
+
+    fn push(&mut self, element: T) {
+        if self.next.is_some() {
+            panic!("Current node already have a next");
+        };
+        self.next = Some(Self::new(element));
+    }
+
+    fn take_next(&mut self) -> Option<T> {
+        match &self.next {
+            Some(node) if node.next.is_some() => panic!("Cannot take nodes with some next"),
+            _ => (),
+        };
+        self.next.take().map(|node| node.element)
+    }
+}
+
 pub struct SimpleLinkedList<T> {
     // Delete this field
     // dummy is needed to avoid unused parameter error during compilation
