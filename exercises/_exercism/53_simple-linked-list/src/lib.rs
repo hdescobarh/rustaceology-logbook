@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 struct Node<T> {
     element: T,
     next: Option<Box<Node<T>>>,
@@ -53,7 +51,12 @@ impl<T> Node<T> {
     }
 
     fn take_next(&mut self) -> Option<T> {
-        if self.next.is_some() {
+        if self
+            .next
+            .as_ref()
+            .map(|next_node| next_node.next.is_some())
+            .unwrap_or(false)
+        {
             panic!("Cannot take nodes with some next")
         }
         self.next.take().map(|node| node.element)
