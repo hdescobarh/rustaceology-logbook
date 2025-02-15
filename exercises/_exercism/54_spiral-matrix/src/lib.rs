@@ -14,54 +14,59 @@
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum Direction {
     Init,
-    Right(usize),
-    Down(usize),
-    Left(usize),
-    Up(usize),
+    Right,
+    Down,
+    Left,
+    Up,
 }
 
 impl Direction {
-    fn next(&self, steps: usize) -> Self {
+    fn next(&self) -> Self {
         match self {
-            Direction::Init => Direction::Right(steps),
-            Direction::Right(_) => Direction::Down(steps),
-            Direction::Down(_) => Direction::Left(steps),
-            Direction::Left(_) => Direction::Up(steps),
-            Direction::Up(_) => Direction::Right(steps),
+            Direction::Init => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+            Direction::Up => Direction::Right,
         }
     }
 }
-struct Movement {
+
+struct Cycles {
     remaining_rows: usize,
     remaining_cols: usize,
     cycle: usize,
+    steps: usize,
     direction: Direction,
 }
 
-impl Movement {
+impl Cycles {
     pub fn new(rows: usize, cols: usize) -> Self {
         Self {
             remaining_rows: rows - 1,
             remaining_cols: cols,
             cycle: 0,
+            steps: 0,
             direction: Direction::Init,
         }
     }
 }
 
-impl Iterator for Movement {
-    type Item = Direction;
+impl Iterator for Cycles {
+    type Item = (Direction, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.cycle % 2 == 0 {
-            self.direction = self.direction.next(self.remaining_cols);
+            self.direction = self.direction.next();
+            self.steps = self.remaining_cols;
             self.remaining_cols = self.remaining_cols.checked_sub(1)?;
         } else {
-            self.direction = self.direction.next(self.remaining_rows);
+            self.direction = self.direction.next();
+            self.steps = self.remaining_rows;
             self.remaining_rows = self.remaining_rows.checked_sub(1)?;
         }
         self.cycle += 1;
-        Some(self.direction)
+        Some((self.direction, self.steps))
     }
 }
 pub fn spiral_matrix(size: u32) -> Vec<Vec<u32>> {
@@ -75,13 +80,13 @@ mod test {
     #[test]
     fn directions_cols_smallest() {
         let (rows, cols) = (3, 4);
-        let moves: Vec<Direction> = Movement::new(rows, cols).take(rows * cols).collect();
+        let moves: Vec<(Direction, usize)> = Cycles::new(rows, cols).take(rows * cols).collect();
         let expect = vec![
-            Direction::Right(4),
-            Direction::Down(2),
-            Direction::Left(3),
-            Direction::Up(1),
-            Direction::Right(2),
+            (Direction::Right, 4),
+            (Direction::Down, 2),
+            (Direction::Left, 3),
+            (Direction::Up, 1),
+            (Direction::Right, 2),
         ];
         assert_eq!(moves, expect)
     }
@@ -89,14 +94,14 @@ mod test {
     #[test]
     fn directions_rows_smallest() {
         let (rows, cols) = (4, 3);
-        let moves: Vec<Direction> = Movement::new(rows, cols).take(rows * cols).collect();
+        let moves: Vec<(Direction, usize)> = Cycles::new(rows, cols).take(rows * cols).collect();
         let expect = vec![
-            Direction::Right(3),
-            Direction::Down(3),
-            Direction::Left(2),
-            Direction::Up(2),
-            Direction::Right(1),
-            Direction::Down(1),
+            (Direction::Right, 3),
+            (Direction::Down, 3),
+            (Direction::Left, 2),
+            (Direction::Up, 2),
+            (Direction::Right, 1),
+            (Direction::Down, 1),
         ];
         assert_eq!(moves, expect)
     }
