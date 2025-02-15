@@ -13,7 +13,6 @@
 // Then, the strategy is to implement a generator of the pattern
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum Direction {
-    Init,
     Right,
     Down,
     Left,
@@ -23,7 +22,6 @@ enum Direction {
 impl Direction {
     fn next(&self) -> Self {
         match self {
-            Direction::Init => Direction::Right,
             Direction::Right => Direction::Down,
             Direction::Down => Direction::Left,
             Direction::Left => Direction::Up,
@@ -47,7 +45,7 @@ impl Cycles {
             remaining_cols: cols,
             cycle: 0,
             steps: 0,
-            direction: Direction::Init,
+            direction: Direction::Up,
         }
     }
 }
