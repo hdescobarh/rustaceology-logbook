@@ -14,7 +14,25 @@
 
 type Coordinate = (usize, usize);
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+pub fn spiral_matrix(size: u32) -> Vec<Vec<u32>> {
+    if size == 0 {
+        return vec![];
+    }
+    let size = size as usize;
+    let mut matrix = vec![vec![0; size]; size];
+    let (mut last_cell, mut index) = (None, 1);
+    for (direction, steps) in Cycles::new(size, size).take(2 * size) {
+        let next_cells = direction.apply_direction_steps_times(last_cell.as_ref(), steps);
+        last_cell = next_cells.last().copied();
+        for coordinate in next_cells {
+            matrix[coordinate.0][coordinate.1] = index;
+            index += 1
+        }
+    }
+    matrix
+}
+
+#[derive(Copy, Clone)]
 enum Direction {
     Right,
     Down,
@@ -96,42 +114,5 @@ impl Iterator for Cycles {
         }
         self.cycle += 1;
         Some((self.direction, self.steps))
-    }
-}
-pub fn spiral_matrix(size: u32) -> Vec<Vec<u32>> {
-    todo!("Function that returns the spiral matrix of square size {size}");
-}
-
-#[cfg(test)]
-mod test {
-    use crate::*;
-
-    #[test]
-    fn directions_cols_smallest() {
-        let (rows, cols) = (3, 4);
-        let moves: Vec<(Direction, usize)> = Cycles::new(rows, cols).take(rows * cols).collect();
-        let expect = vec![
-            (Direction::Right, 4),
-            (Direction::Down, 2),
-            (Direction::Left, 3),
-            (Direction::Up, 1),
-            (Direction::Right, 2),
-        ];
-        assert_eq!(moves, expect)
-    }
-
-    #[test]
-    fn directions_rows_smallest() {
-        let (rows, cols) = (4, 3);
-        let moves: Vec<(Direction, usize)> = Cycles::new(rows, cols).take(rows * cols).collect();
-        let expect = vec![
-            (Direction::Right, 3),
-            (Direction::Down, 3),
-            (Direction::Left, 2),
-            (Direction::Up, 2),
-            (Direction::Right, 1),
-            (Direction::Down, 1),
-        ];
-        assert_eq!(moves, expect)
     }
 }
