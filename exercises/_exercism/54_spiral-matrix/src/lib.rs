@@ -18,15 +18,15 @@ pub fn spiral_matrix(size: u32) -> Vec<Vec<u32>> {
     if size == 0 {
         return vec![];
     }
-    let size = size as usize;
-    let mut matrix = vec![vec![0; size]; size];
-    let (mut last_cell, mut index) = (None, 1);
+    let size = usize::try_from(size).unwrap();
+    let (mut matrix, mut last_cell, mut number) = (vec![vec![0; size]; size], None, 1);
+
     for (direction, steps) in Cycles::new(size, size).take(2 * size) {
-        let next_cells = direction.apply_direction_steps_times(last_cell.as_ref(), steps);
+        let next_cells: Vec<Coordinate> = direction.advance_steps_times(last_cell.as_ref(), steps);
         last_cell = next_cells.last().copied();
         for coordinate in next_cells {
-            matrix[coordinate.0][coordinate.1] = index;
-            index += 1
+            matrix[coordinate.0][coordinate.1] = number;
+            number += 1
         }
     }
     matrix
@@ -50,7 +50,7 @@ impl Direction {
         }
     }
 
-    fn apply_direction_to_coordinate(&self, coordinate: &Coordinate) -> Coordinate {
+    fn advance_in_direction(&self, coordinate: &Coordinate) -> Coordinate {
         match self {
             Direction::Right => (coordinate.0, coordinate.1 + 1),
             Direction::Down => (coordinate.0 + 1, coordinate.1),
@@ -58,22 +58,22 @@ impl Direction {
             Direction::Up => (coordinate.0 - 1, coordinate.1),
         }
     }
-    fn apply_direction_steps_times(
+    fn advance_steps_times(
         &self,
         coordinate: Option<&Coordinate>,
         steps: usize,
     ) -> Vec<Coordinate> {
         let mut moves: Vec<Coordinate> = Vec::with_capacity(steps);
         match coordinate {
-            Some(coo) => {
-                moves.push(self.apply_direction_to_coordinate(coo));
+            Some(coordinate) => {
+                moves.push(self.advance_in_direction(coordinate));
             }
             None => {
                 moves.push((0, 0));
             }
         };
         for _ in 1..steps {
-            moves.push(self.apply_direction_to_coordinate(moves.last().unwrap()))
+            moves.push(self.advance_in_direction(moves.last().unwrap()))
         }
         moves
     }
