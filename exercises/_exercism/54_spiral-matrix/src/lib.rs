@@ -11,6 +11,9 @@
 // (a) f(m-1) = mn
 // (b) f(n) = mn
 // Then, the strategy is to implement a generator of the pattern
+
+type Coordinate = (usize, usize);
+
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum Direction {
     Right,
@@ -27,6 +30,34 @@ impl Direction {
             Direction::Left => Direction::Up,
             Direction::Up => Direction::Right,
         }
+    }
+
+    fn apply_direction_to_coordinate(&self, coordinate: &Coordinate) -> Coordinate {
+        match self {
+            Direction::Right => (coordinate.0, coordinate.1 + 1),
+            Direction::Down => (coordinate.0 + 1, coordinate.1),
+            Direction::Left => (coordinate.0, coordinate.1 - 1),
+            Direction::Up => (coordinate.0 - 1, coordinate.1),
+        }
+    }
+    fn apply_direction_steps_times(
+        &self,
+        coordinate: Option<&Coordinate>,
+        steps: usize,
+    ) -> Vec<Coordinate> {
+        let mut moves: Vec<Coordinate> = Vec::with_capacity(steps);
+        match coordinate {
+            Some(coo) => {
+                moves.push(self.apply_direction_to_coordinate(coo));
+            }
+            None => {
+                moves.push((0, 0));
+            }
+        };
+        for _ in 1..steps {
+            moves.push(self.apply_direction_to_coordinate(moves.last().unwrap()))
+        }
+        moves
     }
 }
 
