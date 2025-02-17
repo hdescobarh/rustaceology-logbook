@@ -119,24 +119,16 @@ impl Display for Summary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let w1 = 31;
         let w2 = 2;
-        writeln!(
+        write!(
             f,
             "{:<w1$}| {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$}",
             "Team", "MP", "W", "D", "L", "P"
         )?;
 
-        for stats in &self.0[..self.0.len() - 1] {
-            writeln!(
-                f,
-                "{:<w1$}| {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$}",
-                stats.team, stats.games, stats.won, stats.tied, stats.lost, stats.points
-            )?;
-        }
-
-        if let Some(stats) = self.0.last() {
+        for stats in &self.0 {
             write!(
                 f,
-                "{:<w1$}| {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$}",
+                "\n{:<w1$}| {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$}",
                 stats.team, stats.games, stats.won, stats.tied, stats.lost, stats.points
             )?;
         }
