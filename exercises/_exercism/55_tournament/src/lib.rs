@@ -7,11 +7,26 @@ const DRAW_SCORE: u16 = 1;
 const LOSS_SCORE: u16 = 0;
 
 pub fn tally(match_results: &str) -> String {
-    let mut summary = Summary::new();
+    let mut parsed_data: BTreeMap<&str, TeamStats> = BTreeMap::new();
     for line in match_results.lines() {
-        summary.read_line(line);
+        let mut match_result = None::<MatchResult>;
+        for (col, value) in line.split(COLUMN_DELIMITER).rev().enumerate() {
+            let team_result = match col {
+                0 => {
+                    match_result = MatchResult::try_from(value).ok();
+                    continue;
+                }
+                1 => &match_result.as_ref().unwrap().as_rival_result(),
+                2 => match_result.as_ref().unwrap(),
+                _ => panic!("Wrong format. Expects three columns"),
+            };
+            parsed_data
+                .entry(value)
+                .and_modify(|team| team.add_match_result(team_result))
+                .or_insert(TeamStats::new(value).with_match(team_result));
+        }
     }
-    summary.to_string()
+    Summary::new(parsed_data).to_string()
 }
 
 enum MatchResult {
@@ -90,41 +105,18 @@ impl TeamStats {
     }
 }
 
-struct Summary<'a> {
-    data: BTreeMap<&'a str, TeamStats>,
-}
+struct Summary(Vec<TeamStats>);
 
-impl<'a> Summary<'a> {
-    fn new() -> Self {
-        Self {
-            data: BTreeMap::new(),
-        }
-    }
-
-    fn read_line(&mut self, line: &'a str) {
-        let mut match_result = None::<MatchResult>;
-        for (col, value) in line.split(COLUMN_DELIMITER).rev().enumerate() {
-            let team_result = match col {
-                0 => {
-                    match_result = MatchResult::try_from(value).ok();
-                    continue;
-                }
-                1 => &match_result.as_ref().unwrap().as_rival_result(),
-                2 => match_result.as_ref().unwrap(),
-                _ => panic!("Wrong format. Expects three columns"),
-            };
-            self.data
-                .entry(value)
-                .and_modify(|team| team.add_match_result(team_result))
-                .or_insert(TeamStats::new(value).with_match(team_result));
-        }
+impl Summary {
+    fn new(data: BTreeMap<&str, TeamStats>) -> Self {
+        let mut sorted_data: Vec<TeamStats> = data.into_values().collect();
+        sorted_data.sort_by_key(|team| Reverse(team.points));
+        Self(sorted_data)
     }
 }
 
-impl Display for Summary<'_> {
+impl Display for Summary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut output: Vec<&TeamStats> = self.data.values().collect();
-        output.sort_by_key(|team| Reverse(team.points));
         let w1 = 31;
         let w2 = 2;
         writeln!(
@@ -133,7 +125,7 @@ impl Display for Summary<'_> {
             "Team", "MP", "W", "D", "L", "P"
         )?;
 
-        for stats in &output[..output.len() - 1] {
+        for stats in &self.0[..self.0.len() - 1] {
             writeln!(
                 f,
                 "{:<w1$}| {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$}",
@@ -141,7 +133,7 @@ impl Display for Summary<'_> {
             )?;
         }
 
-        if let Some(stats) = output.last() {
+        if let Some(stats) = self.0.last() {
             write!(
                 f,
                 "{:<w1$}| {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$} | {:>w2$}",
@@ -150,15 +142,5 @@ impl Display for Summary<'_> {
         }
 
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod test {
-
-    #[test]
-    fn prueba() {
-        let input: &[&str] = &["Allegoric Alaskans;Blithering Badgers;win"];
-        let input = input.join("\n");
     }
 }
