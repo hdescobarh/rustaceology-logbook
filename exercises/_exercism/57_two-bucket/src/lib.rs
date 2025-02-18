@@ -41,10 +41,10 @@ pub fn solve(
     start_bucket: &Bucket,
 ) -> Option<BucketStats> {
     let mut visited_nodes = HashMap::new();
-    let mut solution = None::<State>;
+    let mut solution = None::<(State, u8)>;
     let root = TreeNode::new(&capacity_1, &capacity_2, start_bucket);
     TreeNode::branch(Some(root), goal, &mut visited_nodes, &mut solution);
-    solution.map(|s| BucketStats::new(s.volume_1, s.volume_2, visited_nodes[&s], goal))
+    solution.map(|(state, length)| BucketStats::new(state.volume_1, state.volume_2, length, goal))
 }
 
 struct TreeNode<'a> {
@@ -74,7 +74,7 @@ impl<'a> TreeNode<'a> {
         node: Option<TreeNode>,
         goal: u8,
         visited: &mut HashMap<State, u8>,
-        solution: &mut Option<State>,
+        output: &mut Option<(State, u8)>,
     ) {
         let node = match node {
             Some(node) => node,
@@ -91,26 +91,19 @@ impl<'a> TreeNode<'a> {
         };
 
         if state.arrived_to_goal(goal) {
-            *solution = Some(state);
+            match output {
+                Some((_, solution_length)) if *solution_length < node.path_length => (),
+                _ => *output = Some((state, node.path_length)),
+            }
             return;
         }
 
-        Self::branch(node.fill(&Bucket::One), goal, visited, solution);
-        Self::branch(node.fill(&Bucket::Two), goal, visited, solution);
-        Self::branch(node.empty(&Bucket::One), goal, visited, solution);
-        Self::branch(node.empty(&Bucket::Two), goal, visited, solution);
-        Self::branch(
-            node.pour(&Bucket::Two, &Bucket::One),
-            goal,
-            visited,
-            solution,
-        );
-        Self::branch(
-            node.pour(&Bucket::One, &Bucket::Two),
-            goal,
-            visited,
-            solution,
-        );
+        Self::branch(node.fill(&Bucket::One), goal, visited, output);
+        Self::branch(node.fill(&Bucket::Two), goal, visited, output);
+        Self::branch(node.empty(&Bucket::One), goal, visited, output);
+        Self::branch(node.empty(&Bucket::Two), goal, visited, output);
+        Self::branch(node.pour(&Bucket::Two, &Bucket::One), goal, visited, output);
+        Self::branch(node.pour(&Bucket::One, &Bucket::Two), goal, visited, output);
     }
 
     fn fill(&self, bucket: &Bucket) -> Option<Self> {
