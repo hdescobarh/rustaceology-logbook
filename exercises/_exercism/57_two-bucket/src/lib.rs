@@ -1,9 +1,18 @@
-use std::{collections::HashMap, hash::Hash, path};
+use std::{collections::HashMap, hash::Hash};
 
 #[derive(PartialEq, Eq, Debug)]
 pub enum Bucket {
     One,
     Two,
+}
+
+impl Bucket {
+    fn the_other(&self) -> Self {
+        match &self {
+            Bucket::One => Bucket::Two,
+            Bucket::Two => Bucket::One,
+        }
+    }
 }
 
 /// A struct to hold your results in.
@@ -43,6 +52,12 @@ pub fn solve(
     let mut visited_nodes = HashMap::new();
     let mut solution = None::<(State, u8)>;
     let root = TreeNode::new(&capacity_1, &capacity_2, start_bucket);
+    let forbidden = State::get_from_node(&TreeNode::new(
+        &capacity_1,
+        &capacity_2,
+        &start_bucket.the_other(),
+    ));
+    visited_nodes.insert(forbidden, 0);
     TreeNode::branch(Some(root), goal, &mut visited_nodes, &mut solution);
     solution.map(|(state, length)| BucketStats::new(state.volume_1, state.volume_2, length, goal))
 }
