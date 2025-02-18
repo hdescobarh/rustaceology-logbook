@@ -123,8 +123,8 @@ impl<'a> TreeNode<'a> {
         let remaining_capacity = into_capacity - into_volume;
         let (from_volume, into_volume) = match from_volume.cmp(&remaining_capacity) {
             std::cmp::Ordering::Less => (0, from_volume + into_volume),
-            std::cmp::Ordering::Equal => (0, into_volume),
-            std::cmp::Ordering::Greater => (from_volume - remaining_capacity, into_volume),
+            std::cmp::Ordering::Equal => (0, *into_capacity),
+            std::cmp::Ordering::Greater => (from_volume - remaining_capacity, *into_capacity),
         };
 
         let (volume_1, volume_2) = match from {
@@ -158,5 +158,58 @@ impl State {
 
     fn arrived_to_goal(&self, goal: u8) -> bool {
         self.volume_1 == goal || self.volume_2 == goal
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+
+    #[test]
+    fn action_fill() {
+        let cases = [
+            (2, 3, &Bucket::One, &Bucket::Two),
+            (2, 3, &Bucket::Two, &Bucket::One),
+        ];
+        for input in cases {
+            let node = TreeNode::new(&input.0, &input.1, input.2);
+            assert!(node.fill(input.2).is_none());
+            let output = node.fill(input.3).unwrap();
+            assert!(
+                output.volume_1 == input.0 && output.volume_2 == input.1 && output.path_length == 2
+            );
+        }
+    }
+
+    #[test]
+    fn action_empty() {
+        let cases = [
+            (2, 3, &Bucket::One, &Bucket::Two),
+            (2, 3, &Bucket::Two, &Bucket::One),
+        ];
+        for input in cases {
+            let node = TreeNode::new(&input.0, &input.1, input.2);
+            assert!(node.empty(input.3).is_none());
+            let output = node.empty(input.2).unwrap();
+            assert!(output.volume_1 == 0 && output.volume_2 == 0 && output.path_length == 2);
+        }
+    }
+
+    #[test]
+    fn action_pour() {
+        let cases = [
+            ((3, 2, &Bucket::One, &Bucket::Two), (1, 2)),
+            ((3, 2, &Bucket::Two, &Bucket::One), (2, 0)),
+        ];
+        for (input, expect) in cases {
+            let node = TreeNode::new(&input.0, &input.1, input.2);
+            let output = node.pour(input.2, input.3).unwrap();
+            assert!(
+                output.volume_1 == expect.0
+                    && output.volume_2 == expect.1
+                    && output.path_length == 2
+            );
+            assert!(node.pour(input.3, input.2).is_none());
+        }
     }
 }
