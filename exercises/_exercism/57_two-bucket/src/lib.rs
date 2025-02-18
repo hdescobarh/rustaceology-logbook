@@ -1,4 +1,24 @@
 use std::{collections::HashMap, hash::Hash};
+// Given a state of the buckets, it can potentially branch into six states:
+// three actions per bucket. We stop branching when a state is repeated or contains the goal.
+
+pub fn solve(
+    capacity_1: u8,
+    capacity_2: u8,
+    goal: u8,
+    start_bucket: &Bucket,
+) -> Option<BucketStats> {
+    let (mut visited_nodes, mut solution) = (HashMap::new(), None::<(State, u8)>);
+    let tree_root = TreeNode::new(&capacity_1, &capacity_2, start_bucket);
+    let forbidden = State::get_from_node(&TreeNode::new(
+        &capacity_1,
+        &capacity_2,
+        &start_bucket.the_other(),
+    ));
+    visited_nodes.insert(forbidden, 0);
+    TreeNode::branch(Some(tree_root), goal, &mut visited_nodes, &mut solution);
+    solution.map(|(state, length)| BucketStats::new(state.volume_1, state.volume_2, length, goal))
+}
 
 #[derive(PartialEq, Eq, Debug)]
 pub enum Bucket {
@@ -15,15 +35,10 @@ impl Bucket {
     }
 }
 
-/// A struct to hold your results in.
 #[derive(PartialEq, Eq, Debug)]
 pub struct BucketStats {
-    /// The total number of "moves" it should take to reach the desired number of liters, including
-    /// the first fill.
     pub moves: u8,
-    /// Which bucket should end up with the desired number of liters? (Either "one" or "two")
     pub goal_bucket: Bucket,
-    /// How many liters are left in the other bucket?
     pub other_bucket: u8,
 }
 
@@ -40,26 +55,6 @@ impl BucketStats {
             other_bucket,
         }
     }
-}
-
-/// Solve the bucket problem
-pub fn solve(
-    capacity_1: u8,
-    capacity_2: u8,
-    goal: u8,
-    start_bucket: &Bucket,
-) -> Option<BucketStats> {
-    let mut visited_nodes = HashMap::new();
-    let mut solution = None::<(State, u8)>;
-    let root = TreeNode::new(&capacity_1, &capacity_2, start_bucket);
-    let forbidden = State::get_from_node(&TreeNode::new(
-        &capacity_1,
-        &capacity_2,
-        &start_bucket.the_other(),
-    ));
-    visited_nodes.insert(forbidden, 0);
-    TreeNode::branch(Some(root), goal, &mut visited_nodes, &mut solution);
-    solution.map(|(state, length)| BucketStats::new(state.volume_1, state.volume_2, length, goal))
 }
 
 struct TreeNode<'a> {
@@ -85,6 +80,16 @@ impl<'a> TreeNode<'a> {
         }
     }
 
+    fn next_with_volumes(&self, volume_1: u8, volume_2: u8) -> Self {
+        Self {
+            path_length: self.path_length + 1,
+            capacity_1: self.capacity_1,
+            capacity_2: self.capacity_2,
+            volume_1,
+            volume_2,
+        }
+    }
+
     pub fn branch(
         node: Option<TreeNode>,
         goal: u8,
@@ -100,8 +105,7 @@ impl<'a> TreeNode<'a> {
             Some(length) if node.path_length < *length => *length = node.path_length,
             Some(_) => return,
             None => {
-                let new_length = node.path_length;
-                visited.insert(state, new_length);
+                visited.insert(state, node.path_length);
             }
         };
 
@@ -127,13 +131,7 @@ impl<'a> TreeNode<'a> {
             Bucket::Two if self.volume_2 != *self.capacity_2 => (self.volume_1, *self.capacity_2),
             _ => return None,
         };
-        Some(Self {
-            path_length: self.path_length + 1,
-            capacity_1: self.capacity_1,
-            capacity_2: self.capacity_2,
-            volume_1,
-            volume_2,
-        })
+        Some(self.next_with_volumes(volume_1, volume_2))
     }
 
     fn empty(&self, bucket: &Bucket) -> Option<Self> {
@@ -142,13 +140,7 @@ impl<'a> TreeNode<'a> {
             Bucket::Two if self.volume_2 != 0 => (self.volume_1, 0),
             _ => return None,
         };
-        Some(Self {
-            path_length: self.path_length + 1,
-            capacity_1: self.capacity_1,
-            capacity_2: self.capacity_2,
-            volume_1,
-            volume_2,
-        })
+        Some(self.next_with_volumes(volume_1, volume_2))
     }
 
     fn pour(&self, from: &Bucket, into: &Bucket) -> Option<Self> {
@@ -172,14 +164,7 @@ impl<'a> TreeNode<'a> {
             Bucket::One => (from_volume, into_volume),
             Bucket::Two => (into_volume, from_volume),
         };
-
-        Some(Self {
-            path_length: self.path_length + 1,
-            capacity_1: self.capacity_1,
-            capacity_2: self.capacity_2,
-            volume_1,
-            volume_2,
-        })
+        Some(self.next_with_volumes(volume_1, volume_2))
     }
 }
 
