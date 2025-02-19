@@ -8,7 +8,6 @@ fn at_origin_facing_north() {
 }
 
 #[test]
-#[ignore]
 fn at_negative_position_facing_south() {
     let robot = Robot::new(-1, -1, Direction::South);
     assert_eq!(robot.position(), (-1, -1));
@@ -16,7 +15,6 @@ fn at_negative_position_facing_south() {
 }
 
 #[test]
-#[ignore]
 fn changes_north_to_east() {
     let robot_start = Robot::new(0, 0, Direction::North);
     let robot_end = robot_start.turn_right();
@@ -25,7 +23,6 @@ fn changes_north_to_east() {
 }
 
 #[test]
-#[ignore]
 fn changes_east_to_south() {
     let robot_start = Robot::new(0, 0, Direction::East);
     let robot_end = robot_start.turn_right();
@@ -34,7 +31,6 @@ fn changes_east_to_south() {
 }
 
 #[test]
-#[ignore]
 fn changes_south_to_west() {
     let robot_start = Robot::new(0, 0, Direction::South);
     let robot_end = robot_start.turn_right();
@@ -43,7 +39,6 @@ fn changes_south_to_west() {
 }
 
 #[test]
-#[ignore]
 fn changes_west_to_north() {
     let robot_start = Robot::new(0, 0, Direction::West);
     let robot_end = robot_start.turn_right();
@@ -52,7 +47,6 @@ fn changes_west_to_north() {
 }
 
 #[test]
-#[ignore]
 fn changes_north_to_west() {
     let robot_start = Robot::new(0, 0, Direction::North);
     let robot_end = robot_start.turn_left();
@@ -61,7 +55,6 @@ fn changes_north_to_west() {
 }
 
 #[test]
-#[ignore]
 fn changes_west_to_south() {
     let robot_start = Robot::new(0, 0, Direction::West);
     let robot_end = robot_start.turn_left();
@@ -70,7 +63,6 @@ fn changes_west_to_south() {
 }
 
 #[test]
-#[ignore]
 fn changes_south_to_east() {
     let robot_start = Robot::new(0, 0, Direction::South);
     let robot_end = robot_start.turn_left();
@@ -79,7 +71,6 @@ fn changes_south_to_east() {
 }
 
 #[test]
-#[ignore]
 fn changes_east_to_north() {
     let robot_start = Robot::new(0, 0, Direction::East);
     let robot_end = robot_start.turn_left();
@@ -88,7 +79,6 @@ fn changes_east_to_north() {
 }
 
 #[test]
-#[ignore]
 fn facing_north_increments_y() {
     let robot_start = Robot::new(0, 0, Direction::North);
     let robot_end = robot_start.advance();
@@ -97,7 +87,6 @@ fn facing_north_increments_y() {
 }
 
 #[test]
-#[ignore]
 fn facing_south_decrements_y() {
     let robot_start = Robot::new(0, 0, Direction::South);
     let robot_end = robot_start.advance();
@@ -106,7 +95,6 @@ fn facing_south_decrements_y() {
 }
 
 #[test]
-#[ignore]
 fn facing_east_increments_x() {
     let robot_start = Robot::new(0, 0, Direction::East);
     let robot_end = robot_start.advance();
@@ -115,7 +103,6 @@ fn facing_east_increments_x() {
 }
 
 #[test]
-#[ignore]
 fn facing_west_decrements_x() {
     let robot_start = Robot::new(0, 0, Direction::West);
     let robot_end = robot_start.advance();
@@ -124,7 +111,6 @@ fn facing_west_decrements_x() {
 }
 
 #[test]
-#[ignore]
 fn moving_east_and_north_from_readme() {
     let robot_start = Robot::new(7, 3, Direction::North);
     let robot_end = robot_start.instructions("RAALAL");
@@ -133,7 +119,6 @@ fn moving_east_and_north_from_readme() {
 }
 
 #[test]
-#[ignore]
 fn moving_west_and_north() {
     let robot_start = Robot::new(0, 0, Direction::North);
     let robot_end = robot_start.instructions("LAAARALA");
@@ -142,7 +127,6 @@ fn moving_west_and_north() {
 }
 
 #[test]
-#[ignore]
 fn moving_west_and_south() {
     let robot_start = Robot::new(2, -7, Direction::East);
     let robot_end = robot_start.instructions("RRAAAAALA");
@@ -151,7 +135,6 @@ fn moving_west_and_south() {
 }
 
 #[test]
-#[ignore]
 fn moving_east_and_north() {
     let robot_start = Robot::new(8, 4, Direction::South);
     let robot_end = robot_start.instructions("LAAARRRALLLL");
