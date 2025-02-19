@@ -24,17 +24,47 @@ impl Robot {
 
     #[must_use]
     pub fn turn_right(self) -> Self {
-        todo!()
+        let direction = match self.direction {
+            Direction::North => Direction::East,
+            Direction::East => Direction::South,
+            Direction::South => Direction::West,
+            Direction::West => Direction::North,
+        };
+        Self {
+            x: self.x,
+            y: self.y,
+            direction,
+        }
     }
 
     #[must_use]
     pub fn turn_left(self) -> Self {
-        todo!()
+        let direction = match self.direction {
+            Direction::North => Direction::West,
+            Direction::East => Direction::North,
+            Direction::South => Direction::East,
+            Direction::West => Direction::South,
+        };
+        Self {
+            x: self.x,
+            y: self.y,
+            direction,
+        }
     }
 
     #[must_use]
     pub fn advance(self) -> Self {
-        todo!()
+        let (x, y) = match self.direction {
+            Direction::North => (self.x, self.y + 1),
+            Direction::East => (self.x + 1, self.y),
+            Direction::South => (self.x, self.y - 1),
+            Direction::West => (self.x - 1, self.y),
+        };
+        Self {
+            x,
+            y,
+            direction: self.direction,
+        }
     }
 
     fn parse_instruction(self, instruction: char) -> Result<Self, Error> {
