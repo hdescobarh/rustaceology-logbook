@@ -1,5 +1,7 @@
-// The code below is a stub. Just enough to satisfy the compiler.
-// In order to pass the tests you can add-to or change any of this code.
+#[derive(Debug)]
+pub enum Error {
+    InvalidAction,
+}
 
 #[derive(PartialEq, Eq, Debug)]
 pub enum Direction {
@@ -9,11 +11,15 @@ pub enum Direction {
     West,
 }
 
-pub struct Robot;
+pub struct Robot {
+    x: i32,
+    y: i32,
+    direction: Direction,
+}
 
 impl Robot {
-    pub fn new(x: i32, y: i32, d: Direction) -> Self {
-        todo!("Create a robot at (x, y) ({x}, {y}) facing {d:?}")
+    pub fn new(x: i32, y: i32, direction: Direction) -> Self {
+        Self { x, y, direction }
     }
 
     #[must_use]
@@ -31,16 +37,31 @@ impl Robot {
         todo!()
     }
 
+    fn parse_instruction(self, instruction: char) -> Result<Self, Error> {
+        let output = match instruction {
+            'R' => self.turn_right(),
+            'L' => self.turn_left(),
+            'A' => self.advance(),
+            _ => return Err(Error::InvalidAction),
+        };
+        Ok(output)
+    }
+
     #[must_use]
     pub fn instructions(self, instructions: &str) -> Self {
-        todo!("Follow the given sequence of instructions: {instructions}")
+        instructions
+            .chars()
+            .try_fold(self, |robot, instruction| {
+                robot.parse_instruction(instruction)
+            })
+            .unwrap()
     }
 
     pub fn position(&self) -> (i32, i32) {
-        todo!()
+        (self.x, self.y)
     }
 
     pub fn direction(&self) -> &Direction {
-        todo!()
+        &self.direction
     }
 }
