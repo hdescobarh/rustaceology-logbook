@@ -30,7 +30,25 @@ fn encode_single_value(mut number: u32) -> impl Iterator<Item = u8> {
     })
 }
 
-/// Given a stream of bytes, extract all numbers which are encoded in there.
 pub fn from_bytes(bytes: &[u8]) -> Result<Vec<u32>, Error> {
-    todo!("Convert the list of bytes {bytes:?} to a list of numbers")
+    let mut result: Vec<u32> = Vec::new();
+    let mut number: Vec<u8> = Vec::new();
+    for b in bytes {
+        let septet = b & 127; // remove the most significant bit
+        number.push(septet);
+        if septet == *b {
+            result.push(decode_single_number(&number));
+            number = Vec::new();
+        }
+    }
+    if !number.is_empty() {
+        return Err(Error::IncompleteNumber);
+    }
+    Ok(result)
+}
+
+fn decode_single_number(number: &[u8]) -> u32 {
+    number
+        .iter()
+        .fold(0_u32, |acc, septet| (acc << 7) | *septet as u32)
 }
