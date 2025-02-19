@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/58_variable-length-quantity/Cargo.toml",
+			"exercises/_exercism/59_robot-simulator/Cargo.toml",
 		],
 	},
 	"extensions": {
