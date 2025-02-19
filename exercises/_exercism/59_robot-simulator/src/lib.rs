@@ -30,11 +30,7 @@ impl Robot {
             Direction::South => Direction::West,
             Direction::West => Direction::North,
         };
-        Self {
-            x: self.x,
-            y: self.y,
-            direction,
-        }
+        Self { direction, ..self }
     }
 
     #[must_use]
@@ -45,11 +41,7 @@ impl Robot {
             Direction::South => Direction::East,
             Direction::West => Direction::South,
         };
-        Self {
-            x: self.x,
-            y: self.y,
-            direction,
-        }
+        Self { direction, ..self }
     }
 
     #[must_use]
@@ -60,11 +52,7 @@ impl Robot {
             Direction::South => (self.x, self.y - 1),
             Direction::West => (self.x - 1, self.y),
         };
-        Self {
-            x,
-            y,
-            direction: self.direction,
-        }
+        Self { x, y, ..self }
     }
 
     fn parse_instruction(self, instruction: char) -> Result<Self, Error> {
