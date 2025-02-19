@@ -3,9 +3,31 @@ pub enum Error {
     IncompleteNumber,
 }
 
-/// Convert a list of numbers to a stream of bytes encoded with variable length encoding.
 pub fn to_bytes(values: &[u32]) -> Vec<u8> {
-    todo!("Convert the values {values:?} to a list of bytes")
+    let mut output: Vec<u8> = values
+        .iter()
+        .rev()
+        .flat_map(|&number| encode_single_value(number))
+        .collect();
+    output.reverse();
+    output
+}
+
+fn encode_single_value(mut number: u32) -> impl Iterator<Item = u8> {
+    (0..).map_while(move |index| {
+        match (index, number) {
+            (0, 0) => return Some(0_u8),
+            (_, 0) => return None,
+            _ => (),
+        }
+        let octet = (number & 127) as u8; // get 0 followed by the last seven bits
+        number >>= 7; // remove those read bits
+        if index == 0 {
+            Some(octet)
+        } else {
+            Some(octet | 128)
+        }
+    })
 }
 
 /// Given a stream of bytes, extract all numbers which are encoded in there.
