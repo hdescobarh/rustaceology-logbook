@@ -12,7 +12,7 @@ pub fn translate(rna: &str) -> Option<Vec<&str>> {
 
 enum Error {
     InvalidNucleotideCode,
-    InvalidSequenceLenght,
+    InvalidSequenceLength,
 }
 
 enum RnaNucleotide {
@@ -25,8 +25,14 @@ enum RnaNucleotide {
 impl TryFrom<u8> for RnaNucleotide {
     type Error = Error;
 
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        todo!()
+    fn try_from(code: u8) -> Result<Self, Self::Error> {
+        match code {
+            b'a' | b'A' => Ok(Self::A),
+            b'g' | b'G' => Ok(Self::G),
+            b'c' | b'C' => Ok(Self::C),
+            b'u' | b'U' => Ok(Self::U),
+            _ => Err(Error::InvalidNucleotideCode),
+        }
     }
 }
 struct Codon(Vec<RnaNucleotide>);
