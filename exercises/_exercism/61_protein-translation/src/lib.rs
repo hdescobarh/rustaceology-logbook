@@ -1,3 +1,6 @@
+use AminoAcid::*;
+use RnaNucleotide::*;
+
 pub fn translate(rna: &str) -> Option<Vec<&str>> {
     rna.as_bytes()
         .chunks(3)
@@ -46,10 +49,52 @@ impl Codon {
         todo!()
     }
 }
-enum AminoAcid {}
+enum AminoAcid {
+    Ala,
+    Arg,
+    Asn,
+    Asp,
+    Cys,
+    Gln,
+    Glu,
+    Gly,
+    His,
+    Ile,
+    Leu,
+    Lys,
+    Met,
+    Phe,
+    Pro,
+    Ser,
+    Thr,
+    Trp,
+    Tyr,
+    Val,
+}
 
 impl From<AminoAcid> for &str {
     fn from(value: AminoAcid) -> Self {
-        todo!()
+        match value {
+            Ala => "Alanine",
+            Arg => "Arginine",
+            Asn => "Asparagine",
+            Asp => "Aspartate",
+            Cys => "Cysteine",
+            Gln => "Glutamine",
+            Glu => "Glutamate",
+            Gly => "Glycine",
+            His => "Histidine",
+            Ile => "Isoleucine",
+            Leu => "Leucine",
+            Lys => "Lysine",
+            Met => "Methionine",
+            Phe => "Phenylalanine",
+            Pro => "Proline",
+            Ser => "Serine",
+            Thr => "Threonine",
+            Trp => "Tryptophan",
+            Tyr => "Tyrosine",
+            Val => "Valine",
+        }
     }
 }
