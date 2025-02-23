@@ -49,11 +49,21 @@ enum Operation {
 }
 
 impl TryFrom<(&str, &str)> for Operation {
-    type Error = OperationError;
+    type Error = Box<dyn Error>;
 
-    fn try_from(value: (&str, &str)) -> Result<Self, Self::Error> {
-        // Err UnknownOp
-        todo!()
+    fn try_from(duple: (&str, &str)) -> Result<Self, Self::Error> {
+        let operation = match (duple.0, duple.1) {
+            ("What", num_str) => Self::Init(num_str.parse::<i32>()?),
+            ("plus", num_str) => Self::Add(num_str.parse::<i32>()?),
+            ("minus", num_str) => Self::Sub(num_str.parse::<i32>()?),
+            ("multiplied by", num_str) => Self::Prod(num_str.parse::<i32>()?),
+            ("divided by", num_str) => Self::Div(num_str.parse::<i32>()?),
+            ("raised", num_str) => Self::Pow(num_str.parse::<u32>()?),
+            ("?", "") => Self::Total,
+            ("?", _) => Err(OperationError::InvalidCommandFormat)?,
+            _ => Err(OperationError::UnknownOp)?,
+        };
+        Ok(operation)
     }
 }
 
@@ -65,7 +75,10 @@ pub enum OperationError {
 
 impl Display for OperationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        match &self {
+            OperationError::UnknownOp => writeln!(f, "Unknown operation string."),
+            OperationError::InvalidCommandFormat => writeln!(f, "Invalid command syntax."),
+        }
     }
 }
 
@@ -88,13 +101,12 @@ impl Parser {
         let re_args = Regex::new(&format!(
             "(?:{pattern_beginning})|{pattern_operations}|(?:({pattern_ending})())"
         ))?;
-        let parsed_command = re_args
+        re_args
             .captures_iter(command)
             .map(|caps| {
                 let (_, [param, value]) = caps.extract();
                 Operation::try_from((param, value))
             })
-            .collect::<Result<Vec<Operation>, OperationError>>()?;
-        Ok(parsed_command)
+            .collect::<Result<Vec<Operation>, Box<dyn Error>>>()
     }
 }
