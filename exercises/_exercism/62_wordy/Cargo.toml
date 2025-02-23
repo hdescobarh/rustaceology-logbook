@@ -10,4 +10,5 @@ edition = "2024"
 regex-lite = "0.1.6"
 
 [features]
+default = ["exponentials"]
 exponentials = []
