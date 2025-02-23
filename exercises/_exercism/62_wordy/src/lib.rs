@@ -89,7 +89,7 @@ impl Parser {
     fn read(command: &str) -> Result<Vec<Operation>, Box<dyn Error>> {
         let pattern_beginning = "(What) is (-?\\d+)";
         let pattern_operations = "(?: (plus|minus|multiplied by|divided by) (-?\\d+))|\
-                (?: (raised) to the (?:(1)st|(2)nd|(3)rd|([4-9])th|(\\d\\{2,\\}?)th) power)";
+                (?: (raised) to the (?:(1)st|(2)nd|(3)rd|([4-9])th|(\\d{2,}?)th) power)";
         let pattern_ending = "\\?";
 
         let re_command = Regex::new(&format!(
