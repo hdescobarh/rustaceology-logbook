@@ -37,7 +37,7 @@ impl Calculator {
         todo!()
     }
 }
-
+#[cfg_attr(test, derive(Debug, PartialEq))]
 enum Operation {
     Init(i32),
     Add(i32),
@@ -108,5 +108,83 @@ impl Parser {
                 Operation::try_from((param, value))
             })
             .collect::<Result<Vec<Operation>, Box<dyn Error>>>()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+
+    #[test]
+    fn parses_single_instructions() {
+        let cases = [
+            (
+                "What is -365?",
+                vec![Operation::Init(-365), Operation::Total],
+            ),
+            (
+                "What is -65 plus 5?",
+                vec![Operation::Init(-65), Operation::Add(5), Operation::Total],
+            ),
+            (
+                "What is 5 minus 43?",
+                vec![Operation::Init(5), Operation::Sub(43), Operation::Total],
+            ),
+            (
+                "What is 31415 multiplied by 3?",
+                vec![Operation::Init(31415), Operation::Prod(3), Operation::Total],
+            ),
+            (
+                "What is 100000 divided by 2?",
+                vec![Operation::Init(100000), Operation::Div(2), Operation::Total],
+            ),
+            (
+                "What is 5 raised to the 1st power?",
+                vec![Operation::Init(5), Operation::Pow(1), Operation::Total],
+            ),
+            (
+                "What is 15 raised to the 2nd power?",
+                vec![Operation::Init(15), Operation::Pow(2), Operation::Total],
+            ),
+            (
+                "What is -15 raised to the 2nd power?",
+                vec![Operation::Init(-15), Operation::Pow(2), Operation::Total],
+            ),
+            (
+                "What is 445 raised to the 3rd power?",
+                vec![Operation::Init(445), Operation::Pow(3), Operation::Total],
+            ),
+            (
+                "What is 6563 raised to the 7th power?",
+                vec![Operation::Init(6563), Operation::Pow(7), Operation::Total],
+            ),
+            (
+                "What is 2 raised to the 19th power?",
+                vec![Operation::Init(2), Operation::Pow(19), Operation::Total],
+            ),
+        ];
+        for (input, expect) in cases {
+            assert_eq!(Parser::read(input).unwrap(), expect)
+        }
+    }
+
+    #[test]
+    fn parses_combined_instructions() {
+        let command = "What is 5 plus 6 minus 1 divided by 2 \
+            multiplied by 3 raised to the 2nd power plus 5?";
+        let parsed = Parser::read(command).unwrap();
+        assert_eq!(
+            vec![
+                Operation::Init(5),
+                Operation::Add(6),
+                Operation::Sub(1),
+                Operation::Div(2),
+                Operation::Prod(3),
+                Operation::Pow(2),
+                Operation::Add(5),
+                Operation::Total
+            ],
+            parsed
+        )
     }
 }
