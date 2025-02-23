@@ -1,16 +1,12 @@
 use regex_lite::Regex;
-use std::error::Error;
+use std::{error::Error, fmt::Display};
 
 pub fn answer(command: &str) -> Option<i32> {
-    Parser::read(command)
-        .and_then(|operations| {
-            operations
-                .into_iter()
-                .try_fold(Calculator::new(), |calculator, operation| {
-                    calculator.read(operation)
-                })
-                .and_then(|calculator| calculator.finish())
-        })
+    let operations: Vec<Operation> = Parser::read(command).ok()?;
+    operations
+        .into_iter()
+        .try_fold(Calculator::new(), |calc, op| calc.read(op))
+        .and_then(|calc| calc.finish())
         .ok()
 }
 
@@ -32,10 +28,12 @@ impl Calculator {
     }
 
     fn read(self, operation: Operation) -> Result<Self, Box<dyn Error>> {
+        //if first is not Init => InvalidCommandFormat
         todo!()
     }
 
     fn finish(self) -> Result<i32, Box<dyn Error>> {
+        // if total None => Err InvalidCommandFormat
         todo!()
     }
 }
@@ -50,6 +48,28 @@ enum Operation {
     Total,
 }
 
+impl TryFrom<(&str, &str)> for Operation {
+    type Error = OperationError;
+
+    fn try_from(value: (&str, &str)) -> Result<Self, Self::Error> {
+        // Err UnknownOp
+        todo!()
+    }
+}
+
+#[derive(Debug)]
+pub enum OperationError {
+    UnknownOp,
+    InvalidCommandFormat,
+}
+
+impl Display for OperationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+impl Error for OperationError {}
 struct Parser;
 
 impl Parser {
