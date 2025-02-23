@@ -11,30 +11,46 @@ pub fn answer(command: &str) -> Option<i32> {
 }
 
 struct Calculator {
-    num1: Option<i32>,
-    num2: Option<i32>,
-    operation: Option<Operation>,
+    num: Option<i32>,
     total: Option<i32>,
 }
 
 impl Calculator {
     fn new() -> Self {
         Self {
-            num1: None,
-            num2: None,
-            operation: None,
+            num: None,
             total: None,
         }
     }
 
-    fn read(self, operation: Operation) -> Result<Self, Box<dyn Error>> {
-        //if first is not Init => InvalidCommandFormat
-        todo!()
+    fn update(&mut self, result: Option<i32>) -> Result<(), OperationError> {
+        if result.is_some() {
+            self.num = result;
+            Ok(())
+        } else {
+            Err(OperationError::Overflow)
+        }
+    }
+
+    fn read(mut self, operation: Operation) -> Result<Self, Box<dyn Error>> {
+        match (operation, self.num) {
+            (Operation::Init(other), None) => self.num = Some(other),
+            (Operation::Add(other), Some(num)) => self.update(num.checked_add(other))?,
+            (Operation::Sub(other), Some(num)) => self.update(num.checked_sub(other))?,
+            (Operation::Prod(other), Some(num)) => self.update(num.checked_mul(other))?,
+            (Operation::Div(other), Some(num)) => self.update(num.checked_div(other))?,
+            (Operation::Pow(other), Some(num)) => self.update(num.checked_pow(other))?,
+            (Operation::Total, Some(_)) => self.total = self.num.take(),
+            _ => Err(OperationError::InvalidCommandFormat)?,
+        };
+        Ok(self)
     }
 
     fn finish(self) -> Result<i32, Box<dyn Error>> {
-        // if total None => Err InvalidCommandFormat
-        todo!()
+        match self.total {
+            Some(v) => Ok(v),
+            None => Err(OperationError::InvalidCommandFormat)?,
+        }
     }
 }
 #[cfg_attr(test, derive(Debug, PartialEq))]
@@ -71,6 +87,7 @@ impl TryFrom<(&str, &str)> for Operation {
 pub enum OperationError {
     UnknownOp,
     InvalidCommandFormat,
+    Overflow,
 }
 
 impl Display for OperationError {
@@ -78,6 +95,7 @@ impl Display for OperationError {
         match &self {
             OperationError::UnknownOp => writeln!(f, "Unknown operation string."),
             OperationError::InvalidCommandFormat => writeln!(f, "Invalid command syntax."),
+            OperationError::Overflow => writeln!(f, "Some operation overflows."),
         }
     }
 }
