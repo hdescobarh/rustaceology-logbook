@@ -74,6 +74,27 @@ struct Parser;
 
 impl Parser {
     fn read(command: &str) -> Result<Vec<Operation>, Box<dyn Error>> {
-        todo!()
+        let pattern_beginning = "(What) is (-?\\d+)";
+        let pattern_operations = "(?: (plus|minus|multiplied by|divided by) (-?\\d+))|\
+                (?: (raised) to the (?:(1)st|(2)nd|(3)rd|([4-9])th|(\\d\\{2,\\}?)th) power)";
+        let pattern_ending = "\\?";
+
+        let re_command = Regex::new(&format!(
+            "^{pattern_beginning}({pattern_operations})*{pattern_ending}$",
+        ))?;
+        if !re_command.is_match(command) {
+            Err(OperationError::InvalidCommandFormat)?;
+        }
+        let re_args = Regex::new(&format!(
+            "(?:{pattern_beginning})|{pattern_operations}|(?:({pattern_ending})())"
+        ))?;
+        let parsed_command = re_args
+            .captures_iter(command)
+            .map(|caps| {
+                let (_, [param, value]) = caps.extract();
+                Operation::try_from((param, value))
+            })
+            .collect::<Result<Vec<Operation>, OperationError>>()?;
+        Ok(parsed_command)
     }
 }
