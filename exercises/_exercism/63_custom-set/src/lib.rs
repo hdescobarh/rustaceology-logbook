@@ -1,3 +1,5 @@
+// This solution address the problem implementing a naive
+// hash table using vectors to store the buckets
 use std::hash::{DefaultHasher, Hash, Hasher};
 const MAX_LOAD_FACTOR: f64 = 0.75;
 
