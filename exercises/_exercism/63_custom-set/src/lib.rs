@@ -50,8 +50,25 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
     }
 
     fn resize(&mut self) {
-        let mut set = Self::with_capacity(self.capacity * 2);
-        todo!()
+        self.capacity = if self.capacity == 0 {
+            (1.0 / MAX_LOAD_FACTOR).floor() as usize
+        } else {
+            self.capacity * 2
+        };
+        let mut new_buckets = vec![None::<Vec<T>>; self.capacity];
+        self.buckets
+            .iter()
+            .flatten()
+            .flatten()
+            .for_each(|&element| {
+                let index = self.hash(&element);
+                match new_buckets[index].as_mut() {
+                    Some(bucket) if bucket.contains(&element) => (),
+                    Some(bucket) => bucket.push(element),
+                    None => new_buckets[index] = Some(vec![element]),
+                }
+            });
+        self.buckets = new_buckets
     }
 
     pub fn contains(&self, element: &T) -> bool {
@@ -64,13 +81,24 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
         }
     }
 
-    pub fn add(&mut self, _element: T) {
-        self.capacity = if self.capacity == 0 {
-            (1.0 / MAX_LOAD_FACTOR).ceil() as usize
-        } else {
-            self.capacity * 2
+    pub fn add(&mut self, element: T) {
+        match self.load_factor() {
+            Some(load) if load < MAX_LOAD_FACTOR => (),
+            _ => self.resize(),
         };
-        todo!();
+
+        let index = self.hash(&element);
+        match self.buckets[index].as_mut() {
+            Some(bucket) if bucket.contains(&element) => (),
+            Some(bucket) => {
+                bucket.push(element);
+                self.size += 1;
+            }
+            None => {
+                self.buckets[index] = Some(vec![element]);
+                self.size += 1
+            }
+        }
     }
 
     pub fn is_subset(&self, other: &Self) -> bool {
