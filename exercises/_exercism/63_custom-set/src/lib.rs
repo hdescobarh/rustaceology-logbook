@@ -1,14 +1,14 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 const MAX_LOAD_FACTOR: f64 = 0.75; // remember α cannot exceed 1
 
-#[derive(Debug)]
-pub struct CustomSet<T: PartialEq + Eq + Hash + Clone + Copy> {
+#[derive(Debug, Eq)]
+pub struct CustomSet<T: Eq + Hash + Copy> {
     buckets: Vec<Option<Vec<T>>>,
     capacity: usize,
     size: usize,
 }
 
-impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
+impl<T: Eq + Hash + Copy> CustomSet<T> {
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
             buckets: vec![None::<Vec<T>>; capacity],
@@ -173,16 +173,11 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
 }
 
 // A = B ⟺ A ⊆ B ∧ A ⊇ B
-impl<T> PartialEq for CustomSet<T>
-where
-    T: PartialEq + Eq + Hash + Clone + Copy,
-{
+impl<T: Eq + Hash + Copy> PartialEq for CustomSet<T> {
     fn eq(&self, other: &Self) -> bool {
         self.is_subset(other) && other.is_subset(self) && self.size == other.size
     }
 }
-
-impl<T> Eq for CustomSet<T> where T: PartialEq + Eq + Hash + Clone + Copy {}
 
 #[cfg(test)]
 mod test {
