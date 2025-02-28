@@ -1,13 +1,13 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct CustomSet<T: Eq + Hash + Clone + Copy> {
+#[derive(Debug)]
+pub struct CustomSet<T: PartialEq + Eq + Hash + Clone + Copy> {
     buckets: Vec<Option<Vec<T>>>,
     capacity: usize,
     size: usize,
 }
 
-impl<T: Eq + Hash + Clone + Copy> CustomSet<T> {
+impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
             buckets: vec![None::<Vec<T>>; capacity],
@@ -21,8 +21,14 @@ impl<T: Eq + Hash + Clone + Copy> CustomSet<T> {
             let index = set.hash(&value);
             match set.buckets[index].as_mut() {
                 Some(list) if list.contains(&value) => (),
-                Some(list) => list.push(value),
-                None => set.buckets[index] = Some(vec![value]),
+                Some(list) => {
+                    list.push(value);
+                    set.size += 1;
+                }
+                None => {
+                    set.buckets[index] = Some(vec![value]);
+                    set.size += 1;
+                }
             };
         }
         set
@@ -39,6 +45,8 @@ impl<T: Eq + Hash + Clone + Copy> CustomSet<T> {
     }
 
     pub fn add(&mut self, _element: T) {
+        // update indexes
+        // update size & capacity
         todo!();
     }
 
