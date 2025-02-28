@@ -17,22 +17,7 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
         }
     }
     pub fn new(input: &[T]) -> Self {
-        let mut set = Self::with_capacity(input.len());
-        for &value in input {
-            let index = set.hash(&value);
-            match set.buckets[index].as_mut() {
-                Some(list) if list.contains(&value) => (),
-                Some(list) => {
-                    list.push(value);
-                    set.size += 1;
-                }
-                None => {
-                    set.buckets[index] = Some(vec![value]);
-                    set.size += 1;
-                }
-            };
-        }
-        set
+        input.iter().copied().collect()
     }
 
     fn hash(&self, value: &T) -> usize {
@@ -56,18 +41,14 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
             self.capacity * 2
         };
         let mut new_buckets = vec![None::<Vec<T>>; self.capacity];
-        self.buckets
-            .iter()
-            .flatten()
-            .flatten()
-            .for_each(|&element| {
-                let index = self.hash(&element);
-                match new_buckets[index].as_mut() {
-                    Some(bucket) if bucket.contains(&element) => (),
-                    Some(bucket) => bucket.push(element),
-                    None => new_buckets[index] = Some(vec![element]),
-                }
-            });
+        self.iter().for_each(|&element| {
+            let index = self.hash(&element);
+            match new_buckets[index].as_mut() {
+                Some(bucket) if bucket.contains(&element) => (),
+                Some(bucket) => bucket.push(element),
+                None => new_buckets[index] = Some(vec![element]),
+            }
+        });
         self.buckets = new_buckets
     }
 
@@ -104,10 +85,7 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
     pub fn is_subset(&self, other: &Self) -> bool {
         // self ⊆ other ⟺ for all x, self.contains(x); then other.contains(x)
         // ∅ is subset of every set
-        self.buckets
-            .iter()
-            .flatten()
-            .all(|bucket| bucket.iter().all(|element| other.contains(element)))
+        self.iter().all(|element| other.contains(element))
     }
 
     pub fn is_empty(&self) -> bool {
@@ -123,10 +101,7 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
     pub fn intersection(&self, other: &Self) -> Self {
         // A ∩ B = {x | x ∈ A ∧ x ∈ B}
         let shared_elements = self
-            .buckets
             .iter()
-            .flatten()
-            .flatten()
             .filter_map(|element| {
                 if other.contains(element) {
                     Some(*element)
@@ -142,10 +117,7 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
     pub fn difference(&self, other: &Self) -> Self {
         // A \ B = {x | x ∈ A ∧ x ∉ B}
         let self_only_elements = self
-            .buckets
             .iter()
-            .flatten()
-            .flatten()
             .filter_map(|element| {
                 if other.contains(element) {
                     None
@@ -160,15 +132,12 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
     #[must_use]
     pub fn union(&self, other: &Self) -> Self {
         // A ∪ B = {x | x ∈ A ∨ x ∈ B}
-        let all_elements = self
-            .buckets
-            .iter()
-            .flatten()
-            .flatten()
-            .chain(other.buckets.iter().flatten().flatten())
-            .copied()
-            .collect::<Vec<T>>();
+        let all_elements = self.iter().chain(other.iter()).copied().collect::<Vec<T>>();
         Self::new(&all_elements)
+    }
+
+    fn iter(&self) -> impl Iterator<Item = &T> {
+        self.buckets.iter().flatten().flatten()
     }
 }
 
