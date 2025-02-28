@@ -73,15 +73,28 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
         self.size == 0
     }
 
-    pub fn is_disjoint(&self, _other: &Self) -> bool {
+    pub fn is_disjoint(&self, other: &Self) -> bool {
         // A ∩ B = ∅
-        todo!();
+        self.intersection(other).is_empty()
     }
 
     #[must_use]
-    pub fn intersection(&self, _other: &Self) -> Self {
+    pub fn intersection(&self, other: &Self) -> Self {
         // A ∩ B = {x | x ∈ A ∧ x ∈ B}
-        todo!();
+        let shared_elements = self
+            .buckets
+            .iter()
+            .flatten()
+            .flatten()
+            .filter_map(|element| {
+                if other.contains(element) {
+                    Some(*element)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<T>>();
+        Self::new(&shared_elements)
     }
 
     #[must_use]
