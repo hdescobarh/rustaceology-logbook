@@ -74,21 +74,25 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
     }
 
     pub fn is_disjoint(&self, _other: &Self) -> bool {
+        // A ∩ B = ∅
         todo!();
     }
 
     #[must_use]
     pub fn intersection(&self, _other: &Self) -> Self {
+        // A ∩ B = {x | x ∈ A ∧ x ∈ B}
         todo!();
     }
 
     #[must_use]
     pub fn difference(&self, _other: &Self) -> Self {
+        // A \ B = {x | x ∈ A ∧ x ∉ B}
         todo!();
     }
 
     #[must_use]
     pub fn union(&self, _other: &Self) -> Self {
+        // A ∪ B = {x | x ∈ A ∨ x ∈ B}
         todo!();
     }
 }
