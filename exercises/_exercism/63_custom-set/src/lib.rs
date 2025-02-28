@@ -61,12 +61,8 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
         // ∅ is subset of every set
         self.buckets
             .iter()
-            .filter_map(|bucket| {
-                bucket
-                    .as_ref()
-                    .map(|bucket| bucket.iter().all(|element| other.contains(element)))
-            })
-            .all(|v| v)
+            .flatten()
+            .all(|bucket| bucket.iter().all(|element| other.contains(element)))
     }
 
     pub fn is_empty(&self) -> bool {
