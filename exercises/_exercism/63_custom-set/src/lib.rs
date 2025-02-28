@@ -1,5 +1,5 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
-const MAX_LOAD_FACTOR: f64 = 0.75;
+const MAX_LOAD_FACTOR: f64 = 0.75; // remember α cannot exceed 1
 
 #[derive(Debug)]
 pub struct CustomSet<T: PartialEq + Eq + Hash + Clone + Copy> {
@@ -41,8 +41,12 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
         (hasher.finish() as usize) % self.capacity
     }
 
-    fn load_factor(&self) -> f64 {
-        self.size as f64 / self.capacity as f64
+    fn load_factor(&self) -> Option<f64> {
+        if self.capacity == 0 {
+            None
+        } else {
+            Some(self.size as f64 / self.capacity as f64)
+        }
     }
 
     fn resize(&mut self) {
@@ -61,11 +65,11 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
     }
 
     pub fn add(&mut self, _element: T) {
-        if self.load_factor() > MAX_LOAD_FACTOR {
-            self.resize();
-        }
-        // update indexes
-        // update size & capacity
+        self.capacity = if self.capacity == 0 {
+            (1.0 / MAX_LOAD_FACTOR).ceil() as usize
+        } else {
+            self.capacity * 2
+        };
         todo!();
     }
 
