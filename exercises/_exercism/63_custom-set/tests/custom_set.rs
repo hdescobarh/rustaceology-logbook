@@ -73,7 +73,6 @@ fn set_is_not_a_subset_of_set_that_does_not_contain_its_elements() {
 }
 
 #[test]
-#[ignore]
 fn the_empty_set_is_disjoint_with_itself() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -81,7 +80,6 @@ fn the_empty_set_is_disjoint_with_itself() {
 }
 
 #[test]
-#[ignore]
 fn empty_set_is_disjoint_with_non_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[1]);
@@ -89,7 +87,6 @@ fn empty_set_is_disjoint_with_non_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn non_empty_set_is_disjoint_with_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[1]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -97,7 +94,6 @@ fn non_empty_set_is_disjoint_with_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn sets_are_not_disjoint_if_they_share_an_element() {
     let set_1 = CustomSet::<i32>::new(&[1, 2]);
     let set_2 = CustomSet::<i32>::new(&[2, 3]);
@@ -105,7 +101,6 @@ fn sets_are_not_disjoint_if_they_share_an_element() {
 }
 
 #[test]
-#[ignore]
 fn sets_are_disjoint_if_they_share_no_elements() {
     let set_1 = CustomSet::<i32>::new(&[1, 2]);
     let set_2 = CustomSet::<i32>::new(&[3, 4]);
@@ -189,7 +184,6 @@ fn adding_an_existing_element_does_not_change_the_set() {
 }
 
 #[test]
-#[ignore]
 fn intersection_of_two_empty_sets_is_an_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -198,7 +192,6 @@ fn intersection_of_two_empty_sets_is_an_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn intersection_of_an_empty_set_and_non_empty_set_is_an_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[3, 2, 5]);
@@ -207,7 +200,6 @@ fn intersection_of_an_empty_set_and_non_empty_set_is_an_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn intersection_of_a_non_empty_set_and_an_empty_set_is_an_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3, 4]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -216,7 +208,6 @@ fn intersection_of_a_non_empty_set_and_an_empty_set_is_an_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn intersection_of_two_sets_with_no_shared_elements_is_an_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3]);
     let set_2 = CustomSet::<i32>::new(&[4, 5, 6]);
@@ -225,7 +216,6 @@ fn intersection_of_two_sets_with_no_shared_elements_is_an_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn intersection_of_two_sets_with_shared_elements_is_a_set_of_the_shared_elements() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3, 4]);
     let set_2 = CustomSet::<i32>::new(&[3, 2, 5]);
