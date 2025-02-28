@@ -224,7 +224,6 @@ fn intersection_of_two_sets_with_shared_elements_is_a_set_of_the_shared_elements
 }
 
 #[test]
-#[ignore]
 fn difference_of_two_empty_sets_is_an_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -233,7 +232,6 @@ fn difference_of_two_empty_sets_is_an_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn difference_of_empty_set_and_non_empty_set_is_an_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[3, 2, 5]);
@@ -242,7 +240,6 @@ fn difference_of_empty_set_and_non_empty_set_is_an_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn difference_of_a_non_empty_set_and_an_empty_set_is_the_non_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3, 4]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -251,7 +248,6 @@ fn difference_of_a_non_empty_set_and_an_empty_set_is_the_non_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn difference_of_two_non_empty_sets_is_a_set_of_elements_that_are_only_in_the_first_set() {
     let set_1 = CustomSet::<i32>::new(&[3, 2, 1]);
     let set_2 = CustomSet::<i32>::new(&[2, 4]);
@@ -260,7 +256,6 @@ fn difference_of_two_non_empty_sets_is_a_set_of_elements_that_are_only_in_the_fi
 }
 
 #[test]
-#[ignore]
 fn difference_removes_all_duplicates_in_the_first_set() {
     let set_1 = CustomSet::<i32>::new(&[1, 1]);
     let set_2 = CustomSet::<i32>::new(&[1]);
