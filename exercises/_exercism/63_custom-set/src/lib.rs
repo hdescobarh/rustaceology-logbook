@@ -179,6 +179,19 @@ impl<T: Eq + Hash + Copy> PartialEq for CustomSet<T> {
     }
 }
 
+impl<T: Eq + Hash + Copy> FromIterator<T> for CustomSet<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let iterator = iter.into_iter();
+        let starting_capacity = match iterator.size_hint() {
+            (lower, None) => lower,
+            (_, Some(upper)) => upper,
+        };
+        let mut set = Self::with_capacity(starting_capacity);
+        iterator.for_each(|element| set.add(element));
+        set
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::*;
