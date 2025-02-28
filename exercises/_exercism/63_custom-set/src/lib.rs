@@ -155,3 +155,15 @@ where
 }
 
 impl<T> Eq for CustomSet<T> where T: PartialEq + Eq + Hash + Clone + Copy {}
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+
+    #[test]
+    fn max_load_factor_is_valid() {
+        if MAX_LOAD_FACTOR > 1.0 {
+            panic!("MAX_LOAD_FACTOR cannot exceed 1.0")
+        }
+    }
+}
