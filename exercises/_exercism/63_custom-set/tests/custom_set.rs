@@ -264,7 +264,6 @@ fn difference_removes_all_duplicates_in_the_first_set() {
 }
 
 #[test]
-#[ignore]
 fn union_of_empty_sets_is_an_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -273,7 +272,6 @@ fn union_of_empty_sets_is_an_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn union_of_an_empty_set_and_non_empty_set_is_the_non_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[2]);
@@ -282,7 +280,6 @@ fn union_of_an_empty_set_and_non_empty_set_is_the_non_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn union_of_a_non_empty_set_and_empty_set_is_the_non_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[1, 3]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -291,7 +288,6 @@ fn union_of_a_non_empty_set_and_empty_set_is_the_non_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn union_of_non_empty_sets_contains_all_unique_elements() {
     let set_1 = CustomSet::<i32>::new(&[1, 3]);
     let set_2 = CustomSet::<i32>::new(&[2, 3]);
