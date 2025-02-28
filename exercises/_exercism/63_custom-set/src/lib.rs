@@ -94,9 +94,22 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
     }
 
     #[must_use]
-    pub fn difference(&self, _other: &Self) -> Self {
+    pub fn difference(&self, other: &Self) -> Self {
         // A \ B = {x | x ∈ A ∧ x ∉ B}
-        todo!();
+        let self_only_elements = self
+            .buckets
+            .iter()
+            .flatten()
+            .flatten()
+            .filter_map(|element| {
+                if other.contains(element) {
+                    None
+                } else {
+                    Some(*element)
+                }
+            })
+            .collect::<Vec<T>>();
+        Self::new(&self_only_elements)
     }
 
     #[must_use]
