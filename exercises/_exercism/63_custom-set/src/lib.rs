@@ -113,9 +113,17 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
     }
 
     #[must_use]
-    pub fn union(&self, _other: &Self) -> Self {
+    pub fn union(&self, other: &Self) -> Self {
         // A ∪ B = {x | x ∈ A ∨ x ∈ B}
-        todo!();
+        let all_elements = self
+            .buckets
+            .iter()
+            .flatten()
+            .flatten()
+            .chain(other.buckets.iter().flatten().flatten())
+            .copied()
+            .collect::<Vec<T>>();
+        Self::new(&all_elements)
     }
 }
 
