@@ -157,7 +157,6 @@ fn set_is_equal_to_a_set_constructed_from_an_array_with_duplicates() {
 }
 
 #[test]
-#[ignore]
 fn add_to_empty_set() {
     let mut set = CustomSet::<i32>::new(&[]);
     set.add(3);
@@ -166,7 +165,6 @@ fn add_to_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn add_to_non_empty_set() {
     let mut set = CustomSet::<i32>::new(&[1, 2, 4]);
     set.add(3);
@@ -175,7 +173,6 @@ fn add_to_non_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn adding_an_existing_element_does_not_change_the_set() {
     let mut set = CustomSet::<i32>::new(&[1, 2, 3]);
     set.add(3);
