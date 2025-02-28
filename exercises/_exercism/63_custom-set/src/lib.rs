@@ -40,8 +40,14 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
         (hasher.finish() as usize) % self.capacity
     }
 
-    pub fn contains(&self, _element: &T) -> bool {
-        todo!();
+    pub fn contains(&self, element: &T) -> bool {
+        if self.is_empty() {
+            return false;
+        }
+        match self.buckets[self.hash(element)].as_ref() {
+            Some(list) => list.contains(element),
+            None => false,
+        }
     }
 
     pub fn add(&mut self, _element: T) {
@@ -50,12 +56,21 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
         todo!();
     }
 
-    pub fn is_subset(&self, _other: &Self) -> bool {
-        todo!();
+    pub fn is_subset(&self, other: &Self) -> bool {
+        // self ⊆ other ⟺ for all x, self.contains(x); then other.contains(x)
+        // ∅ is subset of every set
+        self.buckets
+            .iter()
+            .filter_map(|bucket| {
+                bucket
+                    .as_ref()
+                    .map(|bucket| bucket.iter().all(|element| other.contains(element)))
+            })
+            .all(|v| v)
     }
 
     pub fn is_empty(&self) -> bool {
-        todo!();
+        self.size == 0
     }
 
     pub fn is_disjoint(&self, _other: &Self) -> bool {
