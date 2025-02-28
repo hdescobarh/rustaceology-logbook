@@ -92,3 +92,15 @@ impl<T: PartialEq + Eq + Hash + Clone + Copy> CustomSet<T> {
         todo!();
     }
 }
+
+// A = B ⟺ A ⊆ B ∧ A ⊇ B
+impl<T> PartialEq for CustomSet<T>
+where
+    T: PartialEq + Eq + Hash + Clone + Copy,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.is_subset(other) && other.is_subset(self) && self.size == other.size
+    }
+}
+
+impl<T> Eq for CustomSet<T> where T: PartialEq + Eq + Hash + Clone + Copy {}
