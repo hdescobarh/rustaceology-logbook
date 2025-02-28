@@ -1,13 +1,37 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 #[derive(Debug, PartialEq, Eq)]
-pub struct CustomSet<T> {
-    // We fake using T here, so the compiler does not complain that
-    // "parameter `T` is never used". Delete when no longer needed.
-    phantom: std::marker::PhantomData<T>,
+pub struct CustomSet<T: Eq + Hash + Clone + Copy> {
+    buckets: Vec<Option<Vec<T>>>,
+    capacity: usize,
+    size: usize,
 }
 
-impl<T> CustomSet<T> {
-    pub fn new(_input: &[T]) -> Self {
-        todo!();
+impl<T: Eq + Hash + Clone + Copy> CustomSet<T> {
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            buckets: vec![None::<Vec<T>>; capacity],
+            capacity,
+            size: 0,
+        }
+    }
+    pub fn new(input: &[T]) -> Self {
+        let mut set = Self::with_capacity(input.len());
+        for &value in input {
+            let index = set.hash(&value);
+            match set.buckets[index].as_mut() {
+                Some(list) if list.contains(&value) => (),
+                Some(list) => list.push(value),
+                None => set.buckets[index] = Some(vec![value]),
+            };
+        }
+        set
+    }
+
+    fn hash(&self, value: &T) -> usize {
+        let mut hasher = DefaultHasher::new();
+        value.hash(&mut hasher);
+        (hasher.finish() as usize) % self.capacity
     }
 
     pub fn contains(&self, _element: &T) -> bool {
