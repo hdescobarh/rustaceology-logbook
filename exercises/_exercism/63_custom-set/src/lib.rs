@@ -1,5 +1,5 @@
 use std::hash::{DefaultHasher, Hash, Hasher};
-const MAX_LOAD_FACTOR: f64 = 0.75; // remember α cannot exceed 1
+const MAX_LOAD_FACTOR: f64 = 0.75;
 
 #[derive(Debug, Eq)]
 pub struct CustomSet<T: Eq + Hash + Copy> {
@@ -51,7 +51,7 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
 
     fn resize(&mut self) {
         self.capacity = if self.capacity == 0 {
-            (1.0 / MAX_LOAD_FACTOR).floor() as usize
+            (1.0 / MAX_LOAD_FACTOR).ceil() as usize
         } else {
             self.capacity * 2
         };
