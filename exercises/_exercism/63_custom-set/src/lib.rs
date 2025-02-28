@@ -100,8 +100,7 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
     #[must_use]
     pub fn intersection(&self, other: &Self) -> Self {
         // A ∩ B = {x | x ∈ A ∧ x ∈ B}
-        let shared_elements = self
-            .iter()
+        self.iter()
             .filter_map(|element| {
                 if other.contains(element) {
                     Some(*element)
@@ -109,15 +108,13 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
                     None
                 }
             })
-            .collect::<Vec<T>>();
-        Self::new(&shared_elements)
+            .collect()
     }
 
     #[must_use]
     pub fn difference(&self, other: &Self) -> Self {
         // A \ B = {x | x ∈ A ∧ x ∉ B}
-        let self_only_elements = self
-            .iter()
+        self.iter()
             .filter_map(|element| {
                 if other.contains(element) {
                     None
@@ -125,15 +122,13 @@ impl<T: Eq + Hash + Copy> CustomSet<T> {
                     Some(*element)
                 }
             })
-            .collect::<Vec<T>>();
-        Self::new(&self_only_elements)
+            .collect()
     }
 
     #[must_use]
     pub fn union(&self, other: &Self) -> Self {
         // A ∪ B = {x | x ∈ A ∨ x ∈ B}
-        let all_elements = self.iter().chain(other.iter()).copied().collect::<Vec<T>>();
-        Self::new(&all_elements)
+        self.iter().chain(other.iter()).copied().collect()
     }
 
     fn iter(&self) -> impl Iterator<Item = &T> {
