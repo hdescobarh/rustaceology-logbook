@@ -7,35 +7,30 @@ fn sets_with_no_elements_are_empty() {
 }
 
 #[test]
-#[ignore]
 fn sets_with_elements_are_not_empty() {
     let set = CustomSet::<i32>::new(&[1]);
     assert!(!set.is_empty());
 }
 
 #[test]
-#[ignore]
 fn nothing_is_contained_in_an_empty_set() {
     let set = CustomSet::<i32>::new(&[]);
     assert!(!set.contains(&1));
 }
 
 #[test]
-#[ignore]
 fn when_the_element_is_in_the_set() {
     let set = CustomSet::<i32>::new(&[1, 2, 3]);
     assert!(set.contains(&1));
 }
 
 #[test]
-#[ignore]
 fn when_the_element_is_not_in_the_set() {
     let set = CustomSet::<i32>::new(&[1, 2, 3]);
     assert!(!set.contains(&4));
 }
 
 #[test]
-#[ignore]
 fn empty_set_is_a_subset_of_another_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -43,7 +38,6 @@ fn empty_set_is_a_subset_of_another_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn empty_set_is_a_subset_of_non_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[1]);
@@ -51,7 +45,6 @@ fn empty_set_is_a_subset_of_non_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn non_empty_set_is_not_a_subset_of_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[1]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -59,7 +52,6 @@ fn non_empty_set_is_not_a_subset_of_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn set_is_a_subset_of_set_with_exact_same_elements() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3]);
     let set_2 = CustomSet::<i32>::new(&[1, 2, 3]);
@@ -67,7 +59,6 @@ fn set_is_a_subset_of_set_with_exact_same_elements() {
 }
 
 #[test]
-#[ignore]
 fn set_is_a_subset_of_larger_set_with_same_elements() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3]);
     let set_2 = CustomSet::<i32>::new(&[4, 1, 2, 3]);
@@ -75,7 +66,6 @@ fn set_is_a_subset_of_larger_set_with_same_elements() {
 }
 
 #[test]
-#[ignore]
 fn set_is_not_a_subset_of_set_that_does_not_contain_its_elements() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3]);
     let set_2 = CustomSet::<i32>::new(&[4, 1, 3]);
@@ -123,7 +113,6 @@ fn sets_are_disjoint_if_they_share_no_elements() {
 }
 
 #[test]
-#[ignore]
 fn empty_sets_are_equal() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -131,7 +120,6 @@ fn empty_sets_are_equal() {
 }
 
 #[test]
-#[ignore]
 fn empty_set_is_not_equal_to_non_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[]);
     let set_2 = CustomSet::<i32>::new(&[1, 2, 3]);
@@ -139,7 +127,6 @@ fn empty_set_is_not_equal_to_non_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn non_empty_set_is_not_equal_to_empty_set() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3]);
     let set_2 = CustomSet::<i32>::new(&[]);
@@ -147,7 +134,6 @@ fn non_empty_set_is_not_equal_to_empty_set() {
 }
 
 #[test]
-#[ignore]
 fn sets_with_the_same_elements_are_equal() {
     let set_1 = CustomSet::<i32>::new(&[1, 2]);
     let set_2 = CustomSet::<i32>::new(&[2, 1]);
@@ -155,7 +141,6 @@ fn sets_with_the_same_elements_are_equal() {
 }
 
 #[test]
-#[ignore]
 fn sets_with_different_elements_are_not_equal() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3]);
     let set_2 = CustomSet::<i32>::new(&[1, 2, 4]);
@@ -163,7 +148,6 @@ fn sets_with_different_elements_are_not_equal() {
 }
 
 #[test]
-#[ignore]
 fn set_is_not_equal_to_larger_set_with_same_elements() {
     let set_1 = CustomSet::<i32>::new(&[1, 2, 3]);
     let set_2 = CustomSet::<i32>::new(&[1, 2, 3, 4]);
@@ -171,7 +155,6 @@ fn set_is_not_equal_to_larger_set_with_same_elements() {
 }
 
 #[test]
-#[ignore]
 fn set_is_equal_to_a_set_constructed_from_an_array_with_duplicates() {
     let set_1 = CustomSet::<i32>::new(&[1]);
     let set_2 = CustomSet::<i32>::new(&[1, 1]);
