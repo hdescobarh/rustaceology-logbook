@@ -1,3 +1,5 @@
+use std::ops::Neg;
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum AffineCipherError {
     NotCoprime(u8),
@@ -20,14 +22,19 @@ pub fn encode(plaintext: &str, a: u8, b: u8) -> Result<String, AffineCipherError
 }
 
 pub fn decode(ciphertext: &str, a: u8, b: u8) -> Result<String, AffineCipherError> {
-    let cipher = AffineCipher::new(a, b).map(|cipher| todo!());
-    todo!("Decode {ciphertext} with the key ({a}, {b})");
+    AffineCipher::new(a, b).map(|cipher| {
+        ciphertext
+            .chars()
+            .flat_map(|letter| cipher.cypher_to_plain(letter))
+            .collect::<String>()
+    })
 }
 
 struct AffineCipher {
     a: u16,
     b: u16,
-    a_inverse: u16,
+    a_mul_inverse: u16,
+    b_add_inverse: u16,
 }
 
 impl AffineCipher {
@@ -39,7 +46,8 @@ impl AffineCipher {
         Ok(Self {
             a: a as u16,
             b: b as u16,
-            a_inverse,
+            a_mul_inverse: a_inverse,
+            b_add_inverse: (b as i16).neg().rem_euclid(26) as u16,
         })
     }
 
@@ -52,6 +60,16 @@ impl AffineCipher {
         };
         let cypher_letter = b'a' + ((self.a * letter_index as u16 + self.b) % 26) as u8;
         Some(cypher_letter.into())
+    }
+
+    fn cypher_to_plain(&self, letter: char) -> Option<char> {
+        let letter_index = match letter {
+            'a'..='z' => letter as u16 - b'a' as u16,
+            '0'..='9' => return Some(letter),
+            _ => return None,
+        };
+        let decode_index = self.a_mul_inverse * (letter_index + self.b_add_inverse) % 26;
+        Some((b'a' + decode_index as u8).into())
     }
 
     /// Computes the gcd and the Bézout's identity coefficients
