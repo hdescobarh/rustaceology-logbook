@@ -5,6 +5,8 @@ pub enum AffineCipherError {
     NotCoprime(u8),
 }
 
+// Modulo 26 operations: no need to allow negative or large keys,
+// as they all reduce to values in 0..=25
 pub fn encode(plaintext: &str, a: u8, b: u8) -> Result<String, AffineCipherError> {
     AffineCipher::new(a, b).map(|cipher| {
         plaintext
@@ -68,8 +70,8 @@ impl AffineCipher {
             '0'..='9' => return Some(letter),
             _ => return None,
         };
-        let decode_index = self.a_mul_inverse * (letter_index + self.b_add_inverse) % 26;
-        Some((b'a' + decode_index as u8).into())
+        let decoded_index = self.a_mul_inverse * (letter_index + self.b_add_inverse) % 26;
+        Some((b'a' + decoded_index as u8).into())
     }
 
     /// Computes the gcd and the Bézout's identity coefficients
