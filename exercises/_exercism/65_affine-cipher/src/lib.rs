@@ -25,12 +25,12 @@ impl AffineCipher {
 
     fn plain_to_cypher(&self, letter: char) -> Option<char> {
         let letter_index = match letter {
-            'A'..='Z' => (b'A' - letter as u8) as u32,
-            'a'..='z' => (b'a' - letter as u8) as u32,
+            'A'..='Z' => (letter as u8 - b'A') as u32,
+            'a'..='z' => (letter as u8 - b'a') as u32,
             '0'..='1' => return Some(letter),
             _ => return None,
         };
-        let cypher_letter = ((self.0 * letter_index + self.1) % 26) as u8;
+        let cypher_letter = b'a' + ((self.0 * letter_index + self.1) % 26) as u8;
         Some(cypher_letter.into())
     }
 
