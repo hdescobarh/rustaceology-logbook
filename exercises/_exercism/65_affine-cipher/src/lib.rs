@@ -24,16 +24,23 @@ pub fn decode(ciphertext: &str, a: u8, b: u8) -> Result<String, AffineCipherErro
     todo!("Decode {ciphertext} with the key ({a}, {b})");
 }
 
-struct AffineCipher(u16, u16);
+struct AffineCipher {
+    a: u16,
+    b: u16,
+    a_inverse: u16,
+}
 
 impl AffineCipher {
     pub fn new(a: u8, b: u8) -> Result<Self, AffineCipherError> {
-        let (max, min) = if a >= 26 { (a, 26) } else { (26, a) };
-        match Self::extended_euclidean(max as i16, min as i16) {
-            (1, _, _) => (),
+        let a_inverse = match Self::extended_euclidean(a as i16, 26) {
+            (1, inverse, _) => inverse.rem_euclid(26) as u16,
             _ => return Err(AffineCipherError::NotCoprime(a)),
-        }
-        Ok(AffineCipher(a as u16, b as u16))
+        };
+        Ok(Self {
+            a: a as u16,
+            b: b as u16,
+            a_inverse,
+        })
     }
 
     fn plain_to_cypher(&self, letter: char) -> Option<char> {
@@ -43,7 +50,7 @@ impl AffineCipher {
             '0'..='9' => return Some(letter),
             _ => return None,
         };
-        let cypher_letter = b'a' + ((self.0 * letter_index as u16 + self.1) % 26) as u8;
+        let cypher_letter = b'a' + ((self.a * letter_index as u16 + self.b) % 26) as u8;
         Some(cypher_letter.into())
     }
 
