@@ -53,13 +53,13 @@ impl AffineCipher {
 
     fn plain_to_cypher(&self, letter: char) -> Option<char> {
         let letter_index = match letter {
-            'A'..='Z' => letter as u8 - b'A',
-            'a'..='z' => letter as u8 - b'a',
+            'A'..='Z' => letter as u16 - b'A' as u16,
+            'a'..='z' => letter as u16 - b'a' as u16,
             '0'..='9' => return Some(letter),
             _ => return None,
         };
-        let cypher_letter = b'a' + ((self.a * letter_index as u16 + self.b) % 26) as u8;
-        Some(cypher_letter.into())
+        let encoded_index = (self.a * letter_index + self.b) % 26;
+        Some((b'a' + encoded_index as u8).into())
     }
 
     fn cypher_to_plain(&self, letter: char) -> Option<char> {
