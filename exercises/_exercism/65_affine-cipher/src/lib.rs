@@ -4,8 +4,19 @@ pub enum AffineCipherError {
 }
 
 pub fn encode(plaintext: &str, a: u32, b: u32) -> Result<String, AffineCipherError> {
-    let cipher = AffineCipher::new(a, b)?;
-    todo!("Encode {plaintext} with the key ({a}, {b})");
+    AffineCipher::new(a, b).map(|cipher| {
+        plaintext
+            .chars()
+            .flat_map(|letter| cipher.plain_to_cypher(letter))
+            .enumerate()
+            .fold(String::new(), |mut acc, (i, letter)| {
+                if i > 0 && i % 5 == 0 {
+                    acc.push(' ');
+                };
+                acc.push(letter);
+                acc
+            })
+    })
 }
 
 pub fn decode(ciphertext: &str, a: u32, b: u32) -> Result<String, AffineCipherError> {
@@ -18,7 +29,7 @@ struct AffineCipher(u32, u32);
 impl AffineCipher {
     pub fn new(a: u32, b: u32) -> Result<Self, AffineCipherError> {
         if Self::greatest_common_divisor(a, 26) != 1 {
-            return Err(AffineCipherError::NotCoprime(1));
+            return Err(AffineCipherError::NotCoprime(a));
         };
         Ok(AffineCipher(a, b))
     }
