@@ -20,7 +20,7 @@ pub fn encode(plaintext: &str, a: u8, b: u8) -> Result<String, AffineCipherError
 }
 
 pub fn decode(ciphertext: &str, a: u8, b: u8) -> Result<String, AffineCipherError> {
-    let cipher = AffineCipher::new(a, b)?;
+    let cipher = AffineCipher::new(a, b).map(|cipher| todo!());
     todo!("Decode {ciphertext} with the key ({a}, {b})");
 }
 
@@ -55,11 +55,11 @@ impl AffineCipher {
     }
 
     /// Computes the gcd and the Bézout's identity coefficients
-    fn extended_euclidean(a: i16, b: i16) -> (i16, i16, i16) {
-        if b == 0 {
+    fn extended_euclidean(a: i16, m: i16) -> (i16, i16, i16) {
+        if m == 0 {
             return (a, 1, 0);
         }
-        let (gcd, x, y) = Self::extended_euclidean(b, a % b);
-        (gcd, y, x - (a / b) * y)
+        let (gcd, x, y) = Self::extended_euclidean(m, a % m);
+        (gcd, y, x - (a / m) * y)
     }
 }
