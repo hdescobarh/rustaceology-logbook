@@ -1,18 +1,64 @@
-/// While the problem description indicates a return status of 1 should be returned on errors,
-/// it is much more common to return a `Result`, so we provide an error type for the result here.
 #[derive(Debug, Eq, PartialEq)]
 pub enum AffineCipherError {
-    NotCoprime(i32),
+    NotCoprime(u32),
 }
 
-/// Encodes the plaintext using the affine cipher with key (`a`, `b`). Note that, rather than
-/// returning a return code, the more common convention in Rust is to return a `Result`.
-pub fn encode(plaintext: &str, a: i32, b: i32) -> Result<String, AffineCipherError> {
+pub fn encode(plaintext: &str, a: u32, b: u32) -> Result<String, AffineCipherError> {
+    if greatest_common_divisor(a, b) == 1 {
+        return Err(AffineCipherError::NotCoprime(1));
+    }
     todo!("Encode {plaintext} with the key ({a}, {b})");
 }
 
-/// Decodes the ciphertext using the affine cipher with key (`a`, `b`). Note that, rather than
-/// returning a return code, the more common convention in Rust is to return a `Result`.
-pub fn decode(ciphertext: &str, a: i32, b: i32) -> Result<String, AffineCipherError> {
+pub fn decode(ciphertext: &str, a: u32, b: u32) -> Result<String, AffineCipherError> {
+    if greatest_common_divisor(a, b) == 1 {
+        return Err(AffineCipherError::NotCoprime(1));
+    }
     todo!("Decode {ciphertext} with the key ({a}, {b})");
+}
+
+fn greatest_common_divisor(a: u32, b: u32) -> u32 {
+    let (max, min) = if a >= b { (a, b) } else { (b, a) };
+    if min == 0 {
+        return max;
+    }
+    greatest_common_divisor(min, max % min)
+}
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+
+    #[test]
+    fn gcd_not_coprime() {
+        let cases = [
+            (2, 8, 2),
+            (3, 27, 3),
+            (64, 1024, 64),
+            (1071, 462, 21),
+            (1236, 2460, 12),
+            (5275, 7425, 25),
+            (8120, 9240, 280),
+        ];
+        for (a, b, expected) in cases {
+            assert_eq!(greatest_common_divisor(a, b), expected);
+            assert_eq!(greatest_common_divisor(b, a), expected);
+        }
+    }
+
+    #[test]
+    fn gcd_coprime() {
+        let cases = [
+            (2, 3, 1),
+            (1012, 1013, 1),
+            (2021, 3037, 1),
+            (4096, 6561, 1),
+            (5003, 7001, 1),
+            (8125, 9007, 1),
+        ];
+        for (a, b, expected) in cases {
+            assert_eq!(greatest_common_divisor(a, b), expected);
+            assert_eq!(greatest_common_divisor(b, a), expected);
+        }
+    }
 }
