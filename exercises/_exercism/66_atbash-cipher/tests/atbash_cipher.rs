@@ -6,31 +6,26 @@ fn encode_yes() {
 }
 
 #[test]
-#[ignore]
 fn encode_no() {
     assert_eq!(cipher::encode("no"), "ml");
 }
 
 #[test]
-#[ignore]
 fn encode_omg() {
     assert_eq!(cipher::encode("OMG"), "lnt");
 }
 
 #[test]
-#[ignore]
 fn encode_spaces() {
     assert_eq!(cipher::encode("O M G"), "lnt");
 }
 
 #[test]
-#[ignore]
 fn encode_mindblowingly() {
     assert_eq!(cipher::encode("mindblowingly"), "nrmwy oldrm tob");
 }
 
 #[test]
-#[ignore]
 fn encode_numbers() {
     assert_eq!(
         cipher::encode("Testing,1 2 3, testing."),
@@ -39,13 +34,11 @@ fn encode_numbers() {
 }
 
 #[test]
-#[ignore]
 fn encode_deep_thought() {
     assert_eq!(cipher::encode("Truth is fiction."), "gifgs rhurx grlm");
 }
 
 #[test]
-#[ignore]
 fn encode_all_the_letters() {
     assert_eq!(
         cipher::encode("The quick brown fox jumps over the lazy dog."),
