@@ -23,6 +23,17 @@ impl AffineCipher {
         Ok(AffineCipher(a, b))
     }
 
+    fn plain_to_cypher(&self, letter: char) -> Option<char> {
+        let letter_index = match letter {
+            'A'..='Z' => (b'A' - letter as u8) as u32,
+            'a'..='z' => (b'a' - letter as u8) as u32,
+            '0'..='1' => return Some(letter),
+            _ => return None,
+        };
+        let cypher_letter = ((self.0 * letter_index + self.1) % 26) as u8;
+        Some(cypher_letter.into())
+    }
+
     fn greatest_common_divisor(a: u32, b: u32) -> u32 {
         let (max, min) = if a >= b { (a, b) } else { (b, a) };
         if min == 0 {
