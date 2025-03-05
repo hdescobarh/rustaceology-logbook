@@ -27,7 +27,7 @@ impl AffineCipher {
         let letter_index = match letter {
             'A'..='Z' => (letter as u8 - b'A') as u32,
             'a'..='z' => (letter as u8 - b'a') as u32,
-            '0'..='1' => return Some(letter),
+            '0'..='9' => return Some(letter),
             _ => return None,
         };
         let cypher_letter = b'a' + ((self.0 * letter_index + self.1) % 26) as u8;
