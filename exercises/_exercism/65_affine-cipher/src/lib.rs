@@ -17,7 +17,7 @@ struct AffineCipher(u32, u32);
 
 impl AffineCipher {
     pub fn new(a: u32, b: u32) -> Result<Self, AffineCipherError> {
-        if Self::greatest_common_divisor(a, b) != 1 {
+        if Self::greatest_common_divisor(a, 26) != 1 {
             return Err(AffineCipherError::NotCoprime(1));
         };
         Ok(AffineCipher(a, b))
