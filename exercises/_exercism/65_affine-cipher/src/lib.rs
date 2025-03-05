@@ -28,9 +28,11 @@ struct AffineCipher(u32, u32);
 
 impl AffineCipher {
     pub fn new(a: u32, b: u32) -> Result<Self, AffineCipherError> {
-        if Self::greatest_common_divisor(a, 26) != 1 {
-            return Err(AffineCipherError::NotCoprime(a));
-        };
+        let (max, min) = if a >= 26 { (a, 26) } else { (26, a) };
+        match Self::extended_euclidean(max as i64, min as i64) {
+            (1, _, _) => (),
+            _ => return Err(AffineCipherError::NotCoprime(a)),
+        }
         Ok(AffineCipher(a, b))
     }
 
@@ -51,6 +53,15 @@ impl AffineCipher {
             return max;
         }
         Self::greatest_common_divisor(min, max % min)
+    }
+
+    /// Computes the gcd and the Bézout's identity coefficients
+    fn extended_euclidean(a: i64, b: i64) -> (i64, i64, i64) {
+        if b == 0 {
+            return (a, 1, 0);
+        }
+        let (gcd, x, y) = Self::extended_euclidean(b, a % b);
+        (gcd, y, x - (a / b) * y)
     }
 }
 #[cfg(test)]
