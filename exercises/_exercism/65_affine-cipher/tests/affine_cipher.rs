@@ -84,7 +84,6 @@ fn encode_with_a_not_coprime_to_m() {
 }
 
 #[test]
-#[ignore]
 fn decode_exercism() {
     let phrase = "tytgn fjr";
     let (a, b) = (3, 7);
@@ -94,7 +93,6 @@ fn decode_exercism() {
 }
 
 #[test]
-#[ignore]
 fn decode_a_sentence() {
     let phrase = "qdwju nqcro muwhn odqun oppmd aunwd o";
     let (a, b) = (19, 16);
@@ -104,7 +102,6 @@ fn decode_a_sentence() {
 }
 
 #[test]
-#[ignore]
 fn decode_numbers() {
     let phrase = "odpoz ub123 odpoz ub";
     let (a, b) = (25, 7);
@@ -114,7 +111,6 @@ fn decode_numbers() {
 }
 
 #[test]
-#[ignore]
 fn decode_all_the_letters() {
     let phrase = "swxtj npvyk lruol iejdc blaxk swxmh qzglf";
     let (a, b) = (17, 33);
@@ -124,7 +120,6 @@ fn decode_all_the_letters() {
 }
 
 #[test]
-#[ignore]
 fn decode_with_no_spaces_in_input() {
     let phrase = "swxtjnpvyklruoliejdcblaxkswxmhqzglf";
     let (a, b) = (17, 33);
@@ -134,7 +129,6 @@ fn decode_with_no_spaces_in_input() {
 }
 
 #[test]
-#[ignore]
 fn decode_with_too_many_spaces() {
     let phrase = "vszzm    cly   yd cg    qdp";
     let (a, b) = (15, 16);
@@ -144,7 +138,6 @@ fn decode_with_too_many_spaces() {
 }
 
 #[test]
-#[ignore]
 fn decode_with_a_not_coprime_to_m() {
     let phrase = "Test";
     let (a, b) = (13, 5);
