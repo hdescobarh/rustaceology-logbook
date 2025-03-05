@@ -4,27 +4,33 @@ pub enum AffineCipherError {
 }
 
 pub fn encode(plaintext: &str, a: u32, b: u32) -> Result<String, AffineCipherError> {
-    if greatest_common_divisor(a, b) == 1 {
-        return Err(AffineCipherError::NotCoprime(1));
-    }
+    let cipher = AffineCipher::new(a, b)?;
     todo!("Encode {plaintext} with the key ({a}, {b})");
 }
 
 pub fn decode(ciphertext: &str, a: u32, b: u32) -> Result<String, AffineCipherError> {
-    if greatest_common_divisor(a, b) == 1 {
-        return Err(AffineCipherError::NotCoprime(1));
-    }
+    let cipher = AffineCipher::new(a, b)?;
     todo!("Decode {ciphertext} with the key ({a}, {b})");
 }
 
-fn greatest_common_divisor(a: u32, b: u32) -> u32 {
-    let (max, min) = if a >= b { (a, b) } else { (b, a) };
-    if min == 0 {
-        return max;
-    }
-    greatest_common_divisor(min, max % min)
-}
+struct AffineCipher(u32, u32);
 
+impl AffineCipher {
+    pub fn new(a: u32, b: u32) -> Result<Self, AffineCipherError> {
+        if Self::greatest_common_divisor(a, b) == 1 {
+            return Err(AffineCipherError::NotCoprime(1));
+        };
+        Ok(AffineCipher(a, b))
+    }
+
+    fn greatest_common_divisor(a: u32, b: u32) -> u32 {
+        let (max, min) = if a >= b { (a, b) } else { (b, a) };
+        if min == 0 {
+            return max;
+        }
+        Self::greatest_common_divisor(min, max % min)
+    }
+}
 #[cfg(test)]
 mod test {
     use crate::*;
@@ -41,8 +47,8 @@ mod test {
             (8120, 9240, 280),
         ];
         for (a, b, expected) in cases {
-            assert_eq!(greatest_common_divisor(a, b), expected);
-            assert_eq!(greatest_common_divisor(b, a), expected);
+            assert_eq!(AffineCipher::greatest_common_divisor(a, b), expected);
+            assert_eq!(AffineCipher::greatest_common_divisor(b, a), expected);
         }
     }
 
@@ -57,8 +63,8 @@ mod test {
             (8125, 9007, 1),
         ];
         for (a, b, expected) in cases {
-            assert_eq!(greatest_common_divisor(a, b), expected);
-            assert_eq!(greatest_common_divisor(b, a), expected);
+            assert_eq!(AffineCipher::greatest_common_divisor(a, b), expected);
+            assert_eq!(AffineCipher::greatest_common_divisor(b, a), expected);
         }
     }
 }
