@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/66_atbash-cipher/Cargo.toml",
+			"exercises/_exercism/67_crypto-square/Cargo.toml",
 		],
 	},
 	"extensions": {
