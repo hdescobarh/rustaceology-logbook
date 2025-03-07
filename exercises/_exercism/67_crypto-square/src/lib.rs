@@ -19,13 +19,19 @@ impl Cipher {
         Self { rows, cols, normal }
     }
 
+    // From the constraints:
+    // - Option 1: c_1 = ceil(sqrt(n)), with r = c_1
+    // - Option 2: c_2 = ceil(0.5 + sqrt(0.25 + n)), with r = c_1 - 1
+    // Since min(c_1, c_2) = c_1, the choice depends on whether c_1^2 >= n.
+    //
+    // I haven't found a formal proof, but I suspect that c_2 = c_1 + 1.
+    // I verified this holds for the first 10^9 integers.
     fn determine_dimensions(normal_length: f64) -> (usize, usize) {
-        let maybe_perfect_sqrt = normal_length.sqrt().round() as usize;
-        if maybe_perfect_sqrt.pow(2) == normal_length as usize {
-            (maybe_perfect_sqrt, maybe_perfect_sqrt)
+        let check_sqrt = normal_length.sqrt().ceil() as usize;
+        if check_sqrt.pow(2) >= normal_length as usize {
+            (check_sqrt, check_sqrt)
         } else {
-            let c = (0.25 + normal_length.sqrt() + 0.5).ceil() as usize;
-            (c - 1, c)
+            (check_sqrt, check_sqrt + 1)
         }
     }
 }
