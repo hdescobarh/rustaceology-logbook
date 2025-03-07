@@ -8,7 +8,7 @@ pub fn get_diamond(letter: char) -> Vec<String> {
 }
 
 struct Diamond {
-    letter_index: u8,
+    letter_index: usize,
     dimension: usize,
     shape: Option<Vec<String>>,
 }
@@ -16,7 +16,7 @@ struct Diamond {
 impl Diamond {
     fn new(letter: char) -> Option<Self> {
         let letter_index = match letter {
-            'A'..='Z' => letter as u8 - b'A',
+            'A'..='Z' => (letter as u8 - b'A') as usize,
             _ => return None,
         };
         Some(Self {
@@ -26,15 +26,33 @@ impl Diamond {
         })
     }
 
-    fn letter_dim(letter_index: u8) -> usize {
-        letter_index as usize * 2 - 1
+    fn letter_dim(letter_index: usize) -> usize {
+        letter_index * 2 + 1
     }
 
-    fn fill_row(&mut self, row_index: u8) {
-        todo!()
+    fn make_row(&self, row_index: usize) -> String {
+        let dim = Self::letter_dim(row_index);
+        let inner = dim.saturating_sub(2);
+        let outer = (self.dimension - dim) / 2;
+        if row_index == 0 {
+            format!("{s:outer$}A{s:outer$}", s = "")
+        } else {
+            format!(
+                "{s:outer$}{letter}{s:inner$}{letter}{s:outer$}",
+                s = "",
+                letter = (row_index as u8 + b'A') as char
+            )
+        }
     }
 
     fn fill_shape(&mut self) {
-        todo!()
+        let mut shape: Vec<String> = Vec::with_capacity(self.dimension);
+        for row_index in 0..=self.letter_index {
+            let row = self.make_row(row_index);
+            shape.push(row);
+        }
+        shape.extend_from_within(..self.letter_index);
+        shape[self.letter_index + 1..].reverse();
+        self.shape = Some(shape)
     }
 }
