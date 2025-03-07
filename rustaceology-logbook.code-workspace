@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/68_diamond/Cargo.toml",
+			"exercises/_exercism/69_largest-series-product/Cargo.toml",
 		],
 	},
 	"extensions": {
