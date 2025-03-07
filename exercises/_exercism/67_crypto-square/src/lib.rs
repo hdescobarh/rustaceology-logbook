@@ -1,5 +1,7 @@
+use std::fmt::Display;
+
 pub fn encrypt(input: &str) -> String {
-    todo!("Encrypt {input:?} using a square code")
+    Cipher::new(input).to_string()
 }
 
 struct Cipher {
@@ -33,5 +35,19 @@ impl Cipher {
         } else {
             (check_sqrt, check_sqrt + 1)
         }
+    }
+}
+
+impl Display for Cipher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for c in 0..self.cols {
+            if c != 0 {
+                write!(f, " ")?;
+            }
+            for index in (c..=(self.rows - 1) * self.cols + c).step_by(self.cols) {
+                write!(f, "{}", self.normal.get(index).unwrap_or(&' '))?;
+            }
+        }
+        Ok(())
     }
 }
