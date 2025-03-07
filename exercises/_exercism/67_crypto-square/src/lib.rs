@@ -20,14 +20,14 @@ impl Cipher {
     }
 
     // From the constraints:
-    // - Option 1: c_1 = ceil(sqrt(n)), with r = c_1
+    // - Option 1: c_1 = round(sqrt(n)), with r = c_1
     // - Option 2: c_2 = ceil(0.5 + sqrt(0.25 + n)), with r = c_1 - 1
     // Since min(c_1, c_2) = c_1, the choice depends on whether c_1^2 >= n.
     //
     // I haven't found a formal proof, but I suspect that c_2 = c_1 + 1.
     // I verified this holds for the first 10^9 integers.
     fn determine_dimensions(normal_length: f64) -> (usize, usize) {
-        let check_sqrt = normal_length.sqrt().ceil() as usize;
+        let check_sqrt = normal_length.sqrt().round() as usize;
         if check_sqrt.pow(2) >= normal_length as usize {
             (check_sqrt, check_sqrt)
         } else {
