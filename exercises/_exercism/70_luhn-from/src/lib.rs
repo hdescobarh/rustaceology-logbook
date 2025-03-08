@@ -3,16 +3,14 @@ pub struct Luhn(String);
 impl Luhn {
     pub fn is_valid(&self) -> bool {
         self.check_chars_rev()
-            .try_fold((0, false, 0), |mut acc, maybe_digit| {
+            .try_fold((0, false, 0), |(sum, double, size), maybe_digit| {
                 maybe_digit.map(|digit| {
-                    if acc.1 {
-                        acc.0 += if digit < 5 { digit * 2 } else { digit * 2 - 9 };
+                    let sum = if double {
+                        sum + if digit < 5 { digit * 2 } else { digit * 2 - 9 }
                     } else {
-                        acc.0 += digit
-                    }
-                    acc.1 = !acc.1;
-                    acc.2 += 1;
-                    acc
+                        sum + digit
+                    };
+                    (sum, !double, size + 1)
                 })
             })
             .is_ok_and(|(sum, _, length)| sum.rem_euclid(10) == 0 && length > 1)
