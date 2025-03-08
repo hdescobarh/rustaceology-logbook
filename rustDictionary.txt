@@ -1,4 +1,6 @@
+_ascii
 clippy
+_euclid
 isqrt
 repr
 vadimcn
