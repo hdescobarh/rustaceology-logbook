@@ -15,7 +15,6 @@ mod append {
     }
 
     #[test]
-    #[ignore]
     fn list_to_empty_list() {
         let list1 = vec![0i32; 0].into_iter();
         let list2 = vec![1, 2, 3, 4].into_iter();
@@ -27,7 +26,6 @@ mod append {
     }
 
     #[test]
-    #[ignore]
     fn empty_list_to_list() {
         let list1 = vec![1, 2, 3, 4].into_iter();
         let list2 = vec![0i32; 0].into_iter();
@@ -39,7 +37,6 @@ mod append {
     }
 
     #[test]
-    #[ignore]
     fn non_empty_lists() {
         let list1 = vec![1, 2].into_iter();
         let list2 = vec![2, 3, 4, 5].into_iter();
