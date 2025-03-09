@@ -37,13 +37,10 @@ impl<I: Iterator<Item: Iterator>> Iterator for Concat<I> {
         if output.is_some() {
             return output;
         }
-        match self.pending.next() {
-            Some(iter) => {
-                self.current = Some(iter);
-                self.next()
-            }
-            None => None,
-        }
+        self.pending.next().and_then(|iter| {
+            self.current = Some(iter);
+            self.next()
+        })
     }
 }
 /// Combines all items in all nested iterators inside into one flattened iterator
