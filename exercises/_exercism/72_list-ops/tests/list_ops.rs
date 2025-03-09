@@ -205,7 +205,6 @@ mod foldr {
     use super::*;
 
     #[test]
-    #[ignore]
     fn empty_list() {
         let list = vec![0.0f64; 0].into_iter();
         let initial = 2.0;
@@ -217,7 +216,6 @@ mod foldr {
     }
 
     #[test]
-    #[ignore]
     fn direction_independent_function_applied_to_non_empty_list() {
         let list = vec![1.0, 2.0, 3.0, 4.0].into_iter();
         let initial = 5.0;
@@ -229,7 +227,6 @@ mod foldr {
     }
 
     #[test]
-    #[ignore]
     fn direction_dependent_function_applied_to_non_empty_list() {
         let list = vec![1.0, 2.0, 3.0, 4.0].into_iter();
         let initial = 24.0;
