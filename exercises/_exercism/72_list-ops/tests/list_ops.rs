@@ -120,7 +120,6 @@ mod length {
     use super::*;
 
     #[test]
-    #[ignore]
     fn empty_list() {
         let list = vec![0i32; 0].into_iter();
         let output = length(list);
@@ -131,7 +130,6 @@ mod length {
     }
 
     #[test]
-    #[ignore]
     fn non_empty_list() {
         let list = vec![1, 2, 3, 4].into_iter();
         let output = length(list);
