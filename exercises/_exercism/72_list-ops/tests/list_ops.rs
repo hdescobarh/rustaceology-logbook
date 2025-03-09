@@ -53,7 +53,6 @@ mod concat {
     use super::*;
 
     #[test]
-    #[ignore]
     fn empty_list() {
         let lists = vec![vec![0i32; 0]; 0].into_iter().map(Vec::into_iter);
         let output = concat(lists);
@@ -64,7 +63,6 @@ mod concat {
     }
 
     #[test]
-    #[ignore]
     fn list_of_lists() {
         let lists = vec![vec![1, 2], vec![3], vec![], vec![4, 5, 6]]
             .into_iter()
@@ -77,7 +75,6 @@ mod concat {
     }
 
     #[test]
-    #[ignore]
     fn list_of_nested_lists() {
         let lists = vec![
             vec![vec![1], vec![2]],

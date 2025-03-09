@@ -15,15 +15,32 @@ where
     Append(a, b)
 }
 
+struct Concat<I>(I, Option<I>)
+where
+    I: Iterator,
+    I::Item: Iterator;
+
+impl<I> Iterator for Concat<I>
+where
+    I: Iterator,
+    I::Item: Iterator,
+{
+    type Item = <I::Item as Iterator>::Item;
+    fn next(&mut self) -> Option<Self::Item> {
+        //if self.1.is_none() {
+        //    self.1 = self.0.next();
+        //}
+        //self.1.as_mut().and_then(|iter| iter.next())
+        self.0.next().and_then(|mut iter| iter.next())
+    }
+}
 /// Combines all items in all nested iterators inside into one flattened iterator
 pub fn concat<I>(nested_iter: I) -> impl Iterator<Item = <I::Item as Iterator>::Item>
 where
     I: Iterator,
     I::Item: Iterator,
 {
-    // this empty iterator silences a compiler complaint that
-    // () doesn't implement Iterator
-    std::iter::from_fn(|| todo!())
+    Concat(nested_iter, None)
 }
 
 /// Returns an iterator of all items in iter for which `predicate(item)` is true
