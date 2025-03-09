@@ -15,23 +15,35 @@ where
     Append(a, b)
 }
 
-struct Concat<I>(I, Option<I>)
-where
-    I: Iterator,
-    I::Item: Iterator;
+struct Concat<I: Iterator<Item: Iterator>> {
+    pending: I,
+    current: Option<I::Item>,
+}
 
-impl<I> Iterator for Concat<I>
-where
-    I: Iterator,
-    I::Item: Iterator,
-{
+impl<I: Iterator<Item: Iterator>> Concat<I> {
+    fn new(mut iter: I) -> Self {
+        let current = iter.next();
+        Self {
+            pending: iter,
+            current,
+        }
+    }
+}
+
+impl<I: Iterator<Item: Iterator>> Iterator for Concat<I> {
     type Item = <I::Item as Iterator>::Item;
     fn next(&mut self) -> Option<Self::Item> {
-        //if self.1.is_none() {
-        //    self.1 = self.0.next();
-        //}
-        //self.1.as_mut().and_then(|iter| iter.next())
-        self.0.next().and_then(|mut iter| iter.next())
+        let output = self.current.as_mut().and_then(|iter| iter.next());
+        if output.is_some() {
+            return output;
+        }
+        match self.pending.next() {
+            Some(iter) => {
+                self.current = Some(iter);
+                self.next()
+            }
+            None => None,
+        }
     }
 }
 /// Combines all items in all nested iterators inside into one flattened iterator
@@ -40,7 +52,7 @@ where
     I: Iterator,
     I::Item: Iterator,
 {
-    Concat(nested_iter, None)
+    Concat::new(nested_iter)
 }
 
 /// Returns an iterator of all items in iter for which `predicate(item)` is true
