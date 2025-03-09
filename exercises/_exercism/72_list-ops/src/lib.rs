@@ -119,12 +119,19 @@ pub fn foldl<I: Iterator, F: Fn(U, I::Item) -> U, U>(mut iter: I, initial: U, fu
     acc
 }
 
-pub fn foldr<I, F, U>(mut _iter: I, _initial: U, _function: F) -> U
+pub fn foldr<I, F, U>(mut iter: I, initial: U, function: F) -> U
 where
     I: DoubleEndedIterator,
     F: Fn(U, I::Item) -> U,
 {
-    todo!("starting with initial, fold (reduce) each iter item into the accumulator from the right")
+    let mut acc = match iter.next_back() {
+        Some(item) => (function)(initial, item),
+        None => return initial,
+    };
+    for item in iter {
+        acc = (function)(acc, item);
+    }
+    acc
 }
 
 /// Returns an iterator with all the original items, but in reverse order
