@@ -91,12 +91,11 @@ struct Map<I: Iterator, F: Fn(I::Item) -> U, U> {
 
 impl<I: Iterator, F: Fn(I::Item) -> U, U> Iterator for Map<I, F, U> {
     type Item = U;
-
     fn next(&mut self) -> Option<Self::Item> {
-        #[allow(clippy::bind_instead_of_map)]
-        self.iter
-            .next()
-            .and_then(|item| Some((self.function)(item)))
+        match self.iter.next() {
+            Some(item) => Some((self.function)(item)),
+            None => None,
+        }
     }
 }
 /// Returns an iterator of the results of applying `function(item)` on all iter items
