@@ -84,15 +84,28 @@ pub fn length<I: Iterator>(iter: I) -> usize {
     count
 }
 
+struct Map<I: Iterator, F: Fn(I::Item) -> U, U> {
+    iter: I,
+    function: F,
+}
+
+impl<I: Iterator, F: Fn(I::Item) -> U, U> Iterator for Map<I, F, U> {
+    type Item = U;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        #[allow(clippy::bind_instead_of_map)]
+        self.iter
+            .next()
+            .and_then(|item| Some((self.function)(item)))
+    }
+}
 /// Returns an iterator of the results of applying `function(item)` on all iter items
-pub fn map<I, F, U>(_iter: I, _function: F) -> impl Iterator<Item = U>
+pub fn map<I, F, U>(iter: I, function: F) -> impl Iterator<Item = U>
 where
     I: Iterator,
     F: Fn(I::Item) -> U,
 {
-    // this empty iterator silences a compiler complaint that
-    // () doesn't implement Iterator
-    std::iter::from_fn(|| todo!())
+    Map { iter, function }
 }
 
 pub fn foldl<I, F, U>(mut _iter: I, _initial: U, _function: F) -> U
