@@ -108,12 +108,15 @@ where
     Map { iter, function }
 }
 
-pub fn foldl<I, F, U>(mut _iter: I, _initial: U, _function: F) -> U
-where
-    I: Iterator,
-    F: Fn(U, I::Item) -> U,
-{
-    todo!("starting with initial, fold (reduce) each iter item into the accumulator from the left")
+pub fn foldl<I: Iterator, F: Fn(U, I::Item) -> U, U>(mut iter: I, initial: U, function: F) -> U {
+    let mut acc = match iter.next() {
+        Some(item) => (function)(initial, item),
+        None => return initial,
+    };
+    for item in iter {
+        acc = (function)(acc, item);
+    }
+    acc
 }
 
 pub fn foldr<I, F, U>(mut _iter: I, _initial: U, _function: F) -> U
