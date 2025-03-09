@@ -96,7 +96,6 @@ mod filter {
     use super::*;
 
     #[test]
-    #[ignore]
     fn empty_list() {
         let list = vec![0i32; 0].into_iter();
         let output = filter(list, |x| x % 2 == 1);
@@ -107,7 +106,6 @@ mod filter {
     }
 
     #[test]
-    #[ignore]
     fn non_empty_list() {
         let list = vec![1, 2, 3, 5].into_iter();
         let output = filter(list, |x| x % 2 == 1);
