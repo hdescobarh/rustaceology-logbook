@@ -133,9 +133,15 @@ where
     acc
 }
 
+struct Reverse<I: DoubleEndedIterator>(I);
+
+impl<I: DoubleEndedIterator> Iterator for Reverse<I> {
+    type Item = I::Item;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next_back()
+    }
+}
 /// Returns an iterator with all the original items, but in reverse order
-pub fn reverse<I: DoubleEndedIterator>(_iter: I) -> impl Iterator<Item = I::Item> {
-    // this empty iterator silences a compiler complaint that
-    // () doesn't implement Iterator
-    std::iter::from_fn(|| todo!())
+pub fn reverse<I: DoubleEndedIterator>(iter: I) -> impl Iterator<Item = I::Item> {
+    Reverse(iter)
 }
