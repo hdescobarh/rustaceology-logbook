@@ -144,7 +144,6 @@ mod map {
     use super::*;
 
     #[test]
-    #[ignore]
     fn empty_list() {
         let list = vec![0i32; 0].into_iter();
         let output = map(list, |x| x + 1);
@@ -155,7 +154,6 @@ mod map {
     }
 
     #[test]
-    #[ignore]
     fn non_empty_list() {
         let list = vec![1, 3, 5, 7].into_iter();
         let output = map(list, |x| x + 1);
