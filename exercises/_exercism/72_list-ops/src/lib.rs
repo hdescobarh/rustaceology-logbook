@@ -1,12 +1,27 @@
-/// Yields each item of a and then each item of b
-pub fn append<I, J>(_a: I, _b: J) -> impl Iterator<Item = I::Item>
+struct Chain<I, J>(I, J)
+where
+    I: Iterator,
+    J: Iterator<Item = I::Item>;
+
+impl<I, J> Iterator for Chain<I, J>
 where
     I: Iterator,
     J: Iterator<Item = I::Item>,
 {
-    // this empty iterator silences a compiler complaint that
-    // () doesn't implement Iterator
-    std::iter::from_fn(|| todo!())
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.0.next();
+        if next.is_some() { next } else { self.1.next() }
+    }
+}
+/// Yields each item of a and then each item of b
+pub fn append<I, J>(a: I, b: J) -> impl Iterator<Item = I::Item>
+where
+    I: Iterator,
+    J: Iterator<Item = I::Item>,
+{
+    Chain(a, b)
 }
 
 /// Combines all items in all nested iterators inside into one flattened iterator
