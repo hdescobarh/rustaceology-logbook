@@ -1,6 +1,6 @@
-struct Chain<I: Iterator, J: Iterator<Item = I::Item>>(I, J);
+struct Append<I: Iterator, J: Iterator<Item = I::Item>>(I, J);
 
-impl<I: Iterator, J: Iterator<Item = I::Item>> Iterator for Chain<I, J> {
+impl<I: Iterator, J: Iterator<Item = I::Item>> Iterator for Append<I, J> {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().or_else(|| self.1.next())
@@ -12,7 +12,7 @@ where
     I: Iterator,
     J: Iterator<Item = I::Item>,
 {
-    Chain(a, b)
+    Append(a, b)
 }
 
 /// Combines all items in all nested iterators inside into one flattened iterator
