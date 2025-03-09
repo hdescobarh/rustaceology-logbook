@@ -1,3 +1,4 @@
+// Solution avoiding reallocations
 struct Append<I: Iterator, J: Iterator<Item = I::Item>>(I, J);
 
 impl<I: Iterator, J: Iterator<Item = I::Item>> Iterator for Append<I, J> {
