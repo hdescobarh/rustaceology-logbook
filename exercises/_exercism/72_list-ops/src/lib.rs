@@ -1,15 +1,7 @@
-struct Chain<I, J>(I, J)
-where
-    I: Iterator,
-    J: Iterator<Item = I::Item>;
+struct Chain<I: Iterator, J: Iterator<Item = I::Item>>(I, J);
 
-impl<I, J> Iterator for Chain<I, J>
-where
-    I: Iterator,
-    J: Iterator<Item = I::Item>,
-{
+impl<I: Iterator, J: Iterator<Item = I::Item>> Iterator for Chain<I, J> {
     type Item = I::Item;
-
     fn next(&mut self) -> Option<Self::Item> {
         let next = self.0.next();
         if next.is_some() { next } else { self.1.next() }
