@@ -3,8 +3,7 @@ struct Chain<I: Iterator, J: Iterator<Item = I::Item>>(I, J);
 impl<I: Iterator, J: Iterator<Item = I::Item>> Iterator for Chain<I, J> {
     type Item = I::Item;
     fn next(&mut self) -> Option<Self::Item> {
-        let next = self.0.next();
-        if next.is_some() { next } else { self.1.next() }
+        self.0.next().or_else(|| self.1.next())
     }
 }
 /// Yields each item of a and then each item of b
@@ -17,7 +16,7 @@ where
 }
 
 /// Combines all items in all nested iterators inside into one flattened iterator
-pub fn concat<I>(_nested_iter: I) -> impl Iterator<Item = <I::Item as Iterator>::Item>
+pub fn concat<I>(nested_iter: I) -> impl Iterator<Item = <I::Item as Iterator>::Item>
 where
     I: Iterator,
     I::Item: Iterator,
