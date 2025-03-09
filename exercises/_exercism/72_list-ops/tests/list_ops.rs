@@ -242,7 +242,6 @@ mod reverse {
     use super::*;
 
     #[test]
-    #[ignore]
     fn empty_list() {
         let list = vec![0i32; 0].into_iter();
         let output = reverse(list);
@@ -253,7 +252,6 @@ mod reverse {
     }
 
     #[test]
-    #[ignore]
     fn non_empty_list() {
         let list = vec![1, 3, 5, 7].into_iter();
         let output = reverse(list);
@@ -264,7 +262,6 @@ mod reverse {
     }
 
     #[test]
-    #[ignore]
     fn list_of_lists_is_not_flattened() {
         let list = vec![vec![1, 2], vec![3], vec![], vec![4, 5, 6]]
             .into_iter()
