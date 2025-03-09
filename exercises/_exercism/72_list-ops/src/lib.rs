@@ -52,15 +52,28 @@ where
     Concat::new(nested_iter)
 }
 
+struct Filter<I: Iterator, F: Fn(&I::Item) -> bool> {
+    iter: I,
+    predicate: F,
+}
+
+impl<I: Iterator, F: Fn(&I::Item) -> bool> Iterator for Filter<I, F> {
+    type Item = I::Item;
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.iter.next() {
+            Some(item) if (self.predicate)(&item) => Some(item),
+            Some(_) => self.next(),
+            None => None,
+        }
+    }
+}
 /// Returns an iterator of all items in iter for which `predicate(item)` is true
-pub fn filter<I, F>(_iter: I, _predicate: F) -> impl Iterator<Item = I::Item>
+pub fn filter<I, F>(iter: I, predicate: F) -> impl Iterator<Item = I::Item>
 where
     I: Iterator,
     F: Fn(&I::Item) -> bool,
 {
-    // this empty iterator silences a compiler complaint that
-    // () doesn't implement Iterator
-    std::iter::from_fn(|| todo!())
+    Filter { iter, predicate }
 }
 
 pub fn length<I: Iterator>(_iter: I) -> usize {
