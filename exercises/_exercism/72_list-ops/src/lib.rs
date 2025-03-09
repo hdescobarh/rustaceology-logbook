@@ -76,8 +76,12 @@ where
     Filter { iter, predicate }
 }
 
-pub fn length<I: Iterator>(_iter: I) -> usize {
-    todo!("return the total number of items within iter")
+pub fn length<I: Iterator>(iter: I) -> usize {
+    let mut count = 0;
+    for _ in iter {
+        count += 1;
+    }
+    count
 }
 
 /// Returns an iterator of the results of applying `function(item)` on all iter items
