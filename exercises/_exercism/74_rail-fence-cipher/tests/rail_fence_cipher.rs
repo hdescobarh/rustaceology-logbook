@@ -11,7 +11,6 @@ fn encode_with_two_rails() {
 }
 
 #[test]
-#[ignore]
 fn encode_with_three_rails() {
     let input = "WEAREDISCOVEREDFLEEATONCE";
     let rails = 3;
@@ -22,7 +21,6 @@ fn encode_with_three_rails() {
 }
 
 #[test]
-#[ignore]
 fn encode_with_ending_in_the_middle() {
     let input = "EXERCISES";
     let rails = 4;
@@ -66,7 +64,6 @@ fn decode_with_six_rails() {
 }
 
 #[test]
-#[ignore]
 fn encode_wide_characters() {
     let input = "古池蛙飛び込む水の音";
     let rails = 3;
