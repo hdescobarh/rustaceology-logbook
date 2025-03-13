@@ -31,7 +31,16 @@ fn encode_with_ending_in_the_middle() {
 }
 
 #[test]
-#[ignore]
+fn encode_with_indices() {
+    let input = "01234567";
+    let rails = 4;
+    let rail_fence = RailFence::new(rails);
+    let output = rail_fence.encode(input);
+    let expected = "06157243";
+    assert_eq!(output, expected);
+}
+
+#[test]
 fn decode_with_three_rails() {
     let input = "TEITELHDVLSNHDTISEIIEA";
     let rails = 3;
@@ -42,7 +51,6 @@ fn decode_with_three_rails() {
 }
 
 #[test]
-#[ignore]
 fn decode_with_five_rails() {
     let input = "EIEXMSMESAORIWSCE";
     let rails = 5;
@@ -53,7 +61,6 @@ fn decode_with_five_rails() {
 }
 
 #[test]
-#[ignore]
 fn decode_with_six_rails() {
     let input = "133714114238148966225439541018335470986172518171757571896261";
     let rails = 6;
