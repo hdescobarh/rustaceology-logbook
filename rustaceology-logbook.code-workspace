@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/73_phone-number/Cargo.toml",
+			"exercises/_exercism/74_rail-fence-cipher/Cargo.toml",
 		],
 	},
 	"extensions": {
