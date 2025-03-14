@@ -31,19 +31,17 @@ impl RailFence {
             .join("")
     }
 
+    fn cipher_to_plain_indices(&self, length: usize) -> impl Iterator<Item = (usize, usize)> {
+        let mut mapping = vec![Vec::with_capacity(2 * length.div_ceil(self.period)); self.rails];
+        for index in 0..length {
+            mapping[self.plain_index_to_row(index)].push(index)
+        }
+        mapping.into_iter().flatten().enumerate()
+    }
+
     pub fn decode(&self, cipher: &str) -> String {
         let cipher_chars: Vec<char> = cipher.chars().collect();
-        (0..cipher.len())
-            .fold(
-                vec![Vec::with_capacity(2 * cipher_chars.len().div_ceil(self.period)); self.rails],
-                |mut acc, index| {
-                    acc[self.plain_index_to_row(index)].push(index);
-                    acc
-                },
-            )
-            .into_iter()
-            .flatten()
-            .enumerate()
+        self.cipher_to_plain_indices(cipher_chars.len())
             .fold(
                 vec![' '; cipher.len()],
                 |mut acc, (cipher_index, plain_index)| {
