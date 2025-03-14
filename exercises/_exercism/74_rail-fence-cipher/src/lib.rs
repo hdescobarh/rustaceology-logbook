@@ -41,15 +41,10 @@ impl RailFence {
 
     pub fn decode(&self, cipher: &str) -> String {
         let cipher_chars: Vec<char> = cipher.chars().collect();
-        self.cipher_to_plain_indices(cipher_chars.len())
-            .fold(
-                vec![' '; cipher_chars.len()],
-                |mut acc, (cipher_index, plain_index)| {
-                    acc[plain_index] = cipher_chars[cipher_index];
-                    acc
-                },
-            )
-            .into_iter()
-            .collect()
+        let mut plain = vec![' '; cipher_chars.len()];
+        for (cipher_index, plain_index) in self.cipher_to_plain_indices(cipher_chars.len()) {
+            plain[plain_index] = cipher_chars[cipher_index];
+        }
+        plain.into_iter().collect()
     }
 }
