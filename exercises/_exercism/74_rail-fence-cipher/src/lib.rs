@@ -34,10 +34,13 @@ impl RailFence {
     pub fn decode(&self, cipher: &str) -> String {
         let cipher_chars: Vec<char> = cipher.chars().collect();
         (0..cipher.len())
-            .fold(vec![Vec::<usize>::new(); self.rails], |mut acc, index| {
-                acc[self.plain_index_to_row(index)].push(index);
-                acc
-            })
+            .fold(
+                vec![Vec::with_capacity(2 * cipher_chars.len().div_ceil(self.period)); self.rails],
+                |mut acc, index| {
+                    acc[self.plain_index_to_row(index)].push(index);
+                    acc
+                },
+            )
             .into_iter()
             .flatten()
             .enumerate()
