@@ -43,7 +43,7 @@ impl RailFence {
         let cipher_chars: Vec<char> = cipher.chars().collect();
         self.cipher_to_plain_indices(cipher_chars.len())
             .fold(
-                vec![' '; cipher.len()],
+                vec![' '; cipher_chars.len()],
                 |mut acc, (cipher_index, plain_index)| {
                     acc[plain_index] = cipher_chars[cipher_index];
                     acc
