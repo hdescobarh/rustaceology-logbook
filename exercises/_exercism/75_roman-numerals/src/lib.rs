@@ -6,8 +6,13 @@ pub struct Roman {
 }
 
 impl Display for Roman {
-    fn fmt(&self, _f: &mut Formatter<'_>) -> Result {
-        todo!("Return a roman-numeral string representation of the Roman object");
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        if let Some(v) = &self.digits {
+            v.iter().enumerate().try_for_each(|(position, &digit)| {
+                write!(f, "{}", Self::digit_to_roman(position, digit))
+            })?;
+        };
+        Ok(())
     }
 }
 
@@ -28,8 +33,7 @@ impl From<u32> for Roman {
 }
 
 impl Roman {
-    fn digit_to_roman(&self, position: usize, digit: u8) -> Option<String> {
-        self.digits.as_ref()?; // ⟸ with this should never panic!
+    fn digit_to_roman(position: usize, digit: u8) -> String {
         let chars = match position {
             3 => ['\0', '\0', 'M'], // ⟸ constructor already ensures that num < 4000
             2 => ['M', 'D', 'C'],
@@ -37,14 +41,13 @@ impl Roman {
             0 => ['X', 'V', 'I'],
             _ => panic!(),
         };
-        let word = match digit {
+        match digit {
             0..4 => chars[2].to_string().repeat(digit.into()),
             4 => format!("{}{}", chars[2], chars[1]),
             5 => format!("{}", chars[1]),
             6..9 => format!("{}{}", chars[1], chars[2].to_string().repeat(digit.into()),),
             9 => format!("{}{}", chars[2], chars[0]),
             _ => panic!(),
-        };
-        Some(word)
+        }
     }
 }
