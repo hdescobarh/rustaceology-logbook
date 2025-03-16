@@ -26,3 +26,25 @@ impl From<u32> for Roman {
         roman
     }
 }
+
+impl Roman {
+    fn digit_to_roman(&self, position: usize, digit: u8) -> Option<String> {
+        self.digits.as_ref()?; // ⟸ with this should never panic!
+        let letters = match position {
+            3 => ['\0', '\0', 'M'], // ⟸ constructor already ensures that num < 4000
+            2 => ['M', 'D', 'C'],
+            1 => ['C', 'L', 'X'],
+            0 => ['X', 'V', 'I'],
+            _ => panic!(),
+        };
+        let word = match digit {
+            0..4 => format!("{}", letters[2]),
+            4 => format!("{}{}", letters[2], letters[1]),
+            5 => format!("{}", letters[1]),
+            6..9 => format!("{}{}", letters[1], letters[2]),
+            9 => format!("{}{}", letters[2], letters[0]),
+            _ => panic!(),
+        };
+        Some(word)
+    }
+}
