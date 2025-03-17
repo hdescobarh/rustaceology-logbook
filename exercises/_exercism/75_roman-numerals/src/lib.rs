@@ -34,19 +34,20 @@ impl From<u32> for Roman {
 
 impl Roman {
     fn digit_to_roman(position: usize, digit: u8) -> String {
-        let chars = match position {
-            3 => ['\0', '\0', 'M'], // ⟸ constructor already ensures that num < 4000
-            2 => ['M', 'D', 'C'],
-            1 => ['C', 'L', 'X'],
-            0 => ['X', 'V', 'I'],
+        let ch = match position {
+            0 => ['\0', '\0', 'M'], // ⟸ constructor already ensures that num < 4000
+            1 => ['M', 'D', 'C'],
+            2 => ['C', 'L', 'X'],
+            3 => ['X', 'V', 'I'],
             _ => panic!(),
         };
         match digit {
-            0..4 => chars[2].to_string().repeat(digit.into()),
-            4 => format!("{}{}", chars[2], chars[1]),
-            5 => format!("{}", chars[1]),
-            6..9 => format!("{}{}", chars[1], chars[2].to_string().repeat(digit.into()),),
-            9 => format!("{}{}", chars[2], chars[0]),
+            0 => "".to_string(),
+            1..=3 => ch[2].to_string().repeat(digit.into()),
+            4 => format!("{}{}", ch[2], ch[1]),
+            5 => format!("{}", ch[1]),
+            6..=8 => format!("{}{}", ch[1], ch[2].to_string().repeat((digit - 5).into()),),
+            9 => format!("{}{}", ch[2], ch[0]),
             _ => panic!(),
         }
     }
