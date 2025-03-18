@@ -5,7 +5,7 @@ fn parser<F: Fn(char, char) -> u8>(key: &str, text: &str, op: F) -> Option<Strin
     text.chars()
         .zip(key.chars().cycle())
         .map(|(c, shift)| {
-            if !shift.is_ascii_lowercase() || !c.is_alphanumeric() {
+            if !shift.is_ascii_lowercase() || !c.is_ascii_alphabetic() {
                 return Err(());
             };
             Ok(((op)(c, shift) % 26 + b'a') as char)
