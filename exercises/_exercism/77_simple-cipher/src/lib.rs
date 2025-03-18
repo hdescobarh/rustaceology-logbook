@@ -1,3 +1,6 @@
+use rand::Rng;
+use rand::distr::Uniform;
+
 fn parser<F: Fn(char, char) -> u8>(key: &str, text: &str, op: F) -> Option<String> {
     text.chars()
         .zip(key.chars().cycle())
@@ -24,6 +27,12 @@ pub fn decode(key: &str, cipher: &str) -> Option<String> {
     })
 }
 
-pub fn encode_random(s: &str) -> (String, String) {
-    todo!("Generate random key with only a-z chars and encode {s}. Return tuple (key, encoded s)")
+pub fn encode_random(plain: &str) -> (String, String) {
+    let key: String = (&mut rand::rng())
+        .sample_iter(Uniform::new(b'a', b'z').unwrap())
+        .take(100)
+        .map(|c| c as char)
+        .collect();
+    let cipher = encode(&key, plain).unwrap();
+    (key, cipher)
 }
