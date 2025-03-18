@@ -1,9 +1,9 @@
 pub fn encode(key: &str, plain: &str) -> Option<String> {
     plain
         .chars()
-        .zip(key.chars())
+        .zip(key.chars().cycle())
         .map(|(c, shift)| {
-            if !shift.is_ascii_lowercase() {
+            if !shift.is_ascii_lowercase() || !c.is_alphanumeric() {
                 return Err(());
             };
             Ok(((c.to_ascii_lowercase() as u8 + shift as u8 - 2 * b'a') % 26 + b'a') as char)
