@@ -29,7 +29,7 @@ pub fn decode(key: &str, cipher: &str) -> Option<String> {
 
 pub fn encode_random(plain: &str) -> (String, String) {
     let key: String = (&mut rand::rng())
-        .sample_iter(Uniform::new(b'a', b'z').unwrap())
+        .sample_iter(Uniform::new_inclusive(b'a', b'z').unwrap())
         .take(100)
         .map(|c| c as char)
         .collect();
