@@ -11,13 +11,13 @@ pub struct Item {
 pub fn maximum_value(max_weight: u32, items: &[Item]) -> u32 {
     let mut value: HashMap<(u32, usize), u32> = HashMap::new();
     for i in 1..=items.len() {
-        for w in 1..=max_weight {
-            value.insert((w, i), *value.get(&(w, i - 1)).unwrap_or(&0));
-            if items[i - 1].weight <= w {
-                let val =
-                    value.get(&(w - items[i - 1].weight, i - 1)).unwrap_or(&0) + items[i - 1].value;
-                if value[&(w, i)] < val {
-                    value.insert((w, i), val);
+        for bag_size in 1..=max_weight {
+            value.insert((bag_size, i), *value.get(&(bag_size, i - 1)).unwrap_or(&0));
+            let item = &items[i - 1];
+            if item.weight <= bag_size {
+                let val = value.get(&(bag_size - item.weight, i - 1)).unwrap_or(&0) + item.value;
+                if value[&(bag_size, i)] < val {
+                    value.insert((bag_size, i), val);
                 }
             }
         }
