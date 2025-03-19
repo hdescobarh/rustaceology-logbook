@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/79_secret-handshake/Cargo.toml",
+			"exercises/_exercism/80_knapsack/Cargo.toml",
 		],
 	},
 	"extensions": {
