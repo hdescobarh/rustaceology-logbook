@@ -24,6 +24,10 @@ impl<T: Display + Copy> Matcher<T> {
 
         Self { op: Box::new(op) }
     }
+
+    pub fn check(&self, element: T) -> String {
+        (self.op)(element)
+    }
 }
 
 /// A Fizzy is a set of matchers, which may be applied to an iterator.
@@ -41,20 +45,23 @@ pub struct Fizzy<T: Display + Copy> {
 
 impl<T: Display + Copy> Fizzy<T> {
     pub fn new() -> Self {
-        todo!()
+        Self { rules: vec![] }
     }
 
-    // feel free to change the signature to `mut self` if you like
     #[must_use]
-    pub fn add_matcher(self, _matcher: Matcher<T>) -> Self {
-        todo!()
+    pub fn add_matcher(self, matcher: Matcher<T>) -> Self {
+        let mut rules = self.rules;
+        rules.push(matcher);
+        Self { rules }
     }
 
     /// map this fizzy onto every element of an iterator, returning a new iterator
-    pub fn apply<I>(self, _iter: I) -> impl Iterator<Item = String> {
-        // todo!() doesn't actually work, here; () is not an Iterator
-        // that said, this is probably not the actual implementation you desire
-        Vec::new().into_iter()
+    pub fn apply<I: Iterator<Item = T>>(self, iter: I) -> impl Iterator<Item = String> {
+        iter.map(move |element| {
+            self.rules
+                .iter()
+                .fold(String::new(), |_, matcher| matcher.check(element))
+        })
     }
 }
 
