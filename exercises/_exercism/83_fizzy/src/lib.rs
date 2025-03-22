@@ -1,13 +1,28 @@
 // the PhantomData instances in this file are just to stop compiler complaints
 // about missing generics; feel free to remove them
 
+use std::fmt::Display;
+
 /// A Matcher is a single rule of fizzbuzz: given a function on T, should
 /// a word be substituted in? If yes, which word?
-pub struct Matcher<T>(std::marker::PhantomData<T>);
+pub struct Matcher<T: Display> {
+    op: Box<dyn Fn(T) -> String>,
+}
 
-impl<T> Matcher<T> {
-    pub fn new<F, S>(_matcher: F, _subs: S) -> Matcher<T> {
-        todo!()
+impl<T: Display> Matcher<T> {
+    pub fn new<F, S>(matcher: F, subs: S) -> Matcher<T>
+    where
+        F: Fn(&T) -> bool + 'static,
+        S: Display + 'static,
+    {
+        let op = move |value: T| {
+            if matcher(&value) {
+                return subs.to_string();
+            }
+            value.to_string()
+        };
+
+        Self { op: Box::new(op) }
     }
 }
 
@@ -20,9 +35,11 @@ impl<T> Matcher<T> {
 /// here because it's a simpler interface for students to implement.
 ///
 /// Also, it's a good excuse to try out using impl trait.
-pub struct Fizzy<T>(std::marker::PhantomData<T>);
+pub struct Fizzy<T: Display> {
+    rules: Vec<Matcher<T>>,
+}
 
-impl<T> Fizzy<T> {
+impl<T: Display> Fizzy<T> {
     pub fn new() -> Self {
         todo!()
     }
@@ -42,6 +59,6 @@ impl<T> Fizzy<T> {
 }
 
 /// convenience function: return a Fizzy which applies the standard fizz-buzz rules
-pub fn fizz_buzz<T>() -> Fizzy<T> {
+pub fn fizz_buzz<T: Display>() -> Fizzy<T> {
     todo!()
 }
