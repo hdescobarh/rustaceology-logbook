@@ -5,18 +5,18 @@ use std::fmt::Display;
 
 /// A Matcher is a single rule of fizzbuzz: given a function on T, should
 /// a word be substituted in? If yes, which word?
-pub struct Matcher<T: Display> {
+pub struct Matcher<T: Display + Copy> {
     op: Box<dyn Fn(T) -> String>,
 }
 
-impl<T: Display> Matcher<T> {
+impl<T: Display + Copy> Matcher<T> {
     pub fn new<F, S>(matcher: F, subs: S) -> Matcher<T>
     where
-        F: Fn(&T) -> bool + 'static,
+        F: Fn(T) -> bool + 'static,
         S: Display + 'static,
     {
         let op = move |value: T| {
-            if matcher(&value) {
+            if matcher(value) {
                 return subs.to_string();
             }
             value.to_string()
@@ -35,11 +35,11 @@ impl<T: Display> Matcher<T> {
 /// here because it's a simpler interface for students to implement.
 ///
 /// Also, it's a good excuse to try out using impl trait.
-pub struct Fizzy<T: Display> {
+pub struct Fizzy<T: Display + Copy> {
     rules: Vec<Matcher<T>>,
 }
 
-impl<T: Display> Fizzy<T> {
+impl<T: Display + Copy> Fizzy<T> {
     pub fn new() -> Self {
         todo!()
     }
@@ -59,6 +59,6 @@ impl<T: Display> Fizzy<T> {
 }
 
 /// convenience function: return a Fizzy which applies the standard fizz-buzz rules
-pub fn fizz_buzz<T: Display>() -> Fizzy<T> {
+pub fn fizz_buzz<T: Display + Copy>() -> Fizzy<T> {
     todo!()
 }
