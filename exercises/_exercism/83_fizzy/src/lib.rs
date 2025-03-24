@@ -60,13 +60,17 @@ impl<T: Display + Copy> Fizzy<T> {
 
     /// map this fizzy onto every element of an iterator, returning a new iterator
     pub fn apply<I: Iterator<Item = T>>(self, iter: I) -> impl Iterator<Item = String> {
-        iter.map(move |element| {
-            self.rules.iter().fold(String::new(), |mut acc, matcher| {
-                if let Some(v) = matcher.check(element) {
+        iter.map(move |item| {
+            let out = self.rules.iter().fold(String::new(), |mut acc, matcher| {
+                if let Some(v) = matcher.check(item) {
                     acc.push_str(&v);
                 };
                 acc
-            })
+            });
+            if out.is_empty() {
+                return item.to_string();
+            }
+            out
         })
     }
 }
