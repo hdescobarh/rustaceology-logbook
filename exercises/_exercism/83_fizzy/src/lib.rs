@@ -1,13 +1,5 @@
-// the PhantomData instances in this file are just to stop compiler complaints
-// about missing generics; feel free to remove them
+use std::{fmt::Display, ops::Rem};
 
-use std::{
-    fmt::Display,
-    ops::{Div, Rem},
-};
-
-/// A Matcher is a single rule of fizzbuzz: given a function on T, should
-/// a word be substituted in? If yes, which word?
 pub struct Matcher<T: Display + Copy> {
     op: Box<dyn Fn(T) -> Option<String>>,
 }
@@ -33,15 +25,6 @@ impl<T: Display + Copy> Matcher<T> {
     }
 }
 
-/// A Fizzy is a set of matchers, which may be applied to an iterator.
-///
-/// Strictly speaking, it's usually more idiomatic to use `iter.map()` than to
-/// consume an iterator with an `apply` method. Given a Fizzy instance, it's
-/// pretty straightforward to construct a closure which applies it to all
-/// elements of the iterator. However, we're using the `apply` pattern
-/// here because it's a simpler interface for students to implement.
-///
-/// Also, it's a good excuse to try out using impl trait.
 pub struct Fizzy<T: Display + Copy> {
     rules: Vec<Matcher<T>>,
 }
