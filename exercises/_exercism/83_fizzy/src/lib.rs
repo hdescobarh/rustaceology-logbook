@@ -6,7 +6,7 @@ use std::fmt::Display;
 /// A Matcher is a single rule of fizzbuzz: given a function on T, should
 /// a word be substituted in? If yes, which word?
 pub struct Matcher<T: Display + Copy> {
-    op: Box<dyn Fn(T) -> String>,
+    op: Box<dyn Fn(T) -> Option<String>>,
 }
 
 impl<T: Display + Copy> Matcher<T> {
@@ -17,15 +17,15 @@ impl<T: Display + Copy> Matcher<T> {
     {
         let op = move |value: T| {
             if matcher(value) {
-                return subs.to_string();
+                return Some(subs.to_string());
             }
-            value.to_string()
+            None
         };
 
         Self { op: Box::new(op) }
     }
 
-    pub fn check(&self, element: T) -> String {
+    pub fn check(&self, element: T) -> Option<String> {
         (self.op)(element)
     }
 }
@@ -58,9 +58,12 @@ impl<T: Display + Copy> Fizzy<T> {
     /// map this fizzy onto every element of an iterator, returning a new iterator
     pub fn apply<I: Iterator<Item = T>>(self, iter: I) -> impl Iterator<Item = String> {
         iter.map(move |element| {
-            self.rules
-                .iter()
-                .fold(String::new(), |_, matcher| matcher.check(element))
+            self.rules.iter().fold(String::new(), |mut acc, matcher| {
+                if let Some(v) = matcher.check(element) {
+                    acc.push_str(&v);
+                };
+                acc
+            })
         })
     }
 }
