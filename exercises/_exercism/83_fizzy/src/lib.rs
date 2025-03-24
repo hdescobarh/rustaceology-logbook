@@ -1,7 +1,10 @@
 // the PhantomData instances in this file are just to stop compiler complaints
 // about missing generics; feel free to remove them
 
-use std::fmt::Display;
+use std::{
+    fmt::Display,
+    ops::{Div, Rem},
+};
 
 /// A Matcher is a single rule of fizzbuzz: given a function on T, should
 /// a word be substituted in? If yes, which word?
@@ -69,6 +72,11 @@ impl<T: Display + Copy> Fizzy<T> {
 }
 
 /// convenience function: return a Fizzy which applies the standard fizz-buzz rules
-pub fn fizz_buzz<T: Display + Copy>() -> Fizzy<T> {
-    todo!()
+pub fn fizz_buzz<T>() -> Fizzy<T>
+where
+    T: Display + Copy + Rem<Output = T> + From<u8> + PartialEq,
+{
+    Fizzy::new()
+        .add_matcher(Matcher::new(|item: T| item % 3.into() == 0.into(), "fizz"))
+        .add_matcher(Matcher::new(|item: T| item % 5.into() == 0.into(), "buzz"))
 }
