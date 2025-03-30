@@ -2,8 +2,6 @@ use std::collections::HashSet;
 
 // From solving the (in)equations: 3 < small_leg < sum * (2 - sqrt(2)) / 2
 const CONSTRAINT: f64 = 0.2928932188134524;
-//  15 - log(u32::MAX, 10) ≈ 5.36
-const TOLERANCE: f64 = 1e-5;
 
 pub fn find(sum: u32) -> HashSet<[u32; 3]> {
     // From solving the equations: If sum (perimeter) is odd, then one leg is not an integer.
@@ -41,10 +39,10 @@ impl PythagoreanTriangle {
     }
 
     fn into_integer(value: f64) -> Option<u32> {
-        if (value.round() - value).abs() < TOLERANCE && value <= u32::MAX as f64 && value > 0.0 {
-            return Some(value as u32);
-        }
-        None
+        (value > 0.0
+            && (value.round() - value).abs() < f64::EPSILON * value.max(1.0)
+            && value <= u32::MAX as f64)
+            .then_some(value as u32)
     }
 
     pub fn to_slice(&self) -> [u32; 3] {
