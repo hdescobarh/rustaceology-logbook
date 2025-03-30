@@ -28,14 +28,11 @@ impl PythagoreanTriangle {
         let large_leg = Self::into_integer(p * (p - 2.0 * x) / (2.0 * (p - x)))?;
         let y = large_leg as f64;
         let hypothenuse = Self::into_integer((x.powi(2) + y.powi(2)).sqrt())?;
-        if small_leg + large_leg + hypothenuse == perimeter {
-            return Some(Self {
-                small_leg,
-                large_leg,
-                hypothenuse,
-            });
-        }
-        None
+        (small_leg + large_leg + hypothenuse == perimeter).then_some(Self {
+            small_leg,
+            large_leg,
+            hypothenuse,
+        })
     }
 
     fn into_integer(value: f64) -> Option<u32> {
