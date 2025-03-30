@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-// From solving the (in)equations: 3 < small_leg < sum * (2 - sqrt(2)) / 2
+// From solving the (in)equations: 3 ≤ small_leg < sum * (2 - √2) / 2
 const CONSTRAINT: f64 = 0.2928932188134524;
 
 pub fn find(sum: u32) -> HashSet<[u32; 3]> {
@@ -32,7 +32,7 @@ impl PythagoreanTriangle {
     }
 
     fn find_large_leg(small_leg: u32, perimeter: u32) -> Option<u32> {
-        // y = p * (p - 2x) / (2p - 2x)
+        // y = p * (p - 2x) / (2p - 2x), y ∈ ℤ+
         let y_numerator = perimeter * (perimeter - 2 * small_leg);
         let y_denominator = 2 * (perimeter - small_leg);
         (y_numerator % y_denominator == 0).then_some(y_numerator / y_denominator)
