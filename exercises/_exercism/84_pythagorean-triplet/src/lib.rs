@@ -23,11 +23,9 @@ struct PythagoreanTriangle {
 
 impl PythagoreanTriangle {
     pub fn new(perimeter: u32, small_leg: u32) -> Option<PythagoreanTriangle> {
-        // x + y + sqrt(x**2 + y**2) = p
-        let (x, p) = (small_leg as f64, perimeter as f64);
+        let (x, p) = (small_leg as f64, perimeter as f64); // x + y + sqrt(x**2 + y**2) = p
         let large_leg = Self::into_integer(p * (p - 2.0 * x) / (2.0 * (p - x)))?;
-        let y = large_leg as f64;
-        let hypothenuse = Self::into_integer((x.powi(2) + y.powi(2)).sqrt())?;
+        let hypothenuse = Self::into_integer((x.powi(2) + (large_leg as f64).powi(2)).sqrt())?;
         (small_leg + large_leg + hypothenuse == perimeter).then_some(Self {
             small_leg,
             large_leg,
