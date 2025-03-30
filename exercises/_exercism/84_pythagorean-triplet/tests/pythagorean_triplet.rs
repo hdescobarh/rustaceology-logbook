@@ -12,7 +12,6 @@ fn triplets_whose_sum_is_12() {
 }
 
 #[test]
-#[ignore]
 fn triplets_whose_sum_is_108() {
     let input = 108;
     let output = find(input);
@@ -22,7 +21,6 @@ fn triplets_whose_sum_is_108() {
 }
 
 #[test]
-#[ignore]
 fn triplets_whose_sum_is_1000() {
     let input = 1_000;
     let output = find(input);
@@ -32,7 +30,6 @@ fn triplets_whose_sum_is_1000() {
 }
 
 #[test]
-#[ignore]
 fn no_matching_triplets_for_1001() {
     let input = 1_001;
     let output = find(input);
@@ -42,7 +39,6 @@ fn no_matching_triplets_for_1001() {
 }
 
 #[test]
-#[ignore]
 fn returns_all_matching_triplets() {
     let input = 90;
     let output = find(input);
@@ -52,7 +48,6 @@ fn returns_all_matching_triplets() {
 }
 
 #[test]
-#[ignore]
 fn several_matching_triplets() {
     let input = 840;
     let output = find(input);
@@ -71,7 +66,6 @@ fn several_matching_triplets() {
 }
 
 #[test]
-#[ignore]
 fn triplets_for_large_number() {
     let input = 30_000;
     let output = find(input);
