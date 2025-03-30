@@ -23,21 +23,19 @@ struct PythagoreanTriangle {
 
 impl PythagoreanTriangle {
     pub fn new(perimeter: u32, small_leg: u32) -> Option<PythagoreanTriangle> {
-        let (x, p) = (small_leg as f64, perimeter as f64); // x + y + sqrt(x**2 + y**2) = p
-        let large_leg = Self::into_integer(p * (p - 2.0 * x) / (2.0 * (p - x)))?;
-        let hypothenuse = Self::into_integer((x.powi(2) + (large_leg as f64).powi(2)).sqrt())?;
-        (small_leg + large_leg + hypothenuse == perimeter).then_some(Self {
+        // sqrt(x**2 + y**2) = p - x - y, 0 < x < y < a
+        Self::find_large_leg(small_leg, perimeter).map(|large_leg| Self {
             small_leg,
             large_leg,
-            hypothenuse,
+            hypothenuse: perimeter - small_leg - large_leg,
         })
     }
 
-    fn into_integer(value: f64) -> Option<u32> {
-        (value > 0.0
-            && (value.round() - value).abs() < f64::EPSILON * value.max(1.0)
-            && value <= u32::MAX as f64)
-            .then_some(value as u32)
+    fn find_large_leg(small_leg: u32, perimeter: u32) -> Option<u32> {
+        // y = p * (p - 2x) / (2p - 2x)
+        let y_numerator = perimeter * (perimeter - 2 * small_leg);
+        let y_denominator = 2 * (perimeter - small_leg);
+        (y_numerator % y_denominator == 0).then_some(y_numerator / y_denominator)
     }
 
     pub fn to_slice(&self) -> [u32; 3] {
