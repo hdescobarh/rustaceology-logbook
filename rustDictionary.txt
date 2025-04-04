@@ -1,6 +1,7 @@
 _ascii
-clippy
 _euclid
+ascii
+clippy
 isqrt
 repr
 vadimcn
