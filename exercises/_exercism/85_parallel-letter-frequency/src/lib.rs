@@ -35,8 +35,11 @@ mod test {
     fn ascii_non_empty_text() {
         let text = "ab cd ef gh ";
         let cases = [
+            (1, vec![0, 11]),
             (4, vec![0, 3, 6, 9, 11]),
             (6, vec![0, 2, 4, 6, 8, 10, 11]),
+            (10, (0..10).chain(11..12).collect()),
+            (11, (0..12).collect()),
             (12, (0..12).collect()),
             (15, (0..12).collect()),
         ];
