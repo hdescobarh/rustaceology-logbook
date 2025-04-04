@@ -25,3 +25,22 @@ fn get_breakpoints(text: &str, worker_count: usize) -> Vec<usize> {
     breakpoints.push(text.len() - 1);
     breakpoints
 }
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+
+    #[test]
+    fn ascii_non_empty_text() {
+        let text = "ab cd ef gh ";
+        let cases = [
+            (4, vec![0, 3, 6, 9, 11]),
+            (6, vec![0, 2, 4, 6, 8, 10, 11]),
+            (12, (0..12).collect()),
+            (15, (0..12).collect()),
+        ];
+        for (worker_count, expect) in cases {
+            assert_eq!(get_breakpoints(text, worker_count), expect)
+        }
+    }
+}
