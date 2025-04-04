@@ -10,20 +10,21 @@ pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     );
 }
 
+// The idea is to have chunks but without allocation overhead
 fn get_breakpoints(text: &str, worker_count: usize) -> Vec<usize> {
     let chunk_size = (text.len() / worker_count).max(1);
-    let mut breakpoints: Vec<usize> = Vec::with_capacity(worker_count.min(text.len()));
-    let mut current = 0;
-    for _ in 0..breakpoints.capacity() {
-        while !text.is_char_boundary(current) && current < text.len() - 1 {
+    let mut breakpoints = vec![0];
+    let mut current = chunk_size;
+    while breakpoints.len() <= worker_count && current < text.len() {
+        while !text.is_char_boundary(current) && current < text.len() {
             current += 1;
         }
         breakpoints.push(current);
-        current += chunk_size;
+        current = (current + chunk_size).min(text.len())
     }
-    if let Some(true) = breakpoints.last().map(|v| *v < text.len() - 1) {
-        breakpoints.push(text.len() - 1);
-    }
+    if *breakpoints.last().unwrap() != text.len() {
+        breakpoints.push(text.len())
+    };
     breakpoints
 }
 
