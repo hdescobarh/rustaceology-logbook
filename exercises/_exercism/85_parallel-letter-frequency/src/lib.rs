@@ -11,7 +11,7 @@ pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
 }
 
 fn get_breakpoints(text: &str, worker_count: usize) -> Vec<usize> {
-    let chunk_size = text.len().div_ceil(worker_count);
+    let chunk_size = (text.len() / worker_count).max(1);
     let mut breakpoints: Vec<usize> = Vec::with_capacity(worker_count.min(text.len()));
     let mut current = 0;
     for _ in 0..breakpoints.capacity() {
@@ -21,7 +21,7 @@ fn get_breakpoints(text: &str, worker_count: usize) -> Vec<usize> {
         breakpoints.push(current);
         current += chunk_size;
     }
-    if let Some(true) = breakpoints.last().map(|v| *v != text.len() - 1) {
+    if let Some(true) = breakpoints.last().map(|v| *v < text.len() - 1) {
         breakpoints.push(text.len() - 1);
     }
     breakpoints
