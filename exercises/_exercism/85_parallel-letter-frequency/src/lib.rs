@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::thread;
 
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     todo!(
@@ -26,6 +27,37 @@ fn get_breakpoints(text: &str, worker_count: usize) -> Vec<usize> {
         breakpoints.push(text.len())
     };
     breakpoints
+}
+
+fn single_thread_count(text: &str) -> HashMap<char, usize> {
+    let mut counts = HashMap::new();
+    for letter in text.chars() {
+        if letter.is_alphabetic() {
+            counts
+                .entry(letter.to_lowercase().next().unwrap())
+                .and_modify(|count| *count += 1)
+                .or_insert(1);
+        }
+    }
+    counts
+}
+
+fn multi_thread_count(text: &str, worker_count: usize) -> Vec<HashMap<char, usize>> {
+    if text.is_empty() {
+        return vec![];
+    }
+    let breakpoints = get_breakpoints(text, worker_count);
+    thread::scope(|scope| {
+        let mut handles = Vec::with_capacity(worker_count);
+        for pair in breakpoints.windows(2) {
+            let (start, end) = (pair[0], pair[1]);
+            handles.push(scope.spawn(move || single_thread_count(&text[start..end])));
+        }
+        handles
+            .into_iter()
+            .map(|handle| handle.join().unwrap())
+            .collect()
+    })
 }
 
 #[cfg(test)]
