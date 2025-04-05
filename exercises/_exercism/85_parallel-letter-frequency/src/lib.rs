@@ -2,13 +2,19 @@ use std::collections::HashMap;
 use std::thread;
 
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
-    todo!(
-        "Count the frequency of letters in the given input '{input:?}'. Ensure that you are using {} to process the input.",
-        match worker_count {
-            1 => "1 worker".to_string(),
-            _ => format!("{worker_count} workers"),
+    let mut output = HashMap::new();
+    for thread_counts in input
+        .iter()
+        .flat_map(|text| multi_thread_count(text, worker_count))
+    {
+        for (letter, frequency) in thread_counts {
+            output
+                .entry(letter)
+                .and_modify(|old| *old += frequency)
+                .or_insert(frequency);
         }
-    );
+    }
+    output
 }
 
 // The idea is to have chunks but without allocation overhead
