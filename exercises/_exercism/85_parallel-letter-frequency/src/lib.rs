@@ -3,10 +3,7 @@ use std::thread;
 
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     let mut output = HashMap::new();
-    for thread_counts in input
-        .iter()
-        .flat_map(|text| multi_thread_count(text, worker_count))
-    {
+    for thread_counts in multi_thread_count(&input.concat(), worker_count) {
         for (letter, frequency) in thread_counts {
             output
                 .entry(letter)
