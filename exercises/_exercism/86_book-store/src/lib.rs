@@ -6,6 +6,18 @@ pub fn lowest_price(books: &[u32]) -> u32 {
     todo!("Find the lowest price of the bookbasket with books {books:?}")
 }
 
+fn get_total_discount(unique_books: usize) -> Option<f64> {
+    let result = match unique_books {
+        1 => 0.0,
+        2 => 0.10,
+        3 => 0.30,
+        4 => 0.80,
+        5 => 1.25,
+        _ => return None,
+    };
+    Some(result)
+}
+
 fn count_by_id(books: &[u32]) -> Vec<usize> {
     let mut frequency_by_id: HashMap<&u32, usize> = HashMap::new();
     for id in books {
