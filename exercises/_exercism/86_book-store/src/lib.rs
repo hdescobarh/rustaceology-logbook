@@ -15,12 +15,52 @@ use std::collections::{HashMap, HashSet};
 const UNITARY_PRICE: f64 = 800.0;
 
 pub fn lowest_price(books: &[u32]) -> u32 {
-    let mut frequency_by_id = id_frequencies_decreasing(books);
-    frequency_by_id.sort();
-    todo!("Find the lowest price of the bookbasket with books {books:?}")
+    let frequency_by_title = id_frequencies_decreasing(books);
+    let bins = match frequency_by_title.first() {
+        Some(size) => *size,
+        None => return 0,
+    };
+    let mut best_partition = [1_usize].repeat(bins);
+    let mut best_discount = 0.0;
+    for title_count in frequency_by_title.iter().skip(1) {
+        (best_partition, best_discount) = add_title(*title_count, &best_partition);
+    }
+    (UNITARY_PRICE * (best_partition.into_iter().sum::<usize>() as f64 - best_discount)) as u32
 }
 
-fn get_total_discount(unique_books: usize) -> Option<f64> {
+/// add the title choosing the optime arrangement for it
+fn add_title(title_count: usize, current_partition: &[usize]) -> (Vec<usize>, f64) {
+    let mut title_arrangements = HashSet::new();
+    let mut base_case = [
+        [1].repeat(title_count),
+        [0].repeat(current_partition.len() - title_count),
+    ]
+    .concat();
+    unique_permutations(base_case.len(), &mut base_case, &mut title_arrangements);
+
+    let mut best_partition = vec![];
+    let mut best_discount = 0.0;
+    for p in title_arrangements {
+        let candidate: Vec<usize> = current_partition
+            .iter()
+            .zip(p)
+            .map(|(a, b)| a + b)
+            .collect();
+        let candidate_discount = candidate
+            .iter()
+            .try_fold(0.0, |acc, bin_size| {
+                bin_discount(*bin_size).map(|value| value + acc)
+            })
+            .unwrap();
+        if candidate_discount > best_discount {
+            best_partition = candidate;
+            best_discount = candidate_discount;
+        }
+    }
+    (best_partition, best_discount)
+}
+
+fn bin_discount(unique_books: usize) -> Option<f64> {
     let result = match unique_books {
         1 => 0.0,
         2 => 0.10,
