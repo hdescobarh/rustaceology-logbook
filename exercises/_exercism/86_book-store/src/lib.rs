@@ -1,5 +1,17 @@
 use std::collections::{HashMap, HashSet};
 
+// Given an array [a_1, ..., a_5] representing the count of each title in the series,
+// partition them into max(a_i) bins b_j, each with a capacity of 5.
+// Each bin can contain at most one copy of each title.
+// The value of a bin is a function of its size:
+//   f(1) = 0
+//   f(2) = 2 * 0.05
+//   f(3) = 3 * 0.10
+//   f(4) = 4 * 0.20
+//   f(5) = 5 * 0.25
+// The goal is to maximize the total value S = sum of f(size_j) over all bins.
+// The total cost is: unitary_cost * (total_books - S)
+
 const UNITARY_PRICE: f64 = 800.0;
 
 pub fn lowest_price(books: &[u32]) -> u32 {
