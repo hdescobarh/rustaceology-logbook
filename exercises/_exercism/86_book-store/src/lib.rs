@@ -25,7 +25,8 @@ pub fn lowest_price(books: &[u32]) -> u32 {
     for title_count in frequency_by_title.iter().skip(1) {
         (best_partition, best_discount) = add_title(*title_count, &best_partition);
     }
-    (UNITARY_PRICE * (best_partition.into_iter().sum::<usize>() as f64 - best_discount)) as u32
+    (UNITARY_PRICE * (best_partition.into_iter().sum::<usize>() as f64 - best_discount)).round()
+        as u32
 }
 
 /// add the title choosing the optime arrangement for it
