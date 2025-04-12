@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+// Problem model:
 // Given an array [a_1, ..., a_5] representing the count of each title in the series,
 // partition them into max(a_i) bins b_j, each with a capacity of 5.
 // Each bin can contain at most one copy of each title.
@@ -29,7 +30,7 @@ pub fn lowest_price(books: &[u32]) -> u32 {
         as u32
 }
 
-/// add the title choosing the optime arrangement for it
+/// Chooses the optimal arrangement for the title and adds it to the partition.
 fn add_title(title_count: usize, current_partition: &[usize]) -> (Vec<usize>, f64) {
     let mut title_arrangements = HashSet::new();
     let mut base_case = [
@@ -83,7 +84,7 @@ fn id_frequencies_decreasing(books: &[u32]) -> Vec<usize> {
     frequencies
 }
 
-// A sightly modified Heap's algorithm
+/// Permutate the first k elements. This is a sightly modified Heap's algorithm.
 fn unique_permutations(k: usize, elements: &mut [usize], output: &mut HashSet<Vec<usize>>) {
     if k <= 1 {
         output.insert(elements.to_vec());
