@@ -3,6 +3,8 @@ use std::collections::{HashMap, HashSet};
 const UNITARY_PRICE: f64 = 800.0;
 
 pub fn lowest_price(books: &[u32]) -> u32 {
+    let mut frequency_by_id = id_frequencies_decreasing(books);
+    frequency_by_id.sort();
     todo!("Find the lowest price of the bookbasket with books {books:?}")
 }
 
@@ -18,12 +20,14 @@ fn get_total_discount(unique_books: usize) -> Option<f64> {
     Some(result)
 }
 
-fn count_by_id(books: &[u32]) -> Vec<usize> {
+fn id_frequencies_decreasing(books: &[u32]) -> Vec<usize> {
     let mut frequency_by_id: HashMap<&u32, usize> = HashMap::new();
     for id in books {
         *frequency_by_id.entry(id).or_default() += 1;
     }
-    frequency_by_id.values().copied().collect()
+    let mut frequencies: Vec<usize> = frequency_by_id.values().copied().collect();
+    frequencies.sort_by(|a, b| b.cmp(a));
+    frequencies
 }
 
 // A sightly modified Heap's algorithm
