@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/86_book-store/Cargo.toml",
+			"exercises/_exercism/87_rectangles/Cargo.toml",
 		],
 	},
 	"extensions": {
