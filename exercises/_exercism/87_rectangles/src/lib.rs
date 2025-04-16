@@ -11,9 +11,9 @@ pub fn count(lines: &[&str]) -> u32 {
 }
 
 struct ParsedInput {
-    /// Maps proper horizontal edges (start_col, end_col) to the rows where they are
+    /// Maps valid horizontal edges (start_col, end_col) to their corresponding rows.
     hor_edges_to_rows: HashMap<(usize, usize), Vec<usize>>,
-    /// Contains the coordinates of every vertical lines
+    /// Stores the coordinates of all vertical lines and vertices.
     ver_edges_coordinates: HashSet<(usize, usize)>,
 }
 
@@ -56,7 +56,7 @@ impl ParsedInput {
         })
     }
 
-    /// generate all the possible pair of rows
+    // Generates all possible pairs of rows.
     fn permutate_rows(rows: &[usize]) -> Vec<(usize, usize)> {
         let mut result: Vec<(usize, usize)> = Vec::with_capacity(rows.len() * (rows.len() - 1) / 2);
         for i in 0..rows.len() - 1 {
