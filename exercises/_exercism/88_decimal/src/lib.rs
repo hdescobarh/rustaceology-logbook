@@ -43,6 +43,59 @@ impl Decimal {
     }
 }
 
+impl PartialOrd for Decimal {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Decimal {
+    /// Perform comparisons in the following order: sign, integer part size,
+    /// integer part values, decimal part size, and decimal part values.
+    /// The comparison may end early if a difference is detected.
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.non_negative.cmp(&other.non_negative) {
+            Ordering::Equal => (),
+            ordering => return ordering,
+        }
+
+        match (self.value.len() as i128 - self.point_place as i128)
+            .cmp(&(other.value.len() as i128 - other.point_place as i128))
+        {
+            Ordering::Equal => (),
+            ordering => return ordering,
+        }
+
+        for (self_v, other_v) in self.value[self.point_place..]
+            .iter()
+            .rev()
+            .zip(other.value[other.point_place..].iter().rev())
+        {
+            match self_v.cmp(other_v) {
+                Ordering::Equal => (),
+                ordering => return ordering,
+            }
+        }
+
+        match self.point_place.cmp(&other.point_place) {
+            Ordering::Equal => (),
+            ordering => return Ordering::reverse(ordering),
+        }
+
+        for (self_v, other_v) in self.value[..self.point_place]
+            .iter()
+            .rev()
+            .zip(other.value[..other.point_place].iter().rev())
+        {
+            match self_v.cmp(other_v) {
+                Ordering::Equal => (),
+                ordering => return ordering,
+            }
+        }
+        Ordering::Equal
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -137,6 +190,25 @@ mod test {
 
     #[test]
     fn non_negative_decimals() {
+        let cases = [
+            ("0.1", 1, vec![1]),
+            ("0.001", 3, vec![1]),
+            ("1.1", 1, vec![1, 1]),
+            ("1.001", 3, vec![1, 0, 0, 1]),
+        ];
+
+        for (input, point_place, value) in cases {
+            let expect = Decimal {
+                non_negative: true,
+                point_place,
+                value,
+            };
+            assert_eq!(Decimal::try_from(input).unwrap(), expect)
+        }
+    }
+
+    #[test]
+    fn compare_decimals_correctly() {
         let cases = [
             ("0.1", 1, vec![1]),
             ("0.001", 3, vec![1]),
