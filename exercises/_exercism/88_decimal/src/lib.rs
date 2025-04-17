@@ -46,6 +46,24 @@ mod test {
     use super::*;
 
     #[test]
+    fn returns_none_with_wrong_input() {
+        let cases = [
+            "a137.0359",
+            "137.0359a",
+            "137a0359",
+            "137.0359-",
+            "137-0359",
+            "137.0-359",
+            "137.-0359",
+            "137-.0359",
+            "13-7.0359",
+        ];
+        for input in cases {
+            assert_eq!(Decimal::try_from(input), None)
+        }
+    }
+
+    #[test]
     fn valid_positive_int_number() {
         let input = "1002";
         let expect = Decimal {
