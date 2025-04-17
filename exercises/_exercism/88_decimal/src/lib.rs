@@ -15,8 +15,8 @@ impl Decimal {
         let mut non_negative = true;
         for (index, byte) in input.bytes().rev().skip_while(|v| *v == b'0').enumerate() {
             match byte {
-                b'-' => non_negative = false,
-                b'.' => point_place = index,
+                b'-' if index == input.len() - 1 => non_negative = false,
+                b'.' if point_place == 0 => point_place = index,
                 b'0'..=b'9' => value.push(byte - b'0'),
                 _ => return None,
             }
