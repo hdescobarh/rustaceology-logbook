@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 /// Type implementing arbitrary-precision decimal arithmetic
 
 #[derive(PartialEq, Eq, Debug)]
@@ -129,6 +131,25 @@ mod test {
             value: vec![],
         };
         for input in cases {
+            assert_eq!(Decimal::try_from(input).unwrap(), expect)
+        }
+    }
+
+    #[test]
+    fn non_negative_decimals() {
+        let cases = [
+            ("0.1", 1, vec![1]),
+            ("0.001", 3, vec![1]),
+            ("1.1", 1, vec![1, 1]),
+            ("1.001", 3, vec![1, 0, 0, 1]),
+        ];
+
+        for (input, point_place, value) in cases {
+            let expect = Decimal {
+                non_negative: true,
+                point_place,
+                value,
+            };
             assert_eq!(Decimal::try_from(input).unwrap(), expect)
         }
     }
