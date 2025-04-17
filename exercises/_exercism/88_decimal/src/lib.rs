@@ -57,6 +57,8 @@ mod test {
             "137.-0359",
             "137-.0359",
             "13-7.0359",
+            "13.7.0359",
+            "137..0359",
         ];
         for input in cases {
             assert_eq!(Decimal::try_from(input), None)
