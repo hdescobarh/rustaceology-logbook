@@ -225,4 +225,40 @@ mod test {
             assert_eq!(Decimal::try_from(input).unwrap(), expect)
         }
     }
+
+    #[test]
+    fn order_non_equal_decimals_correctly() {
+        let cases_first_greater = [
+            // Check sign
+            ("1", "-1"),
+            ("5.1", "-5.1"),
+            ("0", "-1"),
+            // Check integer part size
+            ("21.1", "0.1"),
+            // Check integer part values
+            ("11.1", "10.1"),
+            // Check decimal part size
+            ("1.2", "1.12"),
+            ("1.11", "1.1"),
+            // Check decimal part values
+            ("0.02", "0.01"),
+            ("0.2", "0.1"),
+            ("1.02", "1.01"),
+            ("1.2", "1.1"),
+            ("21.02", "21.01"),
+            ("21.2", "21.1"),
+        ];
+        for (big, small) in cases_first_greater {
+            let decimal_big = Decimal::try_from(big).unwrap();
+            let decimal_small = Decimal::try_from(small).unwrap();
+            let expect = Ordering::Greater;
+            assert_eq!(
+                decimal_big.cmp(&decimal_small),
+                expect,
+                "\nbig: {decimal_big:?}\n\
+                small: {decimal_small:?}\n\
+                expect: {expect:?}\n"
+            )
+        }
+    }
 }
