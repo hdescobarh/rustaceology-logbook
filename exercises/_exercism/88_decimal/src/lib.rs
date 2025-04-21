@@ -70,7 +70,10 @@ impl Ord for Decimal {
     fn cmp(&self, other: &Self) -> Ordering {
         // Integer part
         match self.non_negative.cmp(&other.non_negative) {
-            Ordering::Equal => (),
+            Ordering::Equal if self.non_negative => (),
+            Ordering::Equal => {
+                return other.as_additive_inverse().cmp(&self.as_additive_inverse());
+            }
             ordering => return ordering,
         }
 
