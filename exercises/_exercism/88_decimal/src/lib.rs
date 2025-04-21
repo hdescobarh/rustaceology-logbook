@@ -15,9 +15,15 @@ impl Decimal {
         let mut value: Vec<u8> = Vec::with_capacity(input.len());
         let mut point_place = 0;
         let mut non_negative = true;
-        for (index, byte) in input.bytes().rev().skip_while(|v| *v == b'0').enumerate() {
+        let mut iter = input
+            .bytes()
+            .rev()
+            .skip_while(|v| *v == b'0')
+            .enumerate()
+            .peekable();
+        while let Some((index, byte)) = iter.next() {
             match byte {
-                b'-' if index == input.len() - 1 => non_negative = false,
+                b'-' if iter.peek().is_none() => non_negative = false,
                 b'.' if point_place == 0 => point_place = index,
                 b'0'..=b'9' => value.push(byte - b'0'),
                 _ => return None,
@@ -212,6 +218,28 @@ mod test {
         for (input, point_place, value) in cases {
             let expect = Decimal {
                 non_negative: true,
+                point_place,
+                value,
+            };
+            assert_eq!(Decimal::try_from(input).unwrap(), expect)
+        }
+    }
+
+    #[test]
+    fn negative_decimals() {
+        let cases = [
+            ("-0.1", 1, vec![1]),
+            ("-0.001", 3, vec![1]),
+            ("-1.1", 1, vec![1, 1]),
+            ("-1.001", 3, vec![1, 0, 0, 1]),
+            ("-1.20", 1, vec![2, 1]),
+            ("-1.11", 2, vec![1, 1, 1]),
+            ("-0.999", 3, vec![9, 9, 9]),
+        ];
+
+        for (input, point_place, value) in cases {
+            let expect = Decimal {
+                non_negative: false,
                 point_place,
                 value,
             };
