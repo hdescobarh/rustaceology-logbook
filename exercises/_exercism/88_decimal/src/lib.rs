@@ -47,6 +47,14 @@ impl Decimal {
         }
         self.value.truncate(self.value.len() - leading_zeros);
     }
+
+    fn as_additive_inverse(&self) -> Self {
+        Self {
+            non_negative: !self.non_negative,
+            point_place: self.point_place,
+            value: self.value.clone(),
+        }
+    }
 }
 
 impl PartialOrd for Decimal {
