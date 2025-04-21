@@ -249,9 +249,8 @@ mod test {
             ("21.1", "0.1"),
             // Check integer part values
             ("11.1", "10.1"),
-            // Check decimal part size
-            ("1.2", "1.12"),
-            ("1.11", "1.1"),
+            ("120.1", "1.1"),
+            ("5.1", "0.1"),
             // Check decimal part values
             ("0.02", "0.01"),
             ("0.2", "0.1"),
@@ -259,6 +258,10 @@ mod test {
             ("1.2", "1.1"),
             ("21.02", "21.01"),
             ("21.2", "21.1"),
+            // Check decimal part size
+            ("1.22", "1.20"),
+            ("1.11", "1.1"),
+            ("0.999", "0.99"),
         ];
         for (big, small) in cases_first_greater {
             let decimal_big = Decimal::try_from(big).unwrap();
@@ -270,7 +273,24 @@ mod test {
                 "\nbig: {decimal_big:?}\n\
                 small: {decimal_small:?}\n\
                 expect: {expect:?}\n"
-            )
+            );
+            let expect = Ordering::Less;
+            assert_eq!(
+                decimal_small.cmp(&decimal_big),
+                expect,
+                "\nbig: {decimal_big:?}\n\
+                small: {decimal_small:?}\n\
+                expect: {expect:?}\n"
+            );
+            for decimal in [decimal_big, decimal_small] {
+                let expect = Ordering::Equal;
+                assert_eq!(
+                    decimal.cmp(&decimal),
+                    expect,
+                    "\ndecimal: {decimal:?}\n\
+                    expect: {expect:?}\n"
+                );
+            }
         }
     }
 }
