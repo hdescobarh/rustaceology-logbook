@@ -291,7 +291,15 @@ mod test {
             ("1.11", "1.1"),
             ("0.999", "0.99"),
         ];
-        for (big, small) in cases_first_greater {
+        let negatives: Vec<(String, String)> = cases_first_greater
+            .iter()
+            .skip(3)
+            .map(|(a, b)| (["-", b].concat(), ["-", a].concat()))
+            .collect();
+        for (big, small) in cases_first_greater
+            .into_iter()
+            .chain(negatives.iter().map(|(a, b)| (a.as_str(), b.as_str())))
+        {
             let decimal_big = Decimal::try_from(big).unwrap();
             let decimal_small = Decimal::try_from(small).unwrap();
             let expect = Ordering::Greater;
