@@ -55,6 +55,42 @@ impl Decimal {
             value: self.value.clone(),
         }
     }
+
+    fn iter_with_padding(&self, trailing: usize, leading: usize) -> PaddedDecimal<'_> {
+        PaddedDecimal {
+            trailing,
+            decimal_value: &self.value,
+            leading,
+            position: 0,
+        }
+    }
+}
+
+struct PaddedDecimal<'a> {
+    trailing: usize,
+    decimal_value: &'a [u8],
+    leading: usize,
+    position: usize,
+}
+
+impl<'a> Iterator for PaddedDecimal<'a> {
+    type Item = &'a u8;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let pseudo_length = self.trailing + self.decimal_value.len() + self.leading;
+        if self.position >= pseudo_length {
+            return None;
+        }
+        let item = if self.position < self.trailing {
+            &0
+        } else if self.position < self.trailing + self.decimal_value.len() {
+            &self.decimal_value[self.position - self.trailing]
+        } else {
+            &0
+        };
+        self.position += 1;
+        Some(item)
+    }
 }
 
 impl PartialOrd for Decimal {
