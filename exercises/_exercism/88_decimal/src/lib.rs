@@ -68,7 +68,7 @@ impl Ord for Decimal {
     /// integer part values, decimal part values (up to the shortest length), and decimal part size.
     /// The comparison may end early if a difference is detected.
     fn cmp(&self, other: &Self) -> Ordering {
-        // Integer part
+        // Sign
         match self.non_negative.cmp(&other.non_negative) {
             Ordering::Equal if self.non_negative => (),
             Ordering::Equal => {
@@ -76,14 +76,14 @@ impl Ord for Decimal {
             }
             ordering => return ordering,
         }
-
+        // Integer part
         match (self.value.len() as i128 - self.point_place as i128)
             .cmp(&(other.value.len() as i128 - other.point_place as i128))
         {
             Ordering::Equal => (),
             ordering => return ordering,
         }
-        // Decimal part
+
         match (
             self.value.get(self.point_place..),
             other.value.get(other.point_place..),
@@ -100,7 +100,7 @@ impl Ord for Decimal {
                 }
             }
         };
-
+        // Decimal part
         for (self_v, other_v) in self.value[..self.point_place.min(self.value.len())]
             .iter()
             .rev()
