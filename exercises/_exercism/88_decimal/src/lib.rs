@@ -64,6 +64,28 @@ impl Decimal {
             position: 0,
         }
     }
+
+    pub fn pairwise<'a>(
+        &'a self,
+        rhs: &'a Self,
+    ) -> impl DoubleEndedIterator + ExactSizeIterator<Item = (&'a u8, &'a u8)> {
+        let (self_trailing, rhs_trailing) = match self.point_place.cmp(&rhs.point_place) {
+            Ordering::Less => (rhs.point_place - self.point_place, 0),
+            Ordering::Equal => (0, 0),
+            Ordering::Greater => (0, self.point_place - rhs.point_place),
+        };
+        let (self_pseudo_len, rhs_pseudo_len) = (
+            self_trailing + self.value.len(),
+            rhs_trailing + rhs.value.len(),
+        );
+        let (self_leading, rhs_leading) = match self_pseudo_len.cmp(&rhs_pseudo_len) {
+            Ordering::Less => (rhs_pseudo_len - self_pseudo_len, 0),
+            Ordering::Equal => (0, 0),
+            Ordering::Greater => (0, self_pseudo_len - rhs_pseudo_len),
+        };
+        self.iter_with_padding(self_trailing, self_leading)
+            .zip(rhs.iter_with_padding(rhs_trailing, rhs_leading))
+    }
 }
 
 struct PaddedDecimal<'a> {
