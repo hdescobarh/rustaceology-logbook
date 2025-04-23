@@ -93,6 +93,24 @@ impl<'a> Iterator for PaddedDecimal<'a> {
     }
 }
 
+impl DoubleEndedIterator for PaddedDecimal<'_> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let pseudo_length = self.trailing + self.decimal_value.len() + self.leading;
+        if self.position >= pseudo_length {
+            return None;
+        }
+        let item = if self.position < self.leading {
+            &0
+        } else if self.position < self.leading + self.decimal_value.len() {
+            &self.decimal_value[self.leading + self.decimal_value.len() - 1 - self.position]
+        } else {
+            &0
+        };
+        self.position += 1;
+        Some(item)
+    }
+}
+
 impl PartialOrd for Decimal {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
@@ -374,6 +392,28 @@ mod test {
                     expect: {expect:?}\n"
                 );
             }
+        }
+    }
+
+    #[test]
+    fn returns_padded_decimal() {
+        let input = "124.1475";
+        let expect = [0, 5, 7, 4, 1, 4, 2, 1, 0, 0];
+        let decimal = Decimal::try_from(input).unwrap();
+        let mut padded = decimal.iter_with_padding(1, 2);
+        for expected_element in expect {
+            assert_eq!(Some(&expected_element), padded.next())
+        }
+    }
+
+    #[test]
+    fn returns_padded_decimal_rev() {
+        let input = "124.9475";
+        let expect = [0, 0, 1, 2, 4, 9, 4, 7, 5, 0];
+        let decimal = Decimal::try_from(input).unwrap();
+        let mut padded = decimal.iter_with_padding(1, 2);
+        for expected_element in expect {
+            assert_eq!(Some(&expected_element), padded.next_back())
         }
     }
 }
