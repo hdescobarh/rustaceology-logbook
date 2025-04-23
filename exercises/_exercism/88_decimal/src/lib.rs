@@ -193,6 +193,16 @@ impl Ord for Decimal {
 mod test {
     use super::*;
 
+    const ITER_WITH_PADDING: [(&str, usize, usize, &str); 7] = [
+        ("124", 0, 1, "4210"),
+        ("124", 1, 0, "0421"),
+        ("124", 2, 3, "00421000"),
+        ("124.1475", 1, 2, "0574142100"),
+        ("0.0072973525643", 0, 3, "34652537927000"),
+        ("0.0072973525643", 2, 0, "0034652537927"),
+        ("0.0072973525643", 2, 3, "0034652537927000"),
+    ];
+
     #[test]
     fn returns_none_with_wrong_input() {
         let cases = [
@@ -407,23 +417,28 @@ mod test {
 
     #[test]
     fn returns_padded_decimal() {
-        let input = "124.1475";
-        let expect = [0, 5, 7, 4, 1, 4, 2, 1, 0, 0];
-        let decimal = Decimal::try_from(input).unwrap();
-        let mut padded = decimal.iter_with_padding(1, 2);
-        for expected_element in expect {
-            assert_eq!(Some(&expected_element), padded.next())
+        for (input, trailing, leading, expect_str) in ITER_WITH_PADDING {
+            let expect: Vec<u8> = expect_str.bytes().map(|b| b - b'0').collect();
+            let decimal = Decimal::try_from(input).unwrap();
+            let actual: Vec<u8> = decimal
+                .iter_with_padding(trailing, leading)
+                .cloned()
+                .collect();
+            assert_eq!(expect, actual)
         }
     }
 
     #[test]
-    fn returns_padded_decimal_rev() {
-        let input = "124.9475";
-        let expect = [0, 0, 1, 2, 4, 9, 4, 7, 5, 0];
-        let decimal = Decimal::try_from(input).unwrap();
-        let mut padded = decimal.iter_with_padding(1, 2);
-        for expected_element in expect {
-            assert_eq!(Some(&expected_element), padded.next_back())
+    fn returns_padded_decimal_reverse() {
+        for (input, trailing, leading, expect_str) in ITER_WITH_PADDING {
+            let expect: Vec<u8> = expect_str.bytes().rev().map(|b| b - b'0').collect();
+            let decimal = Decimal::try_from(input).unwrap();
+            let actual: Vec<u8> = decimal
+                .iter_with_padding(trailing, leading)
+                .rev()
+                .cloned()
+                .collect();
+            assert_eq!(expect, actual)
         }
     }
 }
