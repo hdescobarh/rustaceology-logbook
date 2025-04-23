@@ -91,6 +91,10 @@ impl<'a> Iterator for PaddedDecimal<'a> {
         self.position += 1;
         Some(item)
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
+    }
 }
 
 impl DoubleEndedIterator for PaddedDecimal<'_> {
@@ -108,6 +112,12 @@ impl DoubleEndedIterator for PaddedDecimal<'_> {
         };
         self.position += 1;
         Some(item)
+    }
+}
+
+impl ExactSizeIterator for PaddedDecimal<'_> {
+    fn len(&self) -> usize {
+        self.trailing + self.decimal_value.len() + self.leading - self.position
     }
 }
 
