@@ -215,6 +215,18 @@ impl Ord for Decimal {
 mod test {
     use super::*;
 
+    /// input, expected point place, expected &str
+    const POSITIVE_WITH_NON_SIGNIFICANT_ZEROS: [(&str, usize, &str); 7] = [
+        ("09", 0, "9"),
+        ("009", 0, "9"),
+        ("900", 0, "009"),
+        ("00900", 0, "009"),
+        ("9.00", 0, "9"),
+        ("9.100", 1, "19"),
+        ("0009.1100", 2, "119"),
+    ];
+
+    /// input, trailing zeros, leading zeros, expected as &str
     const ITER_WITH_PADDING: [(&str, usize, usize, &str); 7] = [
         ("124", 0, 1, "4210"),
         ("124", 1, 0, "0421"),
@@ -291,13 +303,15 @@ mod test {
 
     #[test]
     fn remove_non_significant_zeros() {
-        let input = "001.02000";
-        let expect = Decimal {
-            non_negative: true,
-            point_place: 2,
-            value: vec![2, 0, 1],
-        };
-        assert_eq!(Decimal::try_from(input).unwrap(), expect)
+        for (input, point_place, value_str) in POSITIVE_WITH_NON_SIGNIFICANT_ZEROS {
+            let expected = Decimal {
+                non_negative: true,
+                point_place,
+                value: value_str.bytes().map(|b| b - b'0').collect(),
+            };
+
+            assert_eq!(expected, Decimal::try_from(input).unwrap());
+        }
     }
 
     #[test]
