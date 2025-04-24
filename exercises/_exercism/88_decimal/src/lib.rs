@@ -80,7 +80,7 @@ impl Decimal {
         }
     }
 
-    pub fn pairwise<'a>(
+    fn pairwise<'a>(
         &'a self,
         rhs: &'a Self,
     ) -> impl DoubleEndedIterator + ExactSizeIterator<Item = (&'a u8, &'a u8)> {
@@ -100,6 +100,15 @@ impl Decimal {
         };
         self.iter_with_padding(self_trailing, self_leading)
             .zip(rhs.iter_with_padding(rhs_trailing, rhs_leading))
+    }
+
+    /// Returns the digit and carry after op
+    fn apply<F>(a: u8, b: u8, op: F) -> (u8, u8)
+    where
+        F: Fn(u8, u8) -> u8,
+    {
+        let result = (op)(a, b);
+        (result % 10, result / 10)
     }
 }
 
