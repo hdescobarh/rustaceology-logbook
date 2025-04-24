@@ -486,6 +486,14 @@ mod test {
         }
     }
 
+    fn additive_inverse(decimal: &Decimal) -> Decimal {
+        Decimal {
+            non_negative: !decimal.non_negative,
+            point_place: decimal.point_place,
+            value: decimal.value.clone(),
+        }
+    }
+
     #[test]
     fn identify_self_greater_than_other() {
         let assert_cmp = |decimal_self: &Decimal, decimal_other: &Decimal| {
@@ -501,8 +509,8 @@ mod test {
             let decimal_other = Decimal::try_from(input_other).unwrap();
             assert_cmp(&decimal_self, &decimal_other);
             let (decimal_self, decimal_other) = (
-                decimal_other.as_additive_inverse(),
-                decimal_self.as_additive_inverse(),
+                additive_inverse(&decimal_other),
+                additive_inverse(&decimal_self),
             );
             assert_cmp(&decimal_self, &decimal_other);
         }
@@ -523,8 +531,8 @@ mod test {
             let decimal_other = Decimal::try_from(input_other).unwrap();
             assert_cmp(&decimal_self, &decimal_other);
             let (decimal_self, decimal_other) = (
-                decimal_other.as_additive_inverse(),
-                decimal_self.as_additive_inverse(),
+                additive_inverse(&decimal_other),
+                additive_inverse(&decimal_self),
             );
             assert_cmp(&decimal_self, &decimal_other);
         }
