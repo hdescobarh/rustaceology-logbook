@@ -1,4 +1,7 @@
-use std::cmp::Ordering;
+use std::{
+    cmp::Ordering,
+    ops::{Add, Mul, Sub},
+};
 
 /// Type implementing arbitrary-precision decimal arithmetic
 
@@ -105,6 +108,30 @@ impl Decimal {
         };
         self.iter_with_padding(self_trailing, self_leading)
             .zip(rhs.iter_with_padding(rhs_trailing, rhs_leading))
+    }
+}
+
+impl Add for Decimal {
+    type Output = Decimal;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        todo!()
+    }
+}
+
+impl Sub for Decimal {
+    type Output = Decimal;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        todo!()
+    }
+}
+
+impl Mul for Decimal {
+    type Output = Decimal;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        todo!()
     }
 }
 
