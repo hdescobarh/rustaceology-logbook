@@ -170,9 +170,6 @@ impl PartialOrd for Decimal {
 }
 
 impl Ord for Decimal {
-    /// Perform comparisons in the following order: sign, integer part size,
-    /// integer part values, decimal part values (up to the shortest length), and decimal part size.
-    /// The comparison may end early if a difference is detected.
     fn cmp(&self, other: &Self) -> Ordering {
         // Sign
         match self.non_negative.cmp(&other.non_negative) {
@@ -182,52 +179,7 @@ impl Ord for Decimal {
             }
             ordering => return ordering,
         }
-        // Integer part
-        match (self.value.len() as i128 - self.point_place as i128)
-            .cmp(&(other.value.len() as i128 - other.point_place as i128))
-        {
-            Ordering::Equal => (),
-            ordering => return ordering,
-        }
-
-        match (
-            self.value.get(self.point_place..),
-            other.value.get(other.point_place..),
-        ) {
-            (None, None) => (),
-            (None, Some(_)) => return Ordering::Less,
-            (Some(_), None) => return Ordering::Greater,
-            (Some(self_items), Some(other_items)) => {
-                for (self_v, other_v) in self_items.iter().rev().zip(other_items.iter().rev()) {
-                    match self_v.cmp(other_v) {
-                        Ordering::Equal => (),
-                        ordering => return ordering,
-                    }
-                }
-            }
-        };
-        // Decimal part
-        for (self_v, other_v) in self.value[..self.point_place.min(self.value.len())]
-            .iter()
-            .rev()
-            .zip(
-                other.value[..other.point_place.min(other.value.len())]
-                    .iter()
-                    .rev(),
-            )
-        {
-            match self_v.cmp(other_v) {
-                Ordering::Equal => (),
-                ordering => return ordering,
-            }
-        }
-
-        match self.point_place.cmp(&other.point_place) {
-            Ordering::Equal => (),
-            ordering => return ordering,
-        }
-
-        Ordering::Equal
+        todo!()
     }
 }
 
