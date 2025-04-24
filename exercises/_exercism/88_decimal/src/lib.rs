@@ -244,6 +244,35 @@ mod test {
         ("0.0072973525643", 2, 3, "0034652537927000"),
     ];
 
+    /// Bigger input first
+    const SORTED_PAIRS: [[&str; 2]; 21] = [
+        // Different sign
+        ["1", "-1"],
+        ["5.1", "-5.1"],
+        ["0", "-1"],
+        ["42", "-5"],
+        // Same decimal, different whole part
+        ["9.1", "0.1"],
+        ["2.3", "1.3"],
+        ["320.1", "1.1"],
+        // Same whole, different decimal part
+        ["0.2", "0.1"],
+        ["0.2", "0.01"],
+        ["0.02", "0.01"],
+        ["0.02", "0.0001"],
+        ["1.02", "1.01"],
+        ["1.02", "1.001"],
+        ["1.2", "1.1"],
+        ["21.02", "21.01"],
+        ["21.2", "21.1"],
+        ["21.2", "21.001"],
+        // Different whole and decimal parts
+        ["5.32", "2.53794"],
+        ["5.02", "2.53794"],
+        ["5.3218", "2.54"],
+        ["5.3218", "0.54"],
+    ];
+
     #[test]
     fn returns_none_with_wrong_input() {
         let cases = [
@@ -405,70 +434,6 @@ mod test {
     }
 
     #[test]
-    fn order_non_equal_decimals_correctly() {
-        let cases_first_greater = [
-            // Check sign
-            ("1", "-1"),
-            ("5.1", "-5.1"),
-            ("0", "-1"),
-            // Check integer part size
-            ("21.1", "0.1"),
-            // Check integer part values
-            ("11.1", "10.1"),
-            ("120.1", "1.1"),
-            ("5.1", "0.1"),
-            // Check decimal part values
-            ("0.02", "0.01"),
-            ("0.2", "0.1"),
-            ("1.02", "1.01"),
-            ("1.2", "1.1"),
-            ("21.02", "21.01"),
-            ("21.2", "21.1"),
-            // Check decimal part size
-            ("1.22", "1.20"),
-            ("1.11", "1.1"),
-            ("0.999", "0.99"),
-        ];
-        let negatives: Vec<(String, String)> = cases_first_greater
-            .iter()
-            .skip(3)
-            .map(|(a, b)| (["-", b].concat(), ["-", a].concat()))
-            .collect();
-        for (big, small) in cases_first_greater
-            .into_iter()
-            .chain(negatives.iter().map(|(a, b)| (a.as_str(), b.as_str())))
-        {
-            let decimal_big = Decimal::try_from(big).unwrap();
-            let decimal_small = Decimal::try_from(small).unwrap();
-            let expect = Ordering::Greater;
-            assert_eq!(
-                decimal_big.cmp(&decimal_small),
-                expect,
-                "\nbig: {decimal_big:?}\n\
-                small: {decimal_small:?}\n\
-                expect: {expect:?}\n"
-            );
-            let expect = Ordering::Less;
-            assert_eq!(
-                decimal_small.cmp(&decimal_big),
-                expect,
-                "\nbig: {decimal_big:?}\n\
-                small: {decimal_small:?}\n\
-                expect: {expect:?}\n"
-            );
-            for decimal in [decimal_big, decimal_small] {
-                let expect = Ordering::Equal;
-                assert_eq!(
-                    decimal.cmp(&decimal),
-                    expect,
-                    "\ndecimal: {decimal:?}\n\
-                    expect: {expect:?}\n"
-                );
-            }
-        }
-    }
-
-    #[test]
     fn returns_padded_decimal() {
         for (input, trailing, leading, expect_str) in ITER_WITH_PADDING {
             let expect: Vec<u8> = expect_str.bytes().map(|b| b - b'0').collect();
@@ -492,6 +457,59 @@ mod test {
                 .cloned()
                 .collect();
             assert_eq!(expect, actual)
+        }
+    }
+
+    #[test]
+    fn identify_equal_decimals() {
+        for input in SORTED_PAIRS.into_iter().flatten() {
+            let decimal_self = Decimal::try_from(input).unwrap();
+            let decimal_other = Decimal::try_from(input).unwrap();
+            assert!(decimal_self == decimal_other)
+        }
+    }
+
+    #[test]
+    fn identify_self_greater_than_other() {
+        let assert_cmp = |decimal_self: &Decimal, decimal_other: &Decimal| {
+            assert!(
+                decimal_self > decimal_other,
+                "self: {:?}, other: {:?}",
+                decimal_self,
+                decimal_other
+            )
+        };
+        for [input_self, input_other] in SORTED_PAIRS {
+            let decimal_self = Decimal::try_from(input_self).unwrap();
+            let decimal_other = Decimal::try_from(input_other).unwrap();
+            assert_cmp(&decimal_self, &decimal_other);
+            let (decimal_self, decimal_other) = (
+                decimal_other.as_additive_inverse(),
+                decimal_self.as_additive_inverse(),
+            );
+            assert_cmp(&decimal_self, &decimal_other);
+        }
+    }
+
+    #[test]
+    fn identify_self_less_than_other() {
+        let assert_cmp = |decimal_self: &Decimal, decimal_other: &Decimal| {
+            assert!(
+                decimal_self < decimal_other,
+                "self: {:?}, other: {:?}",
+                decimal_self,
+                decimal_other
+            )
+        };
+        for [input_other, input_self] in SORTED_PAIRS {
+            let decimal_self = Decimal::try_from(input_self).unwrap();
+            let decimal_other = Decimal::try_from(input_other).unwrap();
+            assert_cmp(&decimal_self, &decimal_other);
+            let (decimal_self, decimal_other) = (
+                decimal_other.as_additive_inverse(),
+                decimal_self.as_additive_inverse(),
+            );
+            assert_cmp(&decimal_self, &decimal_other);
         }
     }
 }
