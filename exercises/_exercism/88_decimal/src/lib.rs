@@ -14,38 +14,58 @@ impl Decimal {
     pub fn try_from(input: &str) -> Option<Decimal> {
         let mut value: Vec<u8> = Vec::with_capacity(input.len());
         let mut point_place = 0;
-        let mut non_negative = true;
-        let mut iter = input
-            .bytes()
-            .rev()
-            .skip_while(|v| *v == b'0')
-            .enumerate()
-            .peekable();
-        while let Some((index, byte)) = iter.next() {
+        let mut iter = input.bytes().peekable();
+
+        let non_negative = match iter.peek() {
+            Some(b'-') => {
+                iter.next();
+                false
+            }
+            Some(b'0'..=b'9') => true,
+            _ => return None,
+        };
+
+        for (index, byte) in iter.rev().enumerate() {
             match byte {
-                b'-' if iter.peek().is_none() => non_negative = false,
                 b'.' if point_place == 0 => point_place = index,
                 b'0'..=b'9' => value.push(byte - b'0'),
                 _ => return None,
             }
         }
-        let mut decimal = Self {
+        let mut non_normalized_decimal = Decimal {
             non_negative,
             point_place,
             value,
         };
-        decimal.trim_leading_zeros();
-        Some(decimal)
+        non_normalized_decimal.normalize();
+        Some(non_normalized_decimal)
     }
-    fn trim_leading_zeros(&mut self) {
+
+    /// Trim non-significant leading and trailing zeros
+    fn normalize(&mut self) {
+        // remove leading
         let mut leading_zeros = self.value.len();
-        for (index, v) in self.value.iter().rev().enumerate() {
-            if *v != 0 {
+        for (index, digit) in self.value.iter().rev().enumerate() {
+            if *digit != 0 {
                 leading_zeros = index;
                 break;
             }
         }
         self.value.truncate(self.value.len() - leading_zeros);
+
+        // remove trailing
+        let mut trailing_zeros = self.point_place;
+        for (index, digit) in self.value[..self.point_place.min(self.value.len())]
+            .iter()
+            .enumerate()
+        {
+            if *digit != 0 {
+                trailing_zeros = index;
+                break;
+            }
+        }
+        self.point_place -= trailing_zeros;
+        self.value = self.value[trailing_zeros.min(self.value.len())..].to_vec();
     }
 
     fn as_additive_inverse(&self) -> Self {
@@ -253,7 +273,12 @@ mod test {
             "137..0359",
         ];
         for input in cases {
-            assert_eq!(Decimal::try_from(input), None)
+            assert_eq!(
+                Decimal::try_from(input),
+                None,
+                "This must fail. Input: {}",
+                input
+            )
         }
     }
 
@@ -310,20 +335,30 @@ mod test {
                 value: value_str.bytes().map(|b| b - b'0').collect(),
             };
 
-            assert_eq!(expected, Decimal::try_from(input).unwrap());
+            assert_eq!(
+                expected,
+                Decimal::try_from(input).unwrap(),
+                "Used input: {}",
+                input
+            );
         }
     }
 
     #[test]
     fn valid_zeros() {
-        let cases = ["0", "0.0", "0000", "0.0000", "00000.0000"];
+        let cases = ["0", "0000", "0.0000", "0.0", "00000.0000"];
         let expect = Decimal {
             non_negative: true,
             point_place: 0,
             value: vec![],
         };
         for input in cases {
-            assert_eq!(Decimal::try_from(input).unwrap(), expect)
+            assert_eq!(
+                expect,
+                Decimal::try_from(input).unwrap(),
+                "Used input: {}",
+                input
+            )
         }
     }
 
@@ -342,7 +377,12 @@ mod test {
                 point_place,
                 value,
             };
-            assert_eq!(Decimal::try_from(input).unwrap(), expect)
+            assert_eq!(
+                expect,
+                Decimal::try_from(input).unwrap(),
+                "Input: {}",
+                input
+            )
         }
     }
 
