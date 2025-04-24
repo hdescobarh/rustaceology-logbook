@@ -198,17 +198,15 @@ impl PartialOrd for Decimal {
 
 impl Ord for Decimal {
     fn cmp(&self, rhs: &Self) -> Ordering {
-        // Sign
-        match self.non_negative.cmp(&rhs.non_negative) {
-            Ordering::Equal if self.non_negative => (),
-            Ordering::Equal => {
-                return rhs.as_additive_inverse().cmp(&self.as_additive_inverse());
-            }
+        let reverse_ord = match self.non_negative.cmp(&rhs.non_negative) {
+            Ordering::Equal if self.non_negative => false,
+            Ordering::Equal => true,
             ordering => return ordering,
-        }
+        };
         for (self_item, rhs_item) in self.pairwise(rhs).rev() {
             match self_item.cmp(rhs_item) {
                 Ordering::Equal => (),
+                ordering if reverse_ord => return ordering.reverse(),
                 ordering => return ordering,
             }
         }
