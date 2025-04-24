@@ -71,14 +71,6 @@ impl Decimal {
         self.value = self.value[trailing_zeros.min(self.value.len())..].to_vec();
     }
 
-    fn as_additive_inverse(&self) -> Self {
-        Self {
-            non_negative: !self.non_negative,
-            point_place: self.point_place,
-            value: self.value.clone(),
-        }
-    }
-
     fn iter_with_padding(&self, trailing: usize, leading: usize) -> PaddedDecimal<'_> {
         PaddedDecimal {
             trailing,
