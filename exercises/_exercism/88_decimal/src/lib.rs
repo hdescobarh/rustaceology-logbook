@@ -193,8 +193,34 @@ impl Ord for Decimal {
 mod test {
     use super::*;
 
+    /// input, expected Decimal.value field as &str
+    const POSITIVE_WHOLE_NUMBERS: [(&str, &str); 5] = [
+        ("9", "9"),
+        ("42", "24"),
+        ("1602", "2061"),
+        ("1457", "7541"),
+        ("137035999177", "771999530731"),
+    ];
+
+    /// input, expected Decimal.value field as &str, Decimal.point_place field
+    const POSITIVE_DECIMAL_GREATER_THAN_ONE: [(&str, &str, usize); 6] = [
+        ("9.1", "19", 1),
+        ("9.12", "219", 2),
+        ("9.001", "1009", 3),
+        ("1457.32", "237541", 2),
+        ("1.235", "5321", 3),
+        ("137.035999139", "931999530731", 9),
+    ];
+
+    const POSITIVE_DECIMAL_SMALLER_THAN_ONE: [(&str, &str, usize); 4] = [
+        ("0.1", "1", 1),
+        ("0.001", "1", 3),
+        ("0.123", "321", 3),
+        ("0.00123", "321", 5),
+    ];
+
     /// input, expected point place, expected &str
-    const POSITIVE_WITH_NON_SIGNIFICANT_ZEROS: [(&str, usize, &str); 7] = [
+    const POSITIVE_WITH_NON_SIGNIFICANT_ZEROS: [(&str, usize, &str); 10] = [
         ("09", 0, "9"),
         ("009", 0, "9"),
         ("900", 0, "009"),
@@ -202,6 +228,9 @@ mod test {
         ("9.00", 0, "9"),
         ("9.100", 1, "19"),
         ("0009.1100", 2, "119"),
+        ("0.9", 1, "9"),
+        ("0.0900", 2, "9"),
+        ("000.0900", 2, "9"),
     ];
 
     /// input, trailing zeros, leading zeros, expected as &str
@@ -243,47 +272,55 @@ mod test {
     }
 
     #[test]
-    fn valid_positive_int_number() {
-        let input = "1002";
-        let expect = Decimal {
-            non_negative: true,
-            point_place: 0,
-            value: vec![2, 0, 0, 1],
-        };
-        assert_eq!(Decimal::try_from(input).unwrap(), expect)
+    fn valid_positive_whole_number() {
+        for (input, expected_str) in POSITIVE_WHOLE_NUMBERS {
+            let expected = Decimal {
+                non_negative: true,
+                point_place: 0,
+                value: expected_str.bytes().map(|b| b - b'0').collect(),
+            };
+            let actual = Decimal::try_from(input);
+            assert_eq!(Some(expected), actual, "Input: {}", input)
+        }
     }
 
     #[test]
-    fn valid_negative_int_number() {
-        let input = "-1002";
-        let expect = Decimal {
-            non_negative: false,
-            point_place: 0,
-            value: vec![2, 0, 0, 1],
-        };
-        assert_eq!(Decimal::try_from(input).unwrap(), expect)
+    fn valid_negative_whole_number() {
+        for (input, expected_str) in POSITIVE_WHOLE_NUMBERS {
+            let expected = Decimal {
+                non_negative: false,
+                point_place: 0,
+                value: expected_str.bytes().map(|b| b - b'0').collect(),
+            };
+            let actual = Decimal::try_from(&format!("-{}", input));
+            assert_eq!(Some(expected), actual, "Input: {}", input)
+        }
     }
 
     #[test]
-    fn valid_positive_float_number() {
-        let input = "1.002";
-        let expect = Decimal {
-            non_negative: true,
-            point_place: 3,
-            value: vec![2, 0, 0, 1],
-        };
-        assert_eq!(Decimal::try_from(input).unwrap(), expect)
+    fn valid_positive_decimal_greater_than_one() {
+        for (input, expected_str, point_place) in POSITIVE_DECIMAL_GREATER_THAN_ONE {
+            let expected = Decimal {
+                non_negative: true,
+                point_place,
+                value: expected_str.bytes().map(|b| b - b'0').collect(),
+            };
+            let actual = Decimal::try_from(input);
+            assert_eq!(Some(expected), actual, "Input: {}", input)
+        }
     }
 
     #[test]
-    fn valid_negative_float_number() {
-        let input = "-1.002";
-        let expect = Decimal {
-            non_negative: false,
-            point_place: 3,
-            value: vec![2, 0, 0, 1],
-        };
-        assert_eq!(Decimal::try_from(input).unwrap(), expect)
+    fn valid_negative_decimal_greater_than_one() {
+        for (input, expected_str, point_place) in POSITIVE_DECIMAL_GREATER_THAN_ONE {
+            let expected = Decimal {
+                non_negative: false,
+                point_place,
+                value: expected_str.bytes().map(|b| b - b'0').collect(),
+            };
+            let actual = Decimal::try_from(&format!("-{}", input));
+            assert_eq!(Some(expected), actual, "Input: {}", input)
+        }
     }
 
     #[test]
@@ -323,48 +360,28 @@ mod test {
     }
 
     #[test]
-    fn non_negative_decimals() {
-        let cases = [
-            ("0.1", 1, vec![1]),
-            ("0.001", 3, vec![1]),
-            ("1.1", 1, vec![1, 1]),
-            ("1.001", 3, vec![1, 0, 0, 1]),
-        ];
-
-        for (input, point_place, value) in cases {
-            let expect = Decimal {
+    fn valid_positive_decimal_smaller_than_one() {
+        for (input, expected_str, point_place) in POSITIVE_DECIMAL_SMALLER_THAN_ONE {
+            let expected = Decimal {
                 non_negative: true,
                 point_place,
-                value,
+                value: expected_str.bytes().map(|b| b - b'0').collect(),
             };
-            assert_eq!(
-                expect,
-                Decimal::try_from(input).unwrap(),
-                "Input: {}",
-                input
-            )
+            let actual = Decimal::try_from(input);
+            assert_eq!(Some(expected), actual, "Input: {}", input)
         }
     }
 
     #[test]
-    fn negative_decimals() {
-        let cases = [
-            ("-0.1", 1, vec![1]),
-            ("-0.001", 3, vec![1]),
-            ("-1.1", 1, vec![1, 1]),
-            ("-1.001", 3, vec![1, 0, 0, 1]),
-            ("-1.20", 1, vec![2, 1]),
-            ("-1.11", 2, vec![1, 1, 1]),
-            ("-0.999", 3, vec![9, 9, 9]),
-        ];
-
-        for (input, point_place, value) in cases {
-            let expect = Decimal {
+    fn valid_negative_decimal_smaller_than_one() {
+        for (input, expected_str, point_place) in POSITIVE_DECIMAL_SMALLER_THAN_ONE {
+            let expected = Decimal {
                 non_negative: false,
                 point_place,
-                value,
+                value: expected_str.bytes().map(|b| b - b'0').collect(),
             };
-            assert_eq!(Decimal::try_from(input).unwrap(), expect)
+            let actual = Decimal::try_from(&format!("-{}", input));
+            assert_eq!(Some(expected), actual, "Input: {}", input)
         }
     }
 
