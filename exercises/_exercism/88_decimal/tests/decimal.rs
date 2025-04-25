@@ -25,14 +25,12 @@ fn eq() {
 }
 
 #[test]
-#[ignore]
 fn ne() {
     assert!(decimal("0.0") != decimal("1.0"));
     assert!(decimal(BIGS[0]) != decimal(BIGS[1]));
 }
 
 #[test]
-#[ignore]
 fn gt() {
     for slice_2 in BIGS.windows(2) {
         assert!(decimal(slice_2[1]) > decimal(slice_2[0]));
@@ -40,7 +38,6 @@ fn gt() {
 }
 
 #[test]
-#[ignore]
 fn lt() {
     for slice_2 in BIGS.windows(2) {
         assert!(decimal(slice_2[0]) < decimal(slice_2[1]));
@@ -93,21 +90,18 @@ fn mul_id() {
 }
 
 #[test]
-#[ignore]
 fn gt_positive_and_zero() {
     assert!(decimal("1.0") > decimal("0.0"));
     assert!(decimal("0.1") > decimal("0.0"));
 }
 
 #[test]
-#[ignore]
 fn gt_negative_and_zero() {
     assert!(decimal("0.0") > decimal("-0.1"));
     assert!(decimal("0.0") > decimal("-1.0"));
 }
 
 #[test]
-#[ignore]
 fn unequal_number_of_decimal_places() {
     assert!(decimal("3.14") > decimal("3.13"));
     assert!(decimal("3.14") > decimal("3.131"));
@@ -124,7 +118,6 @@ fn add_uneven_position() {
 }
 
 #[test]
-#[ignore]
 fn eq_vary_sig_digits() {
     assert!(decimal("0") == decimal("0000000000000.0000000000000000000000"));
     assert!(decimal("1") == decimal("00000000000000001.000000000000000000"));
@@ -152,7 +145,6 @@ fn cleanup_precision() {
 }
 
 #[test]
-#[ignore]
 fn gt_varying_positive_precisions() {
     assert!(decimal("1.1") > decimal("1.01"));
     assert!(decimal("1.01") > decimal("1.0"));
@@ -161,7 +153,6 @@ fn gt_varying_positive_precisions() {
 }
 
 #[test]
-#[ignore]
 fn gt_positive_and_negative() {
     assert!(decimal("1.0") > decimal("-1.0"));
     assert!(decimal("1.1") > decimal("-1.1"));
@@ -169,7 +160,6 @@ fn gt_positive_and_negative() {
 }
 
 #[test]
-#[ignore]
 fn gt_varying_negative_precisions() {
     assert!(decimal("-0.01") > decimal("-0.1"));
     assert!(decimal("-0.1") > decimal("-1.0"));
@@ -201,7 +191,6 @@ fn multiply_by_negative() {
 }
 
 #[test]
-#[ignore]
 fn simple_partial_cmp() {
     assert!(decimal("1.0") < decimal("1.1"));
     assert!(decimal("0.00000000000000000000001") > decimal("-20000000000000000000000000000"));
