@@ -151,9 +151,6 @@ impl Decimal {
             let raw = 9 - *digit + carry;
             *digit = raw % 10;
             carry = raw / 10;
-            if carry == 0 {
-                break;
-            }
         }
         (result, false)
     }
