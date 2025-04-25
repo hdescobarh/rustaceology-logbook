@@ -110,6 +110,38 @@ impl Decimal {
         let result = (op)(a, b);
         (result % 10, result / 10)
     }
+
+    // This is an attempt of implementing a subtraction that does not rely
+    // in the Ordering trait. Returns a value and non_negative  bare fields result
+    fn sign_agnostic_sub(&self, rhs: &Self) -> (Vec<u8>, bool) {
+        let mut borrow = 0;
+        let exact_size_iter = self.pairwise(rhs);
+        let mut result = Vec::with_capacity(exact_size_iter.len() + 1);
+        for (a, b) in exact_size_iter {
+            let to_reduce = b + borrow;
+            if *a < to_reduce {
+                result.push(10 + a - to_reduce);
+                borrow = 1;
+            } else {
+                result.push(a - to_reduce);
+                borrow = 0;
+            }
+        }
+        if borrow == 0 {
+            return (result, true);
+        };
+
+        let mut carry = 1;
+        for digit in result.iter_mut() {
+            let raw = 9 - *digit + carry;
+            *digit = raw % 10;
+            carry = raw / 10;
+            if carry == 0 {
+                break;
+            }
+        }
+        (result, false)
+    }
 }
 
 impl Add for Decimal {
