@@ -133,7 +133,6 @@ fn add_vary_precision() {
 }
 
 #[test]
-#[ignore]
 fn cleanup_precision() {
     assert_eq!(
         decimal("10000000000000000000000000000000000000000000000.999999999999999999999999998",)
@@ -200,13 +199,11 @@ fn simple_partial_cmp() {
 // these tests are designed to ensure correctness of implementations for which the
 // integer and fractional parts of the number are stored separately
 #[test]
-#[ignore]
 fn carry_into_integer() {
     assert_eq!(decimal("0.901") + decimal("0.1"), decimal("1.001"))
 }
 
 #[test]
-#[ignore]
 fn carry_into_fractional_with_digits_to_right() {
     assert_eq!(decimal("0.0901") + decimal("0.01"), decimal("0.1001"))
 }
@@ -234,19 +231,16 @@ fn sub_carry_over_negative_with_fractional() {
 }
 
 #[test]
-#[ignore]
 fn carry_from_rightmost_one() {
     assert_eq!(decimal("0.09") + decimal("0.01"), decimal("0.1"))
 }
 
 #[test]
-#[ignore]
 fn carry_from_rightmost_more() {
     assert_eq!(decimal("0.099") + decimal("0.001"), decimal("0.1"))
 }
 
 #[test]
-#[ignore]
 fn carry_from_rightmost_into_integer() {
     assert_eq!(decimal("0.999") + decimal("0.001"), decimal("1.0"))
 }
@@ -286,7 +280,6 @@ fn sub_borrow_integral_zeroes() {
 }
 
 #[test]
-#[ignore]
 fn borrow_from_negative() {
     assert_eq!(decimal("-1.0") + decimal("0.01"), decimal("-0.99"))
 }
