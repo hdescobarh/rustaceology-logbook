@@ -49,13 +49,7 @@ impl Decimal {
                 _ => return None,
             }
         }
-        let mut non_normalized_decimal = Decimal {
-            non_negative,
-            point_place,
-            value,
-        };
-        non_normalized_decimal.normalize();
-        Some(non_normalized_decimal)
+        Some(Self::new(non_negative, value, point_place))
     }
 
     /// Trim non-significant leading and trailing zeros
@@ -180,13 +174,7 @@ impl Add for Decimal {
             (true, false) => self.sign_agnostic_sub(&rhs),
             (false, true) => rhs.sign_agnostic_sub(&self),
         };
-        let mut decimal = Self {
-            non_negative,
-            point_place: self.point_place.max(rhs.point_place),
-            value,
-        };
-        decimal.normalize();
-        decimal
+        Self::new(non_negative, value, self.point_place.max(rhs.point_place))
     }
 }
 
@@ -200,13 +188,7 @@ impl Sub for Decimal {
             (true, false) => self.sign_agnostic_add(&rhs),
             (false, true) => self.sign_agnostic_add(&rhs),
         };
-        let mut decimal = Self {
-            non_negative,
-            point_place: self.point_place.max(rhs.point_place),
-            value,
-        };
-        decimal.normalize();
-        decimal
+        Self::new(non_negative, value, self.point_place.max(rhs.point_place))
     }
 }
 
@@ -226,14 +208,11 @@ impl Mul for Decimal {
             carry = raw / 10;
             *digit = raw % 10;
         }
-
-        let mut non_normalized_decimal = Self {
-            non_negative: self.non_negative == rhs.non_negative,
-            point_place: self.point_place + rhs.point_place,
+        Self::new(
+            self.non_negative == rhs.non_negative,
             value,
-        };
-        non_normalized_decimal.normalize();
-        non_normalized_decimal
+            self.point_place + rhs.point_place,
+        )
     }
 }
 
