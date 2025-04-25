@@ -58,7 +58,6 @@ fn sub() {
 }
 
 #[test]
-#[ignore]
 fn mul() {
     for big in BIGS.iter() {
         assert_eq!(decimal(big) * decimal("2"), decimal(big) + decimal(big));
@@ -81,7 +80,6 @@ fn sub_id() {
 }
 
 #[test]
-#[ignore]
 fn mul_id() {
     assert_eq!(decimal("2.1") * decimal("1.0"), decimal("2.1"));
     assert_eq!(decimal("1.0") * decimal("2.1"), decimal("2.1"));
@@ -166,7 +164,6 @@ fn gt_varying_negative_precisions() {
 
 // test signed properties
 #[test]
-#[ignore]
 fn negatives() {
     assert!(Decimal::try_from("-1").is_some());
     assert_eq!(decimal("0") - decimal("1"), decimal("-1"));
@@ -174,14 +171,12 @@ fn negatives() {
 }
 
 #[test]
-#[ignore]
 fn explicit_positive() {
     assert_eq!(decimal("+1"), decimal("1"));
     assert_eq!(decimal("+2.0") - decimal("-0002.0"), decimal("4"));
 }
 
 #[test]
-#[ignore]
 fn multiply_by_negative() {
     assert_eq!(decimal("5") * decimal("-0.2"), decimal("-1"));
     assert_eq!(decimal("-20") * decimal("-0.2"), decimal("4"));
