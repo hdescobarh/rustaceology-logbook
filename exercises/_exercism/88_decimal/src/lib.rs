@@ -163,7 +163,19 @@ impl Add for Decimal {
     type Output = Decimal;
 
     fn add(self, rhs: Self) -> Self::Output {
-        todo!()
+        let (value, non_negative) = match (self.non_negative, rhs.non_negative) {
+            (true, true) => self.sign_agnostic_add(&rhs),
+            (false, false) => self.sign_agnostic_add(&rhs),
+            (true, false) => self.sign_agnostic_sub(&rhs),
+            (false, true) => rhs.sign_agnostic_sub(&self),
+        };
+        let mut decimal = Self {
+            non_negative,
+            point_place: self.point_place.max(rhs.point_place),
+            value,
+        };
+        decimal.normalize();
+        decimal
     }
 }
 
