@@ -20,6 +20,10 @@ impl Decimal {
         let mut iter = input.bytes().peekable();
 
         let non_negative = match iter.peek() {
+            Some(b'+') => {
+                iter.next();
+                true
+            }
             Some(b'-') => {
                 iter.next();
                 false
