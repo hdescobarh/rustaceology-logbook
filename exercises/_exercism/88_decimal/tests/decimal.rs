@@ -52,7 +52,6 @@ fn add() {
 }
 
 #[test]
-#[ignore]
 fn sub() {
     assert_eq!(decimal(BIGS[2]) - decimal(BIGS[1]), decimal(BIGS[0]));
     assert_eq!(decimal(BIGS[2]) - decimal(BIGS[0]), decimal(BIGS[1]));
@@ -76,7 +75,6 @@ fn add_id() {
 }
 
 #[test]
-#[ignore]
 fn sub_id() {
     assert_eq!(decimal("1.0") - decimal("0.0"), decimal("1.0"));
     assert_eq!(decimal("0.1") - decimal("0.0"), decimal("0.1"));
@@ -214,7 +212,6 @@ fn add_carry_over_negative() {
 }
 
 #[test]
-#[ignore]
 fn sub_carry_over_negative() {
     assert_eq!(decimal("-1.99") - decimal("0.01"), decimal("-2.0"))
 }
@@ -225,7 +222,6 @@ fn add_carry_over_negative_with_fractional() {
 }
 
 #[test]
-#[ignore]
 fn sub_carry_over_negative_with_fractional() {
     assert_eq!(decimal("-1.99") - decimal("0.02"), decimal("-2.01"))
 }
@@ -252,7 +248,6 @@ fn add_borrow() {
 }
 
 #[test]
-#[ignore]
 fn sub_borrow() {
     assert_eq!(decimal("0.01") - decimal("0.0001"), decimal("0.0099"))
 }
@@ -263,7 +258,6 @@ fn add_borrow_integral() {
 }
 
 #[test]
-#[ignore]
 fn sub_borrow_integral() {
     assert_eq!(decimal("1.0") - decimal("0.01"), decimal("0.99"))
 }
@@ -274,7 +268,6 @@ fn add_borrow_integral_zeroes() {
 }
 
 #[test]
-#[ignore]
 fn sub_borrow_integral_zeroes() {
     assert_eq!(decimal("1.0") - decimal("0.99"), decimal("0.01"))
 }
@@ -291,7 +284,6 @@ fn add_into_fewer_digits() {
 
 // misc tests of arithmetic properties
 #[test]
-#[ignore]
 fn sub_into_fewer_digits() {
     assert_eq!(decimal("0.011") - decimal("0.001"), decimal("0.01"))
 }
@@ -302,7 +294,6 @@ fn add_away_decimal() {
 }
 
 #[test]
-#[ignore]
 fn sub_away_decimal() {
     assert_eq!(decimal("1.1") - decimal("0.1"), decimal("1.0"))
 }
