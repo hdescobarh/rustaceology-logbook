@@ -111,6 +111,21 @@ impl Decimal {
         (result % 10, result / 10)
     }
 
+    fn sign_agnostic_add(&self, rhs: &Self) -> (Vec<u8>, bool) {
+        let exact_size_iter = self.pairwise(rhs);
+        let mut result = Vec::with_capacity(exact_size_iter.len() + 1);
+        let mut carry = 0;
+        for (a, b) in exact_size_iter {
+            let raw = a + b + carry;
+            result.push(raw % 10);
+            carry = raw / 10;
+        }
+        if carry != 0 {
+            result.push(1)
+        }
+        (result, self.non_negative)
+    }
+
     // This is an attempt of implementing a subtraction that does not rely
     // in the Ordering trait. Returns a value and non_negative  bare fields result
     fn sign_agnostic_sub(&self, rhs: &Self) -> (Vec<u8>, bool) {
