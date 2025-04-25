@@ -14,6 +14,16 @@ pub struct Decimal {
 }
 
 impl Decimal {
+    pub fn new(non_negative: bool, value: Vec<u8>, point_place: usize) -> Self {
+        let mut raw_decimal = Self {
+            non_negative,
+            point_place,
+            value,
+        };
+        raw_decimal.normalize();
+        raw_decimal
+    }
+
     pub fn try_from(input: &str) -> Option<Decimal> {
         let mut value: Vec<u8> = Vec::with_capacity(input.len());
         let mut point_place = 0;
