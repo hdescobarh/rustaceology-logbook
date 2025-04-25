@@ -200,7 +200,26 @@ impl Mul for Decimal {
     type Output = Decimal;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        todo!()
+        let mut value = vec![0; self.value.len() + rhs.value.len()];
+        for i in 0..self.value.len() {
+            for j in 0..rhs.value.len() {
+                value[i + j] = self.value[i] * rhs.value[j];
+            }
+        }
+        let mut carry = 0;
+        for digit in value.iter_mut() {
+            let raw = *digit + carry;
+            carry = raw / 10;
+            *digit = raw % 10;
+        }
+
+        let mut non_normalized_decimal = Self {
+            non_negative: self.non_negative == rhs.non_negative,
+            point_place: self.point_place + rhs.point_place,
+            value,
+        };
+        non_normalized_decimal.normalize();
+        non_normalized_decimal
     }
 }
 
