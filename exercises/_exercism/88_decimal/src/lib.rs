@@ -180,7 +180,19 @@ impl Sub for Decimal {
     type Output = Decimal;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        todo!()
+        let (value, non_negative) = match (self.non_negative, rhs.non_negative) {
+            (true, true) => self.sign_agnostic_sub(&rhs),
+            (false, false) => rhs.sign_agnostic_sub(&self),
+            (true, false) => rhs.sign_agnostic_add(&self),
+            (false, true) => self.sign_agnostic_add(&rhs),
+        };
+        let mut decimal = Self {
+            non_negative,
+            point_place: self.point_place.max(rhs.point_place),
+            value,
+        };
+        decimal.normalize();
+        decimal
     }
 }
 
