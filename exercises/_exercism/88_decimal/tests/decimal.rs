@@ -48,7 +48,6 @@ fn lt() {
 }
 
 #[test]
-#[ignore]
 fn add() {
     assert_eq!(decimal("0.1") + decimal("0.2"), decimal("0.3"));
     assert_eq!(decimal(BIGS[0]) + decimal(BIGS[1]), decimal(BIGS[2]));
@@ -72,7 +71,6 @@ fn mul() {
 
 // test identities
 #[test]
-#[ignore]
 fn add_id() {
     assert_eq!(decimal("1.0") + decimal("0.0"), decimal("1.0"));
     assert_eq!(decimal("0.1") + decimal("0.0"), decimal("0.1"));
@@ -121,7 +119,6 @@ fn unequal_number_of_decimal_places() {
 
 // tests of arbitrary precision behavior
 #[test]
-#[ignore]
 fn add_uneven_position() {
     assert_eq!(decimal("0.1") + decimal("0.02"), decimal("0.12"));
 }
@@ -134,7 +131,6 @@ fn eq_vary_sig_digits() {
 }
 
 #[test]
-#[ignore]
 fn add_vary_precision() {
     assert_eq!(
         decimal("100000000000000000000000000000000000000000000")
@@ -227,7 +223,6 @@ fn carry_into_fractional_with_digits_to_right() {
 }
 
 #[test]
-#[ignore]
 fn add_carry_over_negative() {
     assert_eq!(decimal("-1.99") + decimal("-0.01"), decimal("-2.0"))
 }
@@ -239,7 +234,6 @@ fn sub_carry_over_negative() {
 }
 
 #[test]
-#[ignore]
 fn add_carry_over_negative_with_fractional() {
     assert_eq!(decimal("-1.99") + decimal("-0.02"), decimal("-2.01"))
 }
@@ -270,7 +264,6 @@ fn carry_from_rightmost_into_integer() {
 
 // test arithmetic borrow rules
 #[test]
-#[ignore]
 fn add_borrow() {
     assert_eq!(decimal("0.01") + decimal("-0.0001"), decimal("0.0099"))
 }
@@ -282,7 +275,6 @@ fn sub_borrow() {
 }
 
 #[test]
-#[ignore]
 fn add_borrow_integral() {
     assert_eq!(decimal("1.0") + decimal("-0.01"), decimal("0.99"))
 }
@@ -294,7 +286,6 @@ fn sub_borrow_integral() {
 }
 
 #[test]
-#[ignore]
 fn add_borrow_integral_zeroes() {
     assert_eq!(decimal("1.0") + decimal("-0.99"), decimal("0.01"))
 }
@@ -312,7 +303,6 @@ fn borrow_from_negative() {
 }
 
 #[test]
-#[ignore]
 fn add_into_fewer_digits() {
     assert_eq!(decimal("0.011") + decimal("-0.001"), decimal("0.01"))
 }
@@ -325,7 +315,6 @@ fn sub_into_fewer_digits() {
 }
 
 #[test]
-#[ignore]
 fn add_away_decimal() {
     assert_eq!(decimal("1.1") + decimal("-0.1"), decimal("1.0"))
 }
