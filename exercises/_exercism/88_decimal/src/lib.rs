@@ -13,7 +13,9 @@ pub struct Decimal {
     value: Vec<u8>,
 }
 
+/// A Decimal is normalized when does not contains non-significant leading and trailing zeros.
 impl Decimal {
+    /// Returns a normalized Decimal from bare values.
     pub fn new(non_negative: bool, value: Vec<u8>, point_place: usize) -> Self {
         let mut raw_decimal = Self {
             non_negative,
@@ -23,7 +25,7 @@ impl Decimal {
         raw_decimal.normalize();
         raw_decimal
     }
-
+    /// Returns a normalized Decimal from a &str.
     pub fn try_from(input: &str) -> Option<Decimal> {
         let mut value: Vec<u8> = Vec::with_capacity(input.len());
         let mut point_place = 0;
@@ -87,7 +89,8 @@ impl Decimal {
             position: 0,
         }
     }
-
+    /// Returns an Iterator with values aligned decimal place. For example,
+    /// adding and comparing values require place aware operations.
     fn pairwise<'a>(
         &'a self,
         rhs: &'a Self,
@@ -119,6 +122,7 @@ impl Decimal {
         (result % 10, result / 10)
     }
 
+    /// Returns bare a + b and sign of a. Allows precise manipulation of the sign.
     fn sign_agnostic_add(&self, rhs: &Self) -> (Vec<u8>, bool) {
         let exact_size_iter = self.pairwise(rhs);
         let mut result = Vec::with_capacity(exact_size_iter.len() + 1);
@@ -134,8 +138,8 @@ impl Decimal {
         (result, self.non_negative)
     }
 
-    // This is an attempt of implementing a subtraction that does not rely
-    // in the Ordering trait. Returns a value and non_negative  bare fields result
+    /// Returns bare a - b and a sign determined by their ordering. Allows precise manipulation of the sign.
+    // This is an attempt of implementing a subtraction that does not rely in the Ordering trait.
     fn sign_agnostic_sub(&self, rhs: &Self) -> (Vec<u8>, bool) {
         let mut borrow = 0;
         let exact_size_iter = self.pairwise(rhs);
@@ -216,6 +220,7 @@ impl Mul for Decimal {
     }
 }
 
+/// Iterator to add leading and trailing zeros without overload.
 struct PaddedDecimal<'a> {
     trailing: usize,
     decimal_value: &'a [u8],
