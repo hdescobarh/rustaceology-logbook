@@ -187,7 +187,7 @@ impl Sub for Decimal {
         let (value, non_negative) = match (self.non_negative, rhs.non_negative) {
             (true, true) => self.sign_agnostic_sub(&rhs),
             (false, false) => rhs.sign_agnostic_sub(&self),
-            (true, false) => rhs.sign_agnostic_add(&self),
+            (true, false) => self.sign_agnostic_add(&rhs),
             (false, true) => self.sign_agnostic_add(&rhs),
         };
         let mut decimal = Self {
