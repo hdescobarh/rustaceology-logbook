@@ -113,15 +113,6 @@ impl Decimal {
             .zip(rhs.iter_with_padding(rhs_trailing, rhs_leading))
     }
 
-    /// Returns the digit and carry after op
-    fn apply<F>(a: u8, b: u8, op: F) -> (u8, u8)
-    where
-        F: Fn(u8, u8) -> u8,
-    {
-        let result = (op)(a, b);
-        (result % 10, result / 10)
-    }
-
     /// Returns bare a + b and sign of a. Allows precise manipulation of the sign.
     fn sign_agnostic_add(&self, rhs: &Self) -> (Vec<u8>, bool) {
         let exact_size_iter = self.pairwise(rhs);
