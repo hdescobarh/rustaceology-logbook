@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 /// Given a list of poker hands, return a list of those hands which win.
 ///
@@ -28,18 +28,18 @@ struct Hand<'a> {
 
 impl<'a> Hand<'a> {
     fn try_new(input: &'a str) -> Option<Self> {
-        let mut rank_count: HashMap<u8, u8> = HashMap::new();
-        let mut suits_observed: HashSet<char> = HashSet::new();
+        let mut rank_count: BTreeMap<u8, u8> = BTreeMap::new();
+        let mut suit_groups: HashMap<char, Vec<u8>> = HashMap::new();
         for (index, card_str) in input.split_ascii_whitespace().enumerate() {
             if index > 4 {
                 return None;
             };
             let (rank, suit) = Self::validate_card(card_str)?;
             *rank_count.entry(rank).or_insert(0) += 1;
-            suits_observed.insert(suit);
+            suit_groups.entry(suit).or_default().push(rank);
         }
 
-        let category = Self::categorize(&rank_count, &suits_observed);
+        let category = Self::categorize(&rank_count, &suit_groups);
         Some(Self {
             category,
             reference: input,
@@ -67,7 +67,10 @@ impl<'a> Hand<'a> {
         Some((rank, suit))
     }
 
-    fn categorize(rank_count: &HashMap<u8, u8>, suits_observed: &HashSet<char>) -> HandCategory {
+    fn categorize(
+        rank_count: &BTreeMap<u8, u8>,
+        suits_observed: &HashMap<char, Vec<u8>>,
+    ) -> HandCategory {
         match (rank_count.len(), suits_observed.len()) {
             (5, 1) => todo!(),          // 1 Straight flush or 4 flush
             (2, s) if s > 2 => todo!(), // 2 Four of a kind or 3 Full house
