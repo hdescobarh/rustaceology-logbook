@@ -3,5 +3,6 @@ _euclid
 ascii
 clippy
 isqrt
+peekable
 repr
 vadimcn
