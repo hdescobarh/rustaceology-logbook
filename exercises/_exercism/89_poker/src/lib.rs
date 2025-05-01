@@ -1,4 +1,8 @@
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::{
+    cmp::Ordering,
+    collections::{BTreeMap, HashMap, HashSet},
+    io::repeat,
+};
 
 /// Given a list of poker hands, return a list of those hands which win.
 ///
@@ -76,11 +80,11 @@ impl<'a> Hand<'a> {
                 (hand_ranking, true) => HandCategory::StraightFlush,
                 (hand_ranking, false) => HandCategory::Flush,
             }, // 1 Straight flush or 4 flush
-            (2, s) if s > 2 => todo!(), // 2 Four of a kind or 3 Full house
-            (5, 4) => match Self::sort_sequential(rank_count) {
+            (5, _) => match Self::sort_sequential(rank_count) {
                 (hand_ranking, true) => HandCategory::Straight,
                 (hand_ranking, false) => HandCategory::HighCard,
             }, // 5 Straight
+            (2, s) if s > 2 => todo!(), // 2 Four of a kind or 3 Full house
             (3, s) if s > 1 => todo!(), // 6 Three of a kind or 7 Two pair
             (4, s) if s > 1 => todo!(), // 8 one pair
             _ => HandCategory::HighCard,
@@ -103,5 +107,17 @@ impl<'a> Hand<'a> {
             current_highest = *rank;
         }
         (ranks, true)
+    }
+
+    /// Returns the hand sorted by deceasing, first rank, then number of repeats,
+    /// and the max number of repeats
+    fn sort_by_repeats(rank_count: BTreeMap<u8, usize>) -> (Vec<u8>, usize) {
+        let mut hand_ranking = Vec::with_capacity(rank_count.len());
+        for rank in rank_count.keys() {
+            hand_ranking.push(*rank);
+        }
+        hand_ranking.sort_by_key(|rank| std::cmp::Reverse(rank_count[rank]));
+        let max_repeats = rank_count[&hand_ranking[0]];
+        (hand_ranking, max_repeats)
     }
 }
