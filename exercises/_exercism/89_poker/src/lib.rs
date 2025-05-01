@@ -69,15 +69,39 @@ impl<'a> Hand<'a> {
 
     fn categorize(
         rank_count: &BTreeMap<u8, u8>,
-        suits_observed: &HashMap<char, Vec<u8>>,
+        suits_groups: &HashMap<char, Vec<u8>>,
     ) -> HandCategory {
-        match (rank_count.len(), suits_observed.len()) {
-            (5, 1) => todo!(),          // 1 Straight flush or 4 flush
+        match (rank_count.len(), suits_groups.len()) {
+            (5, 1) => match Self::sort_sequential(rank_count) {
+                (hand_ranking, true) => HandCategory::StraightFlush,
+                (hand_ranking, false) => HandCategory::Flush,
+            }, // 1 Straight flush or 4 flush
             (2, s) if s > 2 => todo!(), // 2 Four of a kind or 3 Full house
-            (5, 4) => todo!(),          // 5 Straight
+            (5, 4) => match Self::sort_sequential(rank_count) {
+                (hand_ranking, true) => HandCategory::Straight,
+                (hand_ranking, false) => HandCategory::HighCard,
+            }, // 5 Straight
             (3, s) if s > 1 => todo!(), // 6 Three of a kind or 7 Two pair
             (4, s) if s > 1 => todo!(), // 8 one pair
             _ => HandCategory::HighCard,
         }
+    }
+
+    /// Returns the and sorted and true if it in sequential order
+    fn sort_sequential(rank_count: &BTreeMap<u8, u8>) -> (Vec<u8>, bool) {
+        let ranks: Vec<u8> = rank_count.keys().rev().copied().collect();
+        if ranks == [14, 13, 12, 11, 10] {
+            return (vec![14, 13, 12, 11, 10], true);
+        } else if ranks == [14, 5, 4, 3, 2] {
+            return (vec![5, 4, 3, 2, 1], true);
+        }
+        let mut current_highest = ranks[0];
+        for rank in ranks[1..].iter() {
+            if rank + 1 != current_highest {
+                return (ranks, false);
+            }
+            current_highest = *rank;
+        }
+        (ranks, true)
     }
 }
