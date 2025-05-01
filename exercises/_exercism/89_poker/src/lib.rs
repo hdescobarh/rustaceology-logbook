@@ -32,7 +32,7 @@ struct Hand<'a> {
 
 impl<'a> Hand<'a> {
     fn try_new(input: &'a str) -> Option<Self> {
-        let mut rank_count: BTreeMap<u8, u8> = BTreeMap::new();
+        let mut rank_count: BTreeMap<u8, usize> = BTreeMap::new();
         let mut suit_groups: HashMap<char, Vec<u8>> = HashMap::new();
         let mut iter = input.split_ascii_whitespace().enumerate().peekable();
         while let Some((index, card_str)) = iter.next() {
@@ -43,7 +43,7 @@ impl<'a> Hand<'a> {
             *rank_count.entry(rank).or_insert(0) += 1;
             suit_groups.entry(suit).or_default().push(rank);
         }
-        let category = Self::categorize(&rank_count, &suit_groups);
+        let category = Self::categorize(rank_count, suit_groups);
         Some(Self {
             category,
             reference: input,
@@ -72,8 +72,8 @@ impl<'a> Hand<'a> {
     }
 
     fn categorize(
-        rank_count: &BTreeMap<u8, u8>,
-        suits_groups: &HashMap<char, Vec<u8>>,
+        rank_count: BTreeMap<u8, usize>,
+        suits_groups: HashMap<char, Vec<u8>>,
     ) -> HandCategory {
         match (rank_count.len(), suits_groups.len()) {
             (5, 1) => match Self::sort_sequential(rank_count) {
@@ -92,7 +92,7 @@ impl<'a> Hand<'a> {
     }
 
     /// Returns the hand sorted and true if it in sequential order
-    fn sort_sequential(rank_count: &BTreeMap<u8, u8>) -> (Vec<u8>, bool) {
+    fn sort_sequential(rank_count: BTreeMap<u8, usize>) -> (Vec<u8>, bool) {
         let ranks: Vec<u8> = rank_count.keys().rev().copied().collect();
         if ranks == [14, 13, 12, 11, 10] {
             return (vec![14, 13, 12, 11, 10], true);
