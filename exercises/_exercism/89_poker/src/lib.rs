@@ -30,15 +30,15 @@ impl<'a> Hand<'a> {
     fn try_new(input: &'a str) -> Option<Self> {
         let mut rank_count: BTreeMap<u8, u8> = BTreeMap::new();
         let mut suit_groups: HashMap<char, Vec<u8>> = HashMap::new();
-        for (index, card_str) in input.split_ascii_whitespace().enumerate() {
-            if index > 4 {
+        let mut iter = input.split_ascii_whitespace().enumerate().peekable();
+        while let Some((index, card_str)) = iter.next() {
+            if iter.peek().is_none() && index != 4 {
                 return None;
-            };
+            }
             let (rank, suit) = Self::validate_card(card_str)?;
             *rank_count.entry(rank).or_insert(0) += 1;
             suit_groups.entry(suit).or_default().push(rank);
         }
-
         let category = Self::categorize(&rank_count, &suit_groups);
         Some(Self {
             category,
@@ -87,7 +87,7 @@ impl<'a> Hand<'a> {
         }
     }
 
-    /// Returns the and sorted and true if it in sequential order
+    /// Returns the hand sorted and true if it in sequential order
     fn sort_sequential(rank_count: &BTreeMap<u8, u8>) -> (Vec<u8>, bool) {
         let ranks: Vec<u8> = rank_count.keys().rev().copied().collect();
         if ranks == [14, 13, 12, 11, 10] {
