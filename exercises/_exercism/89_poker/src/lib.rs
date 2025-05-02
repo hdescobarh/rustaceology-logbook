@@ -12,7 +12,7 @@ pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
     todo!("Out of {hands:?}, which hand wins?")
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum HandCategory {
     HighCard,
     OnePair,
@@ -131,5 +131,28 @@ impl<'a> Hand<'a> {
         hand_ranking.sort_by_key(|rank| std::cmp::Reverse(rank_count[rank]));
         let max_repeats = rank_count[&hand_ranking[0]];
         (hand_ranking, max_repeats)
+    }
+}
+
+impl PartialEq for Hand<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.category == other.category && self.hand_ranking == other.hand_ranking
+    }
+}
+
+impl Eq for Hand<'_> {}
+
+impl Ord for Hand<'_> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.category.cmp(&other.category) {
+            Ordering::Equal => self.hand_ranking.cmp(&other.hand_ranking),
+            ordering => ordering,
+        }
+    }
+}
+
+impl PartialOrd for Hand<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
