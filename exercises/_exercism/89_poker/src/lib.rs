@@ -132,7 +132,7 @@ impl<'a> Hand<'a> {
     /// and the max number of repeats
     fn sort_by_repeats(rank_count: &BTreeMap<u8, usize>) -> (Vec<u8>, usize) {
         let mut hand_ranking = Vec::with_capacity(rank_count.len());
-        for rank in rank_count.keys() {
+        for rank in rank_count.keys().rev() {
             hand_ranking.push(*rank);
         }
         hand_ranking.sort_by_key(|rank| std::cmp::Reverse(rank_count[rank]));
