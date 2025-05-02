@@ -1,15 +1,21 @@
 use std::{
     cmp::Ordering,
-    collections::{BTreeMap, HashMap, HashSet},
-    io::repeat,
+    collections::{BTreeMap, HashSet},
 };
 
-/// Given a list of poker hands, return a list of those hands which win.
-///
-/// Note the type signature: this function should return _the same_ reference to
-/// the winning hand(s) as were passed in, not reconstructed strings which happen to be equal.
-pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
-    todo!("Out of {hands:?}, which hand wins?")
+pub fn winning_hands<'a>(input: &[&'a str]) -> Vec<&'a str> {
+    let mut result = Vec::new();
+    let mut hands = Vec::with_capacity(input.len());
+    for single_hand in input {
+        hands.push(Hand::try_new(single_hand).unwrap());
+    }
+    let max_hand = hands.iter().max().unwrap();
+    for hand in hands.iter() {
+        if hand == max_hand {
+            result.push(hand.reference);
+        }
+    }
+    result
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
