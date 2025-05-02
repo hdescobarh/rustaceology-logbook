@@ -31,6 +31,7 @@ enum HandCategory {
     StraightFlush,
 }
 
+#[derive(Debug)]
 struct Hand<'a> {
     category: HandCategory,
     hand_ranking: Vec<u8>,
@@ -62,7 +63,7 @@ impl<'a> Hand<'a> {
         let mut iter = card.bytes().peekable();
         let rank = match iter.next() {
             Some(v) if (b'2'..=b'9').contains(&v) => v - b'0',
-            Some(b'1') if iter.peek().is_some_and(|v| *v == 0) => {
+            Some(b'1') if iter.peek().is_some_and(|v| *v == b'0') => {
                 iter.next();
                 10
             }
