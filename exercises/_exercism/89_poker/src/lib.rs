@@ -34,7 +34,7 @@ struct Hand<'a> {
 impl<'a> Hand<'a> {
     fn try_new(input: &'a str) -> Option<Self> {
         let mut rank_count: BTreeMap<u8, usize> = BTreeMap::new();
-        let mut suit_groups: HashMap<char, Vec<u8>> = HashMap::new();
+        let mut suits: HashSet<char> = HashSet::new();
         let mut iter = input.split_ascii_whitespace().enumerate().peekable();
         while let Some((index, card_str)) = iter.next() {
             if iter.peek().is_none() && index != 4 {
@@ -42,9 +42,9 @@ impl<'a> Hand<'a> {
             }
             let (rank, suit) = Self::validate_card(card_str)?;
             *rank_count.entry(rank).or_insert(0) += 1;
-            suit_groups.entry(suit).or_default().push(rank);
+            suits.insert(suit);
         }
-        let (category, hand_ranking) = Self::categorize(rank_count, suit_groups);
+        let (category, hand_ranking) = Self::categorize(rank_count, suits);
         Some(Self {
             category,
             hand_ranking,
@@ -75,11 +75,11 @@ impl<'a> Hand<'a> {
 
     fn categorize(
         rank_count: BTreeMap<u8, usize>,
-        suits_groups: HashMap<char, Vec<u8>>,
+        suits: HashSet<char>,
     ) -> (HandCategory, Vec<u8>) {
         if rank_count.len() == 5 {
             let (hand_ranking, is_sequential) = Self::sort_sequential(&rank_count);
-            let category = match (suits_groups.len(), is_sequential) {
+            let category = match (suits.len(), is_sequential) {
                 (1, true) => HandCategory::StraightFlush,
                 (1, false) => HandCategory::Flush,
                 (_, true) => HandCategory::Straight,
