@@ -51,9 +51,11 @@
     ],
     // words - list of words to be always considered correct
     "words": [
-        "euclídeo",
         "euclídea",
+        "euclídeo",
+        "injective",
         "iterador",
+        "Karp",
         "Mouredev",
         "tetrominoes",
         "tripleta",
