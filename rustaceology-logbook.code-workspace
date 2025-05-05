@@ -40,7 +40,7 @@
 			"**/lib/rustlib/src/rust/library/**/*.rs": true,
 		},
 		"rust-analyzer.linkedProjects": [
-			"exercises/_exercism/89_poker/Cargo.toml",
+			"exercises/_exercism/90_dominoes/Cargo.toml",
 		],
 	},
 	"extensions": {
