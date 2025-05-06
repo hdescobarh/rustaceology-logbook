@@ -63,6 +63,9 @@ pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
 }
 
 fn edge_weight(node1: usize, node2: usize, input: &[(u8, u8)]) -> f64 {
+    if node1 == node2 {
+        return f64::INFINITY;
+    }
     let ends = [input[node1].0, input[node1].1];
     if ends.contains(&input[node2].0) || ends.contains(&input[node2].1) {
         return 1.0;
