@@ -24,25 +24,32 @@ pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
     for (subset_k, elements) in power_set.iter_non_singletons() {
         for &node_i in elements {
             let mut min_cost = f64::INFINITY;
+            let mut precursor = 0;
             let subset_k_excluding_node_i = subset_k & !(1 << node_i);
             for &node_j in &power_set.subset_elements[&subset_k_excluding_node_i] {
                 let current_cost = cost_and_precursors[&(node_j, subset_k_excluding_node_i)].0
                     + edge_weight(node_i, node_j, input);
                 if min_cost > current_cost {
                     min_cost = current_cost;
+                    precursor = node_j;
                 }
             }
-            cost_and_precursors.insert((node_i, subset_k), (min_cost, (0, 0)));
+            cost_and_precursors.insert(
+                (node_i, subset_k),
+                (min_cost, (precursor, subset_k_excluding_node_i)),
+            );
         }
     }
 
     let mut min_cost = f64::INFINITY;
+    let mut precursor = 0;
     let subset_k = *power_set.size_to_subsets.last().unwrap().last().unwrap();
     for &node_i in &power_set.subset_elements[&subset_k] {
         let current_cost =
             cost_and_precursors[&(node_i, subset_k)].0 + edge_weight(0, node_i, input);
         if min_cost > current_cost {
             min_cost = current_cost;
+            precursor = node_i;
         }
     }
 
