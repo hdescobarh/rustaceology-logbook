@@ -16,7 +16,6 @@ pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
     let partition = &input[1..];
     let power_set = PowerSet::from_cardinality(partition.len());
     let mut cost: HashMap<(usize, usize), f64> = HashMap::with_capacity(2 * (1 << partition.len()));
-
     for (subset_k, node_i) in power_set.iter_singletons() {
         cost.insert((node_i, subset_k), edge_weight(0, node_i, input));
     }
@@ -36,7 +35,7 @@ pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
     let mut cycle_cost = f64::INFINITY;
     let subset_k = *power_set.size_to_subsets.last().unwrap().last().unwrap();
     for &node_i in &power_set.subset_elements[&subset_k] {
-        cycle_cost = cycle_cost.min(cost[&(node_i, subset_k)])
+        cycle_cost = cycle_cost.min(cost[&(node_i, subset_k)] + edge_weight(0, node_i, input))
     }
 
     if cycle_cost.is_infinite() {
