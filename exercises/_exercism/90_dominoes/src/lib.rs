@@ -2,9 +2,7 @@ use std::collections::HashMap;
 
 /// The problem can be modeled as finding and Eulerian cycle where each stone is an edge
 pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
-    todo!(
-        "From the given input '{input:?}' construct a proper dominoes chain or return None if it is not possible."
-    );
+    PseudoMultiGraph::from_edges(input).find_eulerian_cycle()
 }
 
 /// A symmetric graph-like structure which allows self-edges and multiple edges between a pair of nodes
@@ -47,5 +45,37 @@ impl PseudoMultiGraph {
         self.adjacency
             .iter()
             .map(|(node, map)| (node, map.values().sum()))
+    }
+
+    fn find_eulerian_cycle(&mut self) -> Option<Vec<(u8, u8)>> {
+        // check all nodes have even degree
+        if self.iter_degree().any(|(_node, degree)| degree % 2 != 0) {
+            return None;
+        }
+        // Explore nodes in a deep first search-like approach
+        let mut parent = match self.adjacency.keys().next() {
+            Some(node) => *node,
+            None => return Some(vec![]),
+        };
+        let mut node_path: Vec<u8> = vec![];
+        while let Some(child) = self.get_adjacent(&parent) {
+            self.remove_edge(parent, child);
+            node_path.push(parent);
+            parent = child;
+        }
+        node_path.push(parent);
+        // check all the edges where discovered
+        if self.iter_degree().any(|(_node, degree)| degree != 0) {
+            return None;
+        }
+        // get edge_path from node_path
+        let mut edge_path = Vec::with_capacity(node_path.len() - 1);
+        for window in node_path.windows(2) {
+            match window {
+                [u, v] => edge_path.push((*u, *v)),
+                _ => return None,
+            }
+        }
+        Some(edge_path)
     }
 }
