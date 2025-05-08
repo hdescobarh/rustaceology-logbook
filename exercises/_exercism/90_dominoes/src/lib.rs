@@ -32,4 +32,20 @@ impl PseudoMultiGraph {
             }
         }
     }
+
+    /// given a node_i, gets an adjacent node_j, given priority to node_i = node_j
+    fn get_adjacent(&self, node: &u8) -> Option<u8> {
+        let map = &self.adjacency[node];
+        if map.get(node).is_some() {
+            return Some(*node);
+        }
+        map.keys().next().copied()
+    }
+
+    /// returns an iterator over the nodes degree
+    fn iter_degree(&self) -> impl Iterator<Item = (&u8, usize)> {
+        self.adjacency
+            .iter()
+            .map(|(node, map)| (node, map.values().sum()))
+    }
 }
