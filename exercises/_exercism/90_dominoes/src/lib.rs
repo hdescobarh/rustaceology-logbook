@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// The problem can be modeled as finding and Eulerian cycle where each stone is an edge
 pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
@@ -64,10 +64,12 @@ impl PseudoMultiGraph {
             node_cycles.push(self.deep_first_search(parent))
         }
         let mut edge_cycle = vec![];
-        for window in Self::try_connect_cycles(node_cycles)?.windows(2) {
-            match window {
-                [u, v] => edge_cycle.push((*u, *v)),
-                _ => return None,
+        let mut node_cycle_iter = Self::try_merge_cycles(&node_cycles)?;
+
+        if let Some(mut start) = node_cycle_iter.next() {
+            for end in node_cycle_iter {
+                edge_cycle.push((*start, *end));
+                start = end;
             }
         }
         Some(edge_cycle)
@@ -84,7 +86,43 @@ impl PseudoMultiGraph {
         node_path
     }
 
-    fn try_connect_cycles(mut cycles: Vec<Vec<u8>>) -> Option<Vec<u8>> {
-        todo!()
+    fn try_merge_cycles(paths: &[Vec<u8>]) -> Option<impl Iterator<Item = &u8>> {
+        let mut result: Vec<&[u8]> = paths
+            .first()
+            .map(|v| vec![v.as_slice()])
+            .unwrap_or_default();
+        let mut pending_pos: HashSet<usize> = (1..paths.len()).collect();
+
+        while !pending_pos.is_empty() {
+            let mut complete_iter_without_share = true;
+            for (insert_pos, insert) in pending_pos.iter().map(|&i| (i, &paths[i])) {
+                let shared_node = result.iter().enumerate().find_map(|(outer_pos, sub_path)| {
+                    sub_path
+                        .iter()
+                        .position(|node| *node == insert[0])
+                        .map(|inner_pos| (outer_pos, inner_pos))
+                });
+
+                if shared_node.is_none() {
+                    continue;
+                }
+
+                let (outer_pos, inner_pos) = shared_node.unwrap();
+                result[outer_pos] = &result[outer_pos][inner_pos..];
+                result.splice(
+                    outer_pos..outer_pos,
+                    [&result[outer_pos][..inner_pos], insert],
+                );
+
+                complete_iter_without_share = false;
+                pending_pos.remove(&insert_pos);
+                break;
+            }
+
+            if complete_iter_without_share {
+                return None;
+            }
+        }
+        Some(result.into_iter().flat_map(|inner| inner.iter()))
     }
 }
