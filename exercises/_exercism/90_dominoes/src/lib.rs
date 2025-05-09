@@ -9,6 +9,7 @@ pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
 struct PseudoMultiGraph {
     /// a map node_i ↦ (node_j, multiplicity_j)
     adjacency: HashMap<u8, HashMap<u8, usize>>,
+    edges_size: usize,
 }
 
 impl PseudoMultiGraph {
@@ -17,7 +18,10 @@ impl PseudoMultiGraph {
         for (u, v) in input.iter().flat_map(|(u, v)| [(u, v), (v, u)]) {
             *adjacency.entry(*u).or_default().entry(*v).or_default() += 1
         }
-        Self { adjacency }
+        Self {
+            adjacency,
+            edges_size: input.len(),
+        }
     }
 
     fn remove_edge(&mut self, node1: u8, node2: u8) {
@@ -29,6 +33,7 @@ impl PseudoMultiGraph {
                 *multiset.get_mut(&v).unwrap() -= 1;
             }
         }
+        self.edges_size -= 1;
     }
 
     /// given a node_i, gets an adjacent node_j, given priority to node_i = node_j
@@ -48,15 +53,29 @@ impl PseudoMultiGraph {
     }
 
     fn find_eulerian_cycle(&mut self) -> Option<Vec<(u8, u8)>> {
-        // check all nodes have even degree
         if self.iter_degree().any(|(_node, degree)| degree % 2 != 0) {
             return None;
         }
-        // Explore nodes in a deep first search-like approach
-        let mut parent = match self.adjacency.keys().next() {
-            Some(node) => *node,
-            None => return Some(vec![]),
-        };
+        let mut node_cycles: Vec<Vec<u8>> = vec![];
+
+        while self.edges_size > 0 {
+            let parent = match self.iter_degree().find(|(_node, degree)| *degree != 0) {
+                Some((node, _degree)) => *node,
+                None => return Some(vec![]),
+            };
+            node_cycles.push(self.deep_first_search(parent))
+        }
+        let mut edge_cycle = vec![];
+        for window in Self::try_connect_cycles(node_cycles)?.windows(2) {
+            match window {
+                [u, v] => edge_cycle.push((*u, *v)),
+                _ => return None,
+            }
+        }
+        Some(edge_cycle)
+    }
+
+    fn deep_first_search(&mut self, mut parent: u8) -> Vec<u8> {
         let mut node_path: Vec<u8> = vec![];
         while let Some(child) = self.get_adjacent(&parent) {
             self.remove_edge(parent, child);
@@ -64,18 +83,10 @@ impl PseudoMultiGraph {
             parent = child;
         }
         node_path.push(parent);
-        // check all the edges where discovered
-        if self.iter_degree().any(|(_node, degree)| degree != 0) {
-            return None;
-        }
-        // get edge_path from node_path
-        let mut edge_path = Vec::with_capacity(node_path.len() - 1);
-        for window in node_path.windows(2) {
-            match window {
-                [u, v] => edge_path.push((*u, *v)),
-                _ => return None,
-            }
-        }
-        Some(edge_path)
+        node_path
+    }
+
+    fn try_connect_cycles(mut cycles: Vec<Vec<u8>>) -> Option<Vec<u8>> {
+        todo!()
     }
 }
