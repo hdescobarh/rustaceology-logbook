@@ -9,17 +9,21 @@ pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
 struct PseudoMultiGraph {
     /// a map node_i ↦ (node_j, multiplicity_j)
     adjacency: HashMap<u8, HashMap<u8, usize>>,
+    node_degree: HashMap<u8, usize>,
     edges_size: usize,
 }
 
 impl PseudoMultiGraph {
     fn from_edges(input: &[(u8, u8)]) -> Self {
         let mut adjacency: HashMap<u8, HashMap<u8, usize>> = HashMap::new();
+        let mut node_degree = HashMap::new();
         for (u, v) in input.iter().flat_map(|(u, v)| [(u, v), (v, u)]) {
-            *adjacency.entry(*u).or_default().entry(*v).or_default() += 1
+            *adjacency.entry(*u).or_default().entry(*v).or_default() += 1;
+            *node_degree.entry(*u).or_default() += 1;
         }
         Self {
             adjacency,
+            node_degree,
             edges_size: input.len(),
         }
     }
@@ -32,6 +36,7 @@ impl PseudoMultiGraph {
             } else {
                 *multiset.get_mut(&v).unwrap() -= 1;
             }
+            *self.node_degree.get_mut(&u).unwrap() -= 1;
         }
         self.edges_size -= 1;
     }
@@ -45,21 +50,14 @@ impl PseudoMultiGraph {
         map.keys().next().copied()
     }
 
-    /// returns an iterator over the nodes degree
-    fn iter_degree(&self) -> impl Iterator<Item = (&u8, usize)> {
-        self.adjacency
-            .iter()
-            .map(|(node, map)| (node, map.values().sum()))
-    }
-
     fn find_eulerian_cycle(&mut self) -> Option<Vec<(u8, u8)>> {
-        if self.iter_degree().any(|(_node, degree)| degree % 2 != 0) {
+        if self.node_degree.values().any(|degree| degree % 2 != 0) {
             return None;
         }
-        let mut node_cycles: Vec<Vec<u8>> = vec![];
 
+        let mut node_cycles: Vec<Vec<u8>> = vec![];
         while self.edges_size > 0 {
-            let parent = match self.iter_degree().find(|(_node, degree)| *degree != 0) {
+            let parent = match self.adjacency.iter().find(|(_node, map)| !map.is_empty()) {
                 Some((node, _degree)) => *node,
                 None => return Some(vec![]),
             };
