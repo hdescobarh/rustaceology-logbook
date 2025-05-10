@@ -9,18 +9,18 @@ pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
 struct PseudoMultiGraph {
     /// a map node_i ↦ (node_j, multiplicity_j) s.t. degree(node_i) > 0
     adjacency: HashMap<u8, HashMap<u8, usize>>,
-    nodes: HashSet<u8>,
+    _nodes: HashSet<u8>,
 }
 
 impl PseudoMultiGraph {
     fn from_edges(input: &[(u8, u8)]) -> Self {
         let mut adjacency: HashMap<u8, HashMap<u8, usize>> = HashMap::new();
-        let mut nodes = HashSet::new();
+        let mut _nodes = HashSet::new();
         for (u, v) in input.iter().flat_map(|(u, v)| [(u, v), (v, u)]) {
             *adjacency.entry(*u).or_default().entry(*v).or_default() += 1;
-            nodes.insert(*u);
+            _nodes.insert(*u);
         }
-        Self { adjacency, nodes }
+        Self { adjacency, _nodes }
     }
 
     fn remove_edge(&mut self, node1: u8, node2: u8) {
@@ -51,22 +51,24 @@ impl PseudoMultiGraph {
         if self
             .adjacency
             .values()
-            .any(|map| map.values().sum() % 2 != 0)
+            .any(|map| map.values().sum::<usize>() % 2 != 0)
         {
             return None;
         }
 
-        let mut node_cycles: Vec<Vec<u8>> = vec![];
+        let mut paths: Vec<Vec<u8>> = match self.adjacency.keys().next() {
+            Some(node) => vec![self.deep_first_search(*node)],
+            None => return Some(vec![]),
+        };
+        let mut join_positions: Vec<(usize, usize)> = vec![];
         while !self.adjacency.is_empty() {
-            let parent = match self.adjacency.iter().find(|(_node, map)| !map.is_empty()) {
-                Some((node, _degree)) => *node,
-                None => return Some(vec![]),
-            };
-            node_cycles.push(self.deep_first_search(parent))
+            // If there are no shared nodes, the graph is not connected, so no Eulerian path exists.
+            let (position, parent) = self.find_shared_node(&paths)?;
+            join_positions.push(position);
+            paths.push(self.deep_first_search(parent));
         }
         let mut edge_cycle = vec![];
-        let mut node_cycle_iter = Self::try_merge_cycles(&node_cycles)?;
-
+        let mut node_cycle_iter = Self::merge_cycles(&paths, &join_positions);
         if let Some(mut start) = node_cycle_iter.next() {
             for end in node_cycle_iter {
                 edge_cycle.push((*start, *end));
@@ -87,43 +89,32 @@ impl PseudoMultiGraph {
         node_path
     }
 
-    fn try_merge_cycles(paths: &[Vec<u8>]) -> Option<impl Iterator<Item = &u8>> {
-        let mut result: Vec<&[u8]> = paths
-            .first()
-            .map(|v| vec![v.as_slice()])
-            .unwrap_or_default();
-        let mut pending_pos: HashSet<usize> = (1..paths.len()).collect();
+    /// Attempts to find a shared node between the given paths and the non-isolated adjacency map.
+    /// Returns `((outer_pos, inner_pos), node)`, such that `paths[outer_pos][inner_pos] == shared_node`.
+    fn find_shared_node(&self, paths: &[Vec<u8>]) -> Option<((usize, usize), u8)> {
+        paths.iter().enumerate().find_map(|(outer_pos, path)| {
+            path.iter().enumerate().find_map(|(inner_pos, node)| {
+                self.adjacency
+                    .get(node)
+                    .map(|map| ((outer_pos, inner_pos), *map.keys().next().unwrap()))
+            })
+        })
+    }
 
-        while !pending_pos.is_empty() {
-            let mut complete_iter_without_share = true;
-            for (insert_pos, insert) in pending_pos.iter().map(|&i| (i, &paths[i])) {
-                let shared_node = result.iter().enumerate().find_map(|(outer_pos, sub_path)| {
-                    sub_path
-                        .iter()
-                        .position(|node| *node == insert[0])
-                        .map(|inner_pos| (outer_pos, inner_pos))
-                });
+    fn merge_cycles<'a>(
+        paths: &'a [Vec<u8>],
+        join_positions: &'a [(usize, usize)],
+    ) -> impl Iterator<Item = &'a u8> {
+        let mut result: Vec<&[u8]> = Vec::with_capacity(paths.len() + join_positions.len());
+        result.push(&paths[0]);
 
-                if shared_node.is_none() {
-                    continue;
-                }
-
-                let (outer_pos, inner_pos) = shared_node.unwrap();
-                result[outer_pos] = &result[outer_pos][inner_pos..];
-                result.splice(
-                    outer_pos..outer_pos,
-                    [&result[outer_pos][..inner_pos], insert],
-                );
-
-                complete_iter_without_share = false;
-                pending_pos.remove(&insert_pos);
-                break;
-            }
-
-            if complete_iter_without_share {
-                return None;
-            }
+        for ((outer_pos, inner_pos), insert) in join_positions.iter().zip(paths[1..].iter()) {
+            result[*outer_pos] = &result[*outer_pos][*inner_pos..];
+            result.splice(
+                outer_pos..outer_pos,
+                [&result[*outer_pos][..*inner_pos], insert],
+            );
         }
-        Some(result.into_iter().flat_map(|inner| inner.iter()))
+        result.into_iter().flat_map(|inner| inner.iter())
     }
 }
