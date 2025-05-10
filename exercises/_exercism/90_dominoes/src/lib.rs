@@ -1,11 +1,11 @@
 use std::collections::{HashMap, HashSet};
 
-/// The problem can be modeled as finding and Eulerian cycle where each stone is an edge
+/// The problem can be modeled as finding an Eulerian cycle, where each stone represents an edge.
 pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
     PseudoMultiGraph::from_edges(input).find_eulerian_cycle()
 }
 
-/// A symmetric graph-like structure which allows self-edges and multiple edges between a pair of nodes
+/// A symmetric, graph-like structure that allows self-edges and multiple edges between pairs of nodes.
 struct PseudoMultiGraph {
     /// a map node_i ↦ (node_j, multiplicity_j) s.t. degree(node_i) > 0
     adjacency: HashMap<u8, HashMap<u8, usize>>,
@@ -37,7 +37,7 @@ impl PseudoMultiGraph {
         }
     }
 
-    /// given a node_i, gets an adjacent node_j, given priority to node_i = node_j
+    //// Given a node `i`, returns an adjacent node `j`, giving priority to the case where `i == j`.
     fn get_adjacent(&self, node: &u8) -> Option<u8> {
         let map = &self.adjacency[node];
         if map.get(node).is_some() {
