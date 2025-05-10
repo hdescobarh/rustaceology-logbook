@@ -39,7 +39,7 @@ impl PseudoMultiGraph {
 
     //// Given a node `i`, returns an adjacent node `j`, giving priority to the case where `i == j`.
     fn get_adjacent(&self, node: &u8) -> Option<u8> {
-        let map = &self.adjacency[node];
+        let map = &self.adjacency.get(node)?;
         if map.get(node).is_some() {
             return Some(*node);
         }
