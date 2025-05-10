@@ -101,6 +101,7 @@ impl PseudoMultiGraph {
         })
     }
 
+    // Need FIX: the logic is incorrect. the positions is over the original paths, not the result vec.
     fn merge_cycles<'a>(
         paths: &'a [Vec<u8>],
         join_positions: &'a [(usize, usize)],
