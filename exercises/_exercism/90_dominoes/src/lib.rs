@@ -7,38 +7,34 @@ pub fn chain(input: &[(u8, u8)]) -> Option<Vec<(u8, u8)>> {
 
 /// A symmetric graph-like structure which allows self-edges and multiple edges between a pair of nodes
 struct PseudoMultiGraph {
-    /// a map node_i ↦ (node_j, multiplicity_j)
+    /// a map node_i ↦ (node_j, multiplicity_j) s.t. degree(node_i) > 0
     adjacency: HashMap<u8, HashMap<u8, usize>>,
-    node_degree: HashMap<u8, usize>,
-    edges_size: usize,
+    nodes: HashSet<u8>,
 }
 
 impl PseudoMultiGraph {
     fn from_edges(input: &[(u8, u8)]) -> Self {
         let mut adjacency: HashMap<u8, HashMap<u8, usize>> = HashMap::new();
-        let mut node_degree = HashMap::new();
+        let mut nodes = HashSet::new();
         for (u, v) in input.iter().flat_map(|(u, v)| [(u, v), (v, u)]) {
             *adjacency.entry(*u).or_default().entry(*v).or_default() += 1;
-            *node_degree.entry(*u).or_default() += 1;
+            nodes.insert(*u);
         }
-        Self {
-            adjacency,
-            node_degree,
-            edges_size: input.len(),
-        }
+        Self { adjacency, nodes }
     }
 
     fn remove_edge(&mut self, node1: u8, node2: u8) {
         for (u, v) in [(node1, node2), (node2, node1)] {
-            let multiset = self.adjacency.get_mut(&u).unwrap();
-            if multiset[&v] == 1 {
-                multiset.remove_entry(&v);
-            } else {
-                *multiset.get_mut(&v).unwrap() -= 1;
+            match (self.adjacency[&u].len(), self.adjacency[&u][&v]) {
+                (1, 1) => {
+                    self.adjacency.remove_entry(&u);
+                }
+                (_, 1) => {
+                    self.adjacency.get_mut(&u).unwrap().remove_entry(&v);
+                }
+                _ => *self.adjacency.get_mut(&u).unwrap().get_mut(&v).unwrap() -= 1,
             }
-            *self.node_degree.get_mut(&u).unwrap() -= 1;
         }
-        self.edges_size -= 1;
     }
 
     /// given a node_i, gets an adjacent node_j, given priority to node_i = node_j
@@ -51,12 +47,17 @@ impl PseudoMultiGraph {
     }
 
     fn find_eulerian_cycle(&mut self) -> Option<Vec<(u8, u8)>> {
-        if self.node_degree.values().any(|degree| degree % 2 != 0) {
+        // An undirected graph can contain an Eulerian cycle only if all its nodes have even degree.
+        if self
+            .adjacency
+            .values()
+            .any(|map| map.values().sum() % 2 != 0)
+        {
             return None;
         }
 
         let mut node_cycles: Vec<Vec<u8>> = vec![];
-        while self.edges_size > 0 {
+        while !self.adjacency.is_empty() {
             let parent = match self.adjacency.iter().find(|(_node, map)| !map.is_empty()) {
                 Some((node, _degree)) => *node,
                 None => return Some(vec![]),
