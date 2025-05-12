@@ -88,34 +88,4 @@ impl PseudoMultiGraph {
         node_path.push(parent);
         node_path
     }
-
-    /// Attempts to find a shared node between the given paths and the non-isolated adjacency map.
-    /// Returns `((outer_pos, inner_pos), node)`, such that `paths[outer_pos][inner_pos] == shared_node`.
-    fn find_shared_node(&self, paths: &[Vec<u8>]) -> Option<((usize, usize), u8)> {
-        paths.iter().enumerate().find_map(|(outer_pos, path)| {
-            path.iter().enumerate().find_map(|(inner_pos, node)| {
-                self.adjacency
-                    .get(node)
-                    .map(|map| ((outer_pos, inner_pos), *map.keys().next().unwrap()))
-            })
-        })
-    }
-
-    // Need FIX: the logic is incorrect. the positions is over the original paths, not the result vec.
-    fn merge_cycles<'a>(
-        paths: &'a [Vec<u8>],
-        join_positions: &'a [(usize, usize)],
-    ) -> impl Iterator<Item = &'a u8> {
-        let mut result: Vec<&[u8]> = Vec::with_capacity(paths.len() + join_positions.len());
-        result.push(&paths[0]);
-
-        for ((outer_pos, inner_pos), insert) in join_positions.iter().zip(paths[1..].iter()) {
-            result[*outer_pos] = &result[*outer_pos][*inner_pos..];
-            result.splice(
-                outer_pos..outer_pos,
-                [&result[*outer_pos][..*inner_pos], insert],
-            );
-        }
-        result.into_iter().flat_map(|inner| inner.iter())
-    }
 }
