@@ -56,20 +56,22 @@ impl PseudoMultiGraph {
             return None;
         }
 
-        let mut path: Vec<u8> = match self.adjacency.keys().next() {
+        let mut node_cycle: Vec<u8> = match self.adjacency.keys().next() {
             Some(node) => self.deep_first_search(*node),
             None => return Some(vec![]),
         };
+
         while !self.adjacency.is_empty() {
             // If there are no shared nodes, the graph is not connected, so no Eulerian path exists.
-            let shared_node_pos = path
+            let shared_node_pos = node_cycle
                 .iter()
                 .position(|node| self.adjacency.contains_key(node))?;
-            let new_path = self.deep_first_search(path[shared_node_pos]);
-            path.splice(shared_node_pos..shared_node_pos + 1, new_path);
+            let next_cycle = self.deep_first_search(node_cycle[shared_node_pos]);
+            node_cycle.splice(shared_node_pos..shared_node_pos + 1, next_cycle);
         }
-        let mut edge_cycle = Vec::with_capacity(path.len());
-        for window in path.windows(2) {
+
+        let mut edge_cycle = Vec::with_capacity(node_cycle.len());
+        for window in node_cycle.windows(2) {
             match window {
                 [a, b] => edge_cycle.push((*a, *b)),
                 _ => return None,
